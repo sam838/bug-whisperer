@@ -29,7 +29,8 @@ with Claude Code as the coding agent.
 | Detective: complaint (+ screenshot) → Kane reproduces the bug | ✅ Works from the command line ([evidence 001](docs/evidence/001-past-date-booking/)) |
 | Fix loop: Claude fixes, Kane re-checks (max 3 tries, then a human) | ✅ Works from the command line ([evidence 001](docs/evidence/001-past-date-booking/)) |
 | Saved regression tests, with no secrets stored, replayed with no adaptive heal | ✅ Works |
-| Website: submit a report, watch Kane live, see the result | ⏳ Next |
+| Website: submit a report and screenshot, watch Kane live, "Fix it", before/after, reply, ticket | ✅ Works ([evidence 002](docs/evidence/002-double-booking/)) |
+| Restarts the app after a fix, and resets test data before every Kane run | ✅ Works |
 | Connect any app (link only, or link + code) | ⏳ Planned |
 | "Report a problem" button for any website | ⏳ Planned |
 
@@ -40,11 +41,10 @@ reproduced the bug (the app accepted bookings in the past), Claude fixed it from
 alone, Kane passed the same objective afterwards, and the saved test now replays in 20 seconds.
 → [docs/evidence/001-past-date-booking](docs/evidence/001-past-date-booking/)
 
-```bash
-# Try it (needs the sample app running on :8001)
-python -m whisperer investigate apps/clinic.json "cant book in the past?? it just saved it"
-python -m whisperer fix apps/clinic.json runs/<investigation-id>
-```
+**Second result, all through the website:** *"we have 2 patients booked at 10:00 tomorrow??"*
+was reproduced, fixed and proven. The first fix run wasn't proven, and the reason was
+Bug Whisperer's own bug (the app never reloaded). That story is in
+[docs/evidence/002-double-booking](docs/evidence/002-double-booking/).
 
 ## How it works
 
@@ -75,21 +75,34 @@ python -m venv .venv
 .venv\Scripts\activate            # macOS/Linux: source .venv/bin/activate
 pip install fastapi "uvicorn[standard]" jinja2 python-multipart httpx pytest
 python -m pytest -q tests         # uses a fake Kane: no credits, no Chrome
+
+uvicorn whisperer.web:app --port 8000
 ```
+
+Open **http://127.0.0.1:8000**. The website also starts the sample app on port 8001. Pick one of
+the example reports and press **Investigate**.
+
+Bug Whisperer also uses Claude Code headless (`claude -p`) for reading reports and fixing code. It
+finds `claude` on your PATH or in the VS Code extension, or set `CLAUDE_BIN`.
+
+From the command line:
+
+```bash
+python -m whisperer investigate apps/clinic.json "cant book in the past?? it just saved it"
+python -m whisperer fix apps/clinic.json runs/<investigation-id>
+```
+
+### Connect an app
+
+Each app is a JSON file in `apps/`: its URL, test accounts, and optionally its code folder plus
+start and reset commands (see [apps/clinic.json](apps/clinic.json)). With only a URL, Bug
+Whisperer reproduces bugs and writes tickets. With the code connected, it also fixes them.
 
 ### The sample app
 
 `clinic/` is a clinic booking app. It is **not** Bug Whisperer. It's the sample app whose users
-send bug reports.
-
-```bash
-cd clinic
-pip install -r requirements.txt
-python seed.py
-uvicorn app:app --port 8001
-```
-
-Logins: `sunrise@example.com` / `sunrise123` and `harbor@example.com` / `harbor123`.
+send bug reports. Logins: `sunrise@example.com` / `sunrise123` and `harbor@example.com` /
+`harbor123`.
 
 ## Repository
 
