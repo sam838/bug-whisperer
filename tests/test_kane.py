@@ -49,6 +49,14 @@ def test_missing_completion_event_is_error(tmp_path):
     assert r.verdict == "error"
 
 
+def test_kane_automation_bug_is_not_an_app_failure(tmp_path):
+    r = run_fake([START, {"type": "test_md_bug_verdict", "family": "automation_bug",
+                          "one_liner": "Password variable did not populate"},
+                  {"type": "test_md_done", "overall_status": "failed"}], 1, tmp_path)
+    assert r.verdict == "error"
+    assert "automation problem" in r.errors[-1]
+
+
 def test_status_and_exit_code_must_agree(tmp_path):
     r = run_fake([START, {"type": "run_end", "status": "passed"}], 1, tmp_path)
     assert r.verdict == "error"

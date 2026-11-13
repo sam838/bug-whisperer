@@ -36,6 +36,7 @@ class KaneResult:
     steps: list[dict] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     ndjson_path: str | None = None
+    kane_diagnosis: dict | None = None  # Kane's own bug verdict on a failed testmd step
 
     @property
     def failed_step(self) -> dict | None:
@@ -63,12 +64,18 @@ def run(
     timeout: int = 180,
     headless: bool = True,
     cdp_endpoint: str | None = None,
+    name: str | None = None,
     log_path: Path | None = None,
     on_event: Callable[[dict], None] | None = None,
 ) -> KaneResult:
-    """Run one plain-English objective with `kane-cli run --agent`."""
+    """Run one plain-English objective with `kane-cli run --agent`.
+
+    `name` saves the run as a Kane test (.testmuai/tests/<name>_test.md) that can be replayed.
+    """
     argv = [kane_binary(), "run", objective, "--agent", "--max-steps", str(max_steps),
             "--timeout", str(timeout)]
+    if name:
+        argv += ["--name", name]
     if url:
         argv += ["--url", url]
     if variables:
@@ -90,6 +97,7 @@ def _execute(argv, *, timeout, log_path, on_event) -> KaneResult:
     steps: list[dict] = []
     errors: list[str] = []
     completion: dict | None = None
+    diagnosis: dict | None = None
     log = open(log_path, "w", encoding="utf-8") if log_path else None
     try:
         for line in proc.stdout:  # type: ignore[union-attr]
@@ -105,6 +113,8 @@ def _execute(argv, *, timeout, log_path, on_event) -> KaneResult:
                 completion = event
             elif kind == "error":
                 errors.append(str(event.get("message", "")))
+            elif kind == "test_md_bug_verdict":
+                diagnosis = event
             elif kind is None and "step" in event and event.get("status") in ("done", "failed"):
                 steps.append(event)
             if time.time() - started > timeout:
@@ -131,8 +141,13 @@ def _execute(argv, *, timeout, log_path, on_event) -> KaneResult:
         result.credits = completion.get("credits_consumed", completion.get("credits"))
         result.duration = completion.get("duration") or completion.get("duration_s")
 
+    result.kane_diagnosis = diagnosis
+    automation_problem = bool(diagnosis and diagnosis.get("family") == "automation_bug")
     if completion and exit_code == 0 and result.status == "passed":
         result.verdict = "passed"
+    elif completion and exit_code == 1 and result.status == "failed" and automation_problem:
+        # Kane says the failure is in the test setup, not the app: that tells us nothing about the app.
+        errors.append(f"Kane: automation problem, not an app bug: {diagnosis.get('one_liner')}")
     elif completion and exit_code == 1 and result.status == "failed":
         result.verdict = "failed"
     else:

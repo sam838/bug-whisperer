@@ -62,6 +62,7 @@ class Investigation:
     kane: dict = field(default_factory=dict)
     judgement: dict = field(default_factory=dict)
     attempts: list = field(default_factory=list)
+    fix: dict = field(default_factory=dict)
 
     @property
     def folder(self) -> Path:

@@ -1,0 +1,14 @@
+﻿diff --git a/clinic/app.py b/clinic/app.py
+index 46b0718..269425d 100644
+--- a/clinic/app.py
++++ b/clinic/app.py
+@@ -244,7 +244,8 @@ def validate_patient(full_name: str, date_of_birth: str) -> list[str]:
+ def validate_appointment(appt_date: str, appt_time: str) -> list[str]:
+     errors = []
+     try:
+-        date.fromisoformat(appt_date)
++        if date.fromisoformat(appt_date) < date.today():
++            errors.append("The appointment date cannot be in the past. The appointment was not saved.")
+     except ValueError:
+         errors.append("Please choose a valid date.")
+     try:
