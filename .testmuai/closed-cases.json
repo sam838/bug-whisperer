@@ -12,11 +12,12 @@
     {
       "case_id": "20261113-124324-d930",
       "app_file": "apps/clinic.json",
-      "test": "bug-20261113-124324-d930-4",
+      "test": "bug-20261113-124324-d930-fixed-date",
       "title": "Two patients can be booked into the same appointment slot",
       "report": "we have 2 patients booked at 10:00 tomorrow?? how did the system allow that. sunrise clinic. the 2nd one should be blocked",
-      "objective": "Go to http://127.0.0.1:8001/login and log in with email {{account1_email}} and password {{account1_password}}. Open the appointment booking page. Book an appointment for the first patient in the patient list on tomorrow's date at 10:00 and submit. Open the appointment booking page again. Book an appointment for the second patient in the patient list on tomorrow's date at 10:00 and submit. Store what the page shows after that as 'what_happened'. Verify that the second booking was refused with a message that the 10:00 slot tomorrow is already taken.",
-      "closed": "2026-11-13 13:05"
+      "objective": "Go to http://127.0.0.1:8001/login and log in with email {{account1_email}} and password {{account1_password}}. Open the appointment booking page. Book an appointment for the first patient in the patient list on 2027-11-14 at 10:00 and submit. Open the appointment booking page again. Book an appointment for the second patient in the patient list on 2027-11-14 at 10:00 and submit. Store what the page shows after that as 'what_happened'. Verify that the second booking was refused with a message that the 10:00 slot on 2027-11-14 is already taken.",
+      "closed": "2026-11-13 13:05",
+      "rerecorded": "Re-recorded with a fixed date (2027-11-14) instead of 'tomorrow' (old test: bug-20261113-124324-d930-4)."
     }
   ]
 }

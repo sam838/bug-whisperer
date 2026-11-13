@@ -31,4 +31,13 @@ both used the same file name. Since then each fix run writes its own files
 
 ## The regression test
 
-`.testmuai/tests/bug-20261113-124324-d930_test.md`, with secrets removed.
+`.testmuai/tests/bug-20261113-124324-d930-fixed-date_test.md`, with secrets removed.
+
+**Re-recorded the same day (Nov 13), and why.** The original passing run booked "tomorrow", and
+Kane recorded the date it actually typed: 2026-11-14. A day later that date is in the past, so
+a replay would hit the (correct) past-date error from case 001 instead, and fail even though
+double booking is still fixed. The hook could then block Claude for no reason. So we ran the same
+check with a fixed date a year ahead (**2027-11-14**). Kane passed on the fixed code
+([rerecord-fixed-date.ndjson](rerecord-fixed-date.ndjson), 138 s), and that run replaced the old
+test. The planner now always writes exact, far-future dates, so new cases don't have this
+problem.
