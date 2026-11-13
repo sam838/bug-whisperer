@@ -42,10 +42,10 @@ fixing it, checking the fix, and replying.
 | Part | What it is | Status |
 |---|---|---|
 | **Kane runner** (`whisperer/kane.py`) | Runs Kane and reads its NDJSON output safely | ✅ Done, 5 tests |
-| **Detective** | Complaint + screenshot → Claude writes a Kane test → Kane tries to reproduce it | ⏳ Next |
-| **Website: inbox** | Submit a report (text + screenshot upload + app), watch Kane work live, see the result | ⏳ |
-| **Fix loop** | Claude fixes the code, Kane re-checks, at most 3 tries, then a human | ⏳ |
-| **Saved tests** | Each fixed bug becomes a Kane `_test.md` that is replayed after every change | ⏳ |
+| **Detective** | Complaint + screenshot → Claude writes a Kane test → Kane tries to reproduce it. Re-plans once from Kane's own advice if Kane gets lost | ✅ Command line |
+| **Website: inbox** | Submit a report (text + screenshot upload + app), watch Kane work live, see the result | ⏳ Next |
+| **Fix loop** | Claude fixes the code, Kane re-checks, at most 3 tries, then a human | ✅ Command line |
+| **Saved tests** | Each fixed bug becomes a Kane `_test.md`, with secrets removed, replayed with no adaptive heal (about 20 s, no credits) | ✅ |
 | **Proof reply** | A before/after page and a message for the user | ⏳ |
 | **Connect your app** | A form: name, link, optional test login, optional code location | ⏳ |
 | **"Report a problem" widget** | One `<script>` line adds a report button to any website | ⏳ Stretch |

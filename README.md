@@ -26,13 +26,25 @@ with Claude Code as the coding agent.
 | Part | Status |
 |---|---|
 | Kane runner: runs Kane CLI and reads its NDJSON output | ✅ Works (tests in `tests/`) |
-| Detective: complaint + screenshot → Kane reproduces the bug | ⏳ In progress |
-| Website: submit a report, watch Kane live, see the result | ⏳ Planned |
-| Fix loop: Claude fixes, Kane re-checks (max 3 tries, then a human) | ⏳ Planned |
+| Detective: complaint (+ screenshot) → Kane reproduces the bug | ✅ Works from the command line ([evidence 001](docs/evidence/001-past-date-booking/)) |
+| Fix loop: Claude fixes, Kane re-checks (max 3 tries, then a human) | ✅ Works from the command line ([evidence 001](docs/evidence/001-past-date-booking/)) |
+| Saved regression tests, with no secrets stored, replayed with no adaptive heal | ✅ Works |
+| Website: submit a report, watch Kane live, see the result | ⏳ Next |
 | Connect any app (link only, or link + code) | ⏳ Planned |
 | "Report a problem" button for any website | ⏳ Planned |
 
 The full plan is in [PLAN.md](PLAN.md).
+
+**First real result:** a clinic user wrote *"the system just saved it?? no warning nothing"*. Kane
+reproduced the bug (the app accepted bookings in the past), Claude fixed it from Kane's evidence
+alone, Kane passed the same objective afterwards, and the saved test now replays in 20 seconds.
+→ [docs/evidence/001-past-date-booking](docs/evidence/001-past-date-booking/)
+
+```bash
+# Try it (needs the sample app running on :8001)
+python -m whisperer investigate apps/clinic.json "cant book in the past?? it just saved it"
+python -m whisperer fix apps/clinic.json runs/<investigation-id>
+```
 
 ## How it works
 
