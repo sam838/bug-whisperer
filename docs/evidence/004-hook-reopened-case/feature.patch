@@ -1,0 +1,13 @@
+﻿diff --git a/clinic/templates/appointments.html b/clinic/templates/appointments.html
+index 200fe57..46fac29 100644
+--- a/clinic/templates/appointments.html
++++ b/clinic/templates/appointments.html
+@@ -43,7 +43,7 @@
+   </div>
+ </div>
+ 
+-<h2>Upcoming</h2>
++<h2>Upcoming ({{ upcoming | length }})</h2>
+ {{ appt_table(upcoming, "No upcoming appointments.") }}
+ 
+ {% if past %}

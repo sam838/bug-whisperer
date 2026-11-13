@@ -38,6 +38,7 @@ with Claude Code as the coding agent.
 | Restarts the app after a fix, and resets test data before every Kane run | ✅ Works |
 | **Any website:** connect an app on the Apps page (link only, or link + code). Passwords are kept out of git | ✅ Works ([evidence 003](docs/evidence/003-shop-search-any-website/): LambdaTest's demo shop) |
 | **Claim double-check:** if a verdict relies on what the user claimed, Kane checks the claim too | ✅ Works |
+| **🪝 The hook:** when Claude Code tries to finish, Kane revisits every closed case. If one reopened, Claude is blocked, gets Kane's evidence and repairs it | ✅ Works ([evidence 004](docs/evidence/004-hook-reopened-case/)) |
 | Connect any app (link only, or link + code) | ⏳ Planned |
 | "Report a problem" button for any website | ⏳ Planned |
 
@@ -98,6 +99,20 @@ From the command line:
 python -m whisperer investigate apps/clinic.json "cant book in the past?? it just saved it"
 python -m whisperer fix apps/clinic.json runs/<investigation-id>
 ```
+
+### The hook: Kane revisits closed cases
+
+Every case Bug Whisperer closes leaves a saved Kane test, listed in `.testmuai/closed-cases.json`.
+`.claude/settings.json` adds a Claude Code **Stop hook**: whenever Claude tries to finish work in
+this repo, Kane replays the closed cases for any app whose code changed. If an old bug is back,
+Claude is blocked, given Kane's evidence, and has to repair it before it can finish. Run it by hand:
+
+```bash
+python -m whisperer guard          # Kane revisits every closed case
+```
+
+The hook fails open: if Kane can't run, Claude isn't blocked, and nothing is claimed. Turn it off
+with `/hooks` in Claude Code.
 
 ### Connect an app
 

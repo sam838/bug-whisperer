@@ -1,0 +1,119 @@
+{"type":"stream_start","cli_version":"0.10.4","surface":"testmd","pid":20048,"v":1,"ts":"2026-11-13T07:10:17.063Z"}
+{"type":"test_md_step_start","step_index":1,"heading":"Step 1","ref":null,"v":1,"ts":"2026-11-13T07:10:31.041Z"}
+{"type":"run_start","objective":"Go to http://127.0.0.1:8001/login and log in with email {{account1_email}} and password {{account1_password}}. Open the appointment booking page. Book an appointment for the first patient in the patient list on tomorrow's date at 10:00 and submit. Open the appointment booking page again. Book an appointment for the second patient in the patient list on tomorrow's date at 10:00 and submit. Store what the page shows after that as 'what_happened'. Verify that the second booking was refused with a message that the 10:00 slot tomorrow is already taken.","timestamp":1794553831,"environment":{"resolution":"1920x1080"},"v":1,"ts":"2026-11-13T07:10:31.077Z"}
+{"type":"step_event","index":0,"event":"replay_started","detail":"replaying 22 actions","recording_length":22,"v":1,"ts":"2026-11-13T07:10:31.080Z"}
+{"type":"step_start","index":1,"objective":"Step 1","v":1,"ts":"2026-11-13T07:10:31.080Z"}
+{"type":"step_event","index":1,"event":"screenshot","detail":"https://kaneai-playground.lambdatest.io/","v":1,"ts":"2026-11-13T07:10:31.258Z"}
+{"type":"step_event","index":1,"event":"action","detail":"Navigate to http://127.0.0.1:8001/login","action_type":"navigate","success":true,"v":1,"ts":"2026-11-13T07:10:31.347Z"}
+{"type":"step_event","index":1,"event":"reasoning","detail":"Navigate to http://127.0.0.1:8001/login","action_type":"navigate","v":1,"ts":"2026-11-13T07:10:31.349Z"}
+{"type":"step_end","index":1,"status":"passed","duration":0.3,"summary":"navigate: Navigate to http://127.0.0.1:8001/login","ordinal":1,"id":"0-1","kind":"navigate","screenshot":"screenshot.jpg","action_id":"374c1d47-a07d-4d83-bc06-89b4a2e68dcb","v":1,"ts":"2026-11-13T07:10:31.357Z"}
+{"type":"step_start","index":2,"objective":"Step 2","v":1,"ts":"2026-11-13T07:10:31.358Z"}
+{"type":"step_event","index":2,"event":"screenshot","detail":"http://127.0.0.1:8001/login","v":1,"ts":"2026-11-13T07:10:31.492Z"}
+{"type":"step_event","index":2,"event":"action","detail":"Waiting for the email password form to be filled","action_type":"wait","success":true,"v":1,"ts":"2026-11-13T07:10:32.503Z"}
+{"type":"step_event","index":2,"event":"reasoning","detail":"Waiting for the email password form to be filled","action_type":"wait","v":1,"ts":"2026-11-13T07:10:32.504Z"}
+{"type":"step_end","index":2,"status":"passed","duration":1.2,"summary":"wait: Waiting for the email password form to be filled","ordinal":2,"id":"0-2","kind":"wait","screenshot":"screenshot.jpg","action_id":"d9c47545-7bfa-4218-8148-691419c315ca","v":1,"ts":"2026-11-13T07:10:32.506Z"}
+{"type":"step_start","index":3,"objective":"Step 3","v":1,"ts":"2026-11-13T07:10:32.507Z"}
+{"type":"step_event","index":3,"event":"screenshot","detail":"http://127.0.0.1:8001/login","v":1,"ts":"2026-11-13T07:10:32.605Z"}
+{"type":"step_event","index":3,"event":"action","detail":"Type \"{{global.account1_email}}\" into \"Email\"","action_type":"fill","success":true,"v":1,"ts":"2026-11-13T07:10:32.795Z"}
+{"type":"step_event","index":3,"event":"reasoning","detail":"Type \"{{global.account1_email}}\" into \"Email\"","action_type":"fill","v":1,"ts":"2026-11-13T07:10:32.796Z"}
+{"type":"step_end","index":3,"status":"passed","duration":0.3,"summary":"fill: Type \"{{global.account1_email}}\" into \"Email\"","ordinal":3,"id":"0-3","kind":"fill","screenshot":"screenshot.jpg","action_id":"9009cfe6-da2a-4af3-b333-1ecd53237291","v":1,"ts":"2026-11-13T07:10:32.877Z"}
+{"type":"step_start","index":4,"objective":"Step 4","v":1,"ts":"2026-11-13T07:10:32.878Z"}
+{"type":"step_event","index":4,"event":"screenshot","detail":"http://127.0.0.1:8001/login","v":1,"ts":"2026-11-13T07:10:32.970Z"}
+{"type":"step_event","index":4,"event":"action","detail":"Waiting while typing Password and clicking Log in","action_type":"wait","success":true,"v":1,"ts":"2026-11-13T07:10:33.996Z"}
+{"type":"step_event","index":4,"event":"reasoning","detail":"Waiting while typing Password and clicking Log in","action_type":"wait","v":1,"ts":"2026-11-13T07:10:33.996Z"}
+{"type":"step_end","index":4,"status":"passed","duration":1.1,"summary":"wait: Waiting while typing Password and clicking Log in","ordinal":4,"id":"0-4","kind":"wait","screenshot":"screenshot.jpg","action_id":"28d84e07-8817-4aa8-8998-75905b6b990f","v":1,"ts":"2026-11-13T07:10:34.000Z"}
+{"type":"step_start","index":5,"objective":"Step 5","v":1,"ts":"2026-11-13T07:10:34.001Z"}
+{"type":"step_event","index":5,"event":"screenshot","detail":"http://127.0.0.1:8001/login","v":1,"ts":"2026-11-13T07:10:34.085Z"}
+{"type":"step_event","index":5,"event":"action","detail":"Type \"{{secrets.user.account1_password}}\" into \"Password\"","action_type":"fill","success":true,"v":1,"ts":"2026-11-13T07:10:34.232Z"}
+{"type":"step_event","index":5,"event":"reasoning","detail":"Type \"{{secrets.user.account1_password}}\" into \"Password\"","action_type":"fill","v":1,"ts":"2026-11-13T07:10:34.232Z"}
+{"type":"step_end","index":5,"status":"passed","duration":0.2,"summary":"fill: Type \"{{secrets.user.account1_password}}\" into \"Password\"","ordinal":5,"id":"0-5","kind":"fill","screenshot":"screenshot.jpg","action_id":"b2664cf1-7257-41f6-bb39-7e3a68b40150","v":1,"ts":"2026-11-13T07:10:34.279Z"}
+{"type":"step_start","index":6,"objective":"Step 6","v":1,"ts":"2026-11-13T07:10:34.279Z"}
+{"type":"step_event","index":6,"event":"screenshot","detail":"http://127.0.0.1:8001/login","v":1,"ts":"2026-11-13T07:10:34.369Z"}
+{"type":"step_event","index":6,"event":"action","detail":"Clicking the Log in button","action_type":"click","success":true,"v":1,"ts":"2026-11-13T07:10:35.111Z"}
+{"type":"step_event","index":6,"event":"reasoning","detail":"Clicking the Log in button","action_type":"click","v":1,"ts":"2026-11-13T07:10:35.112Z"}
+{"type":"step_end","index":6,"status":"passed","duration":0.8,"summary":"click: Clicking the Log in button","ordinal":6,"id":"0-6","kind":"click","screenshot":"screenshot.jpg","action_id":"f3e5a3ef-26c0-49de-ba8c-d824d9a9b194","v":1,"ts":"2026-11-13T07:10:35.161Z"}
+{"type":"step_start","index":7,"objective":"Step 7","v":1,"ts":"2026-11-13T07:10:35.161Z"}
+{"type":"step_event","index":7,"event":"screenshot","detail":"http://127.0.0.1:8001/patients","v":1,"ts":"2026-11-13T07:10:35.288Z"}
+{"type":"step_event","index":7,"event":"action","detail":"Clicking Appointments in the top navigation","action_type":"click","success":true,"v":1,"ts":"2026-11-13T07:10:35.928Z"}
+{"type":"step_event","index":7,"event":"reasoning","detail":"Clicking Appointments in the top navigation","action_type":"click","v":1,"ts":"2026-11-13T07:10:35.929Z"}
+{"type":"step_end","index":7,"status":"passed","duration":0.8,"summary":"click: Clicking Appointments in the top navigation","ordinal":7,"id":"0-7","kind":"click","screenshot":"screenshot.jpg","action_id":"7de479ae-0711-404c-bb70-15ec2f1b7636","v":1,"ts":"2026-11-13T07:10:35.980Z"}
+{"type":"step_start","index":8,"objective":"Step 8","v":1,"ts":"2026-11-13T07:10:35.982Z"}
+{"type":"step_event","index":8,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments","v":1,"ts":"2026-11-13T07:10:36.087Z"}
+{"type":"step_event","index":8,"event":"action","detail":"Clicking Book appointment for the first patient at 10:00 tomorrow","action_type":"click","success":true,"v":1,"ts":"2026-11-13T07:10:36.731Z"}
+{"type":"step_event","index":8,"event":"reasoning","detail":"Clicking Book appointment for the first patient at 10:00 tomorrow","action_type":"click","v":1,"ts":"2026-11-13T07:10:36.732Z"}
+{"type":"step_end","index":8,"status":"passed","duration":0.8,"summary":"click: Clicking Book appointment for the first patient at 10:00 tomorrow","ordinal":8,"id":"0-8","kind":"click","screenshot":"screenshot.jpg","action_id":"93b5bea7-7c09-4e0b-b686-7073c1cfbccf","v":1,"ts":"2026-11-13T07:10:36.775Z"}
+{"type":"step_start","index":9,"objective":"Step 9","v":1,"ts":"2026-11-13T07:10:36.776Z"}
+{"type":"step_event","index":9,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:36.880Z"}
+{"type":"step_event","index":9,"event":"action","detail":"Selecting Aisha Rahman in the Patient dropdown","action_type":"select","success":true,"v":1,"ts":"2026-11-13T07:10:36.925Z"}
+{"type":"step_event","index":9,"event":"reasoning","detail":"Selecting Aisha Rahman in the Patient dropdown","action_type":"select","v":1,"ts":"2026-11-13T07:10:36.926Z"}
+{"type":"step_end","index":9,"status":"passed","duration":0.2,"summary":"select: Selecting Aisha Rahman in the Patient dropdown","ordinal":9,"id":"0-9","kind":"select","screenshot":"screenshot.jpg","action_id":"4f682dc3-d042-4b8f-bbd6-52b4e421f591","v":1,"ts":"2026-11-13T07:10:36.970Z"}
+{"type":"step_start","index":10,"objective":"Step 10","v":1,"ts":"2026-11-13T07:10:36.970Z"}
+{"type":"step_event","index":10,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:37.049Z"}
+{"type":"step_event","index":10,"event":"action","detail":"Entering the date in the booking form and submitting the appointment","action_type":"fill","success":true,"v":1,"ts":"2026-11-13T07:10:37.196Z"}
+{"type":"step_event","index":10,"event":"reasoning","detail":"Entering the date in the booking form and submitting the appointment","action_type":"fill","v":1,"ts":"2026-11-13T07:10:37.197Z"}
+{"type":"step_end","index":10,"status":"passed","duration":0.2,"summary":"fill: Entering the date in the booking form and submitting the appointment","ordinal":10,"id":"0-10","kind":"fill","screenshot":"screenshot.jpg","action_id":"045b6c83-8cd7-4149-8a50-ba4573d470f9","v":1,"ts":"2026-11-13T07:10:37.243Z"}
+{"type":"step_start","index":11,"objective":"Step 11","v":1,"ts":"2026-11-13T07:10:37.244Z"}
+{"type":"step_event","index":11,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:37.335Z"}
+{"type":"step_event","index":11,"event":"action","detail":"Typing 10:00 into the Time field","action_type":"fill","success":true,"v":1,"ts":"2026-11-13T07:10:37.472Z"}
+{"type":"step_event","index":11,"event":"reasoning","detail":"Typing 10:00 into the Time field","action_type":"fill","v":1,"ts":"2026-11-13T07:10:37.472Z"}
+{"type":"step_end","index":11,"status":"passed","duration":0.2,"summary":"fill: Typing 10:00 into the Time field","ordinal":11,"id":"0-11","kind":"fill","screenshot":"screenshot.jpg","action_id":"23e44a56-8bdd-4f01-9405-76f4c0297c77","v":1,"ts":"2026-11-13T07:10:37.521Z"}
+{"type":"step_start","index":12,"objective":"Step 12","v":1,"ts":"2026-11-13T07:10:37.522Z"}
+{"type":"step_event","index":12,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:37.613Z"}
+{"type":"step_event","index":12,"event":"action","detail":"Clicking Book appointment to submit the first patient booking","action_type":"click","success":true,"v":1,"ts":"2026-11-13T07:10:38.228Z"}
+{"type":"step_event","index":12,"event":"reasoning","detail":"Clicking Book appointment to submit the first patient booking","action_type":"click","v":1,"ts":"2026-11-13T07:10:38.229Z"}
+{"type":"step_end","index":12,"status":"passed","duration":0.7,"summary":"click: Clicking Book appointment to submit the first patient booking","ordinal":12,"id":"0-12","kind":"click","screenshot":"screenshot.jpg","action_id":"39866f79-9806-490b-bb53-97569f86c3ac","v":1,"ts":"2026-11-13T07:10:38.279Z"}
+{"type":"step_start","index":13,"objective":"Step 13","v":1,"ts":"2026-11-13T07:10:38.279Z"}
+{"type":"step_event","index":13,"event":"screenshot","detail":"http://127.0.0.1:8001/patients/109","v":1,"ts":"2026-11-13T07:10:38.384Z"}
+{"type":"step_event","index":13,"event":"action","detail":"Clicking Appointments in the top navigation again","action_type":"click","success":true,"v":1,"ts":"2026-11-13T07:10:39.035Z"}
+{"type":"step_event","index":13,"event":"reasoning","detail":"Clicking Appointments in the top navigation again","action_type":"click","v":1,"ts":"2026-11-13T07:10:39.035Z"}
+{"type":"step_end","index":13,"status":"passed","duration":0.8,"summary":"click: Clicking Appointments in the top navigation again","ordinal":13,"id":"0-13","kind":"click","screenshot":"screenshot.jpg","action_id":"078b2f26-896f-43d2-8f26-5765e766421f","v":1,"ts":"2026-11-13T07:10:39.080Z"}
+{"type":"step_start","index":14,"objective":"Step 14","v":1,"ts":"2026-11-13T07:10:39.081Z"}
+{"type":"step_event","index":14,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments","v":1,"ts":"2026-11-13T07:10:39.184Z"}
+{"type":"step_event","index":14,"event":"action","detail":"Clicking Book appointment for the second patient on tomorrow at 10:00","action_type":"click","success":true,"v":1,"ts":"2026-11-13T07:10:39.798Z"}
+{"type":"step_event","index":14,"event":"reasoning","detail":"Clicking Book appointment for the second patient on tomorrow at 10:00","action_type":"click","v":1,"ts":"2026-11-13T07:10:39.798Z"}
+{"type":"step_end","index":14,"status":"passed","duration":0.7,"summary":"click: Clicking Book appointment for the second patient on tomorrow at 10:00","ordinal":14,"id":"0-14","kind":"click","screenshot":"screenshot.jpg","action_id":"2416c039-1efa-4290-97c8-d249a68c6e8a","v":1,"ts":"2026-11-13T07:10:39.847Z"}
+{"type":"step_start","index":15,"objective":"Step 15","v":1,"ts":"2026-11-13T07:10:39.847Z"}
+{"type":"step_event","index":15,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:39.956Z"}
+{"type":"step_event","index":15,"event":"action","detail":"Selecting James Carter as the second patient","action_type":"select","success":true,"v":1,"ts":"2026-11-13T07:10:39.995Z"}
+{"type":"step_event","index":15,"event":"reasoning","detail":"Selecting James Carter as the second patient","action_type":"select","v":1,"ts":"2026-11-13T07:10:39.996Z"}
+{"type":"step_end","index":15,"status":"passed","duration":0.1,"summary":"select: Selecting James Carter as the second patient","ordinal":15,"id":"0-15","kind":"select","screenshot":"screenshot.jpg","action_id":"9649215c-bbb3-433e-8ca2-8fb425bccdeb","v":1,"ts":"2026-11-13T07:10:40.038Z"}
+{"type":"step_start","index":16,"objective":"Step 16","v":1,"ts":"2026-11-13T07:10:40.039Z"}
+{"type":"step_event","index":16,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:40.134Z"}
+{"type":"step_event","index":16,"event":"action","detail":"Entering 2026-11-14 in the Date field for booking","action_type":"fill","success":true,"v":1,"ts":"2026-11-13T07:10:40.263Z"}
+{"type":"step_event","index":16,"event":"reasoning","detail":"Entering 2026-11-14 in the Date field for booking","action_type":"fill","v":1,"ts":"2026-11-13T07:10:40.264Z"}
+{"type":"step_end","index":16,"status":"passed","duration":0.2,"summary":"fill: Entering 2026-11-14 in the Date field for booking","ordinal":16,"id":"0-16","kind":"fill","screenshot":"screenshot.jpg","action_id":"a948944a-2cc3-47ee-85cb-fbdba7b6417f","v":1,"ts":"2026-11-13T07:10:40.305Z"}
+{"type":"step_start","index":17,"objective":"Step 17","v":1,"ts":"2026-11-13T07:10:40.305Z"}
+{"type":"step_event","index":17,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:40.401Z"}
+{"type":"step_event","index":17,"event":"action","detail":"Typing 10:00 in the appointment time field","action_type":"fill","success":true,"v":1,"ts":"2026-11-13T07:10:40.531Z"}
+{"type":"step_event","index":17,"event":"reasoning","detail":"Typing 10:00 in the appointment time field","action_type":"fill","v":1,"ts":"2026-11-13T07:10:40.532Z"}
+{"type":"step_end","index":17,"status":"passed","duration":0.2,"summary":"fill: Typing 10:00 in the appointment time field","ordinal":17,"id":"0-17","kind":"fill","screenshot":"screenshot.jpg","action_id":"a157b6a4-00a2-479c-acb3-5dda056ea625","v":1,"ts":"2026-11-13T07:10:40.576Z"}
+{"type":"step_start","index":18,"objective":"Step 18","v":1,"ts":"2026-11-13T07:10:40.576Z"}
+{"type":"step_event","index":18,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:40.670Z"}
+{"type":"step_event","index":18,"event":"action","detail":"Clicking Book appointment for the second patient tomorrow at 10:00","action_type":"click","success":true,"v":1,"ts":"2026-11-13T07:10:41.329Z"}
+{"type":"step_event","index":18,"event":"reasoning","detail":"Clicking Book appointment for the second patient tomorrow at 10:00","action_type":"click","v":1,"ts":"2026-11-13T07:10:41.330Z"}
+{"type":"step_end","index":18,"status":"passed","duration":0.8,"summary":"click: Clicking Book appointment for the second patient tomorrow at 10:00","ordinal":18,"id":"0-18","kind":"click","screenshot":"screenshot.jpg","action_id":"86e405fb-579e-4bd1-b52a-8c0c52f48d2d","v":1,"ts":"2026-11-13T07:10:41.371Z"}
+{"type":"step_start","index":19,"objective":"Step 19","v":1,"ts":"2026-11-13T07:10:41.372Z"}
+{"type":"step_event","index":19,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:41.470Z"}
+{"type":"step_event","index":19,"event":"action","detail":"Checking whether the second booking refusal state is present","action_type":"analyze","success":true,"v":1,"ts":"2026-11-13T07:10:41.507Z"}
+{"type":"step_event","index":19,"event":"reasoning","detail":"Checking whether the second booking refusal state is present","action_type":"analyze","v":1,"ts":"2026-11-13T07:10:41.508Z"}
+{"type":"step_end","index":19,"status":"passed","duration":0.1,"summary":"analyze: Checking whether the second booking refusal state is present","ordinal":19,"id":"0-19","kind":"analyze","screenshot":"screenshot.jpg","action_id":"d9cda277-dda7-4fe6-9b17-0fe091331b70","v":1,"ts":"2026-11-13T07:10:41.512Z"}
+{"type":"step_start","index":20,"objective":"Step 20","v":1,"ts":"2026-11-13T07:10:41.513Z"}
+{"type":"step_event","index":20,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:41.622Z"}
+{"type":"step_event","index":20,"event":"action","detail":"Checking whether the 10:00 slot already-taken message is present","action_type":"analyze","success":true,"v":1,"ts":"2026-11-13T07:10:41.651Z"}
+{"type":"step_event","index":20,"event":"reasoning","detail":"Checking whether the 10:00 slot already-taken message is present","action_type":"analyze","v":1,"ts":"2026-11-13T07:10:41.651Z"}
+{"type":"step_end","index":20,"status":"passed","duration":0.1,"summary":"analyze: Checking whether the 10:00 slot already-taken message is present","ordinal":20,"id":"0-20","kind":"analyze","screenshot":"screenshot.jpg","action_id":"1cd7d252-b88a-4c28-9b8a-9466adc3a54e","v":1,"ts":"2026-11-13T07:10:41.655Z"}
+{"type":"step_start","index":21,"objective":"Step 21","v":1,"ts":"2026-11-13T07:10:41.655Z"}
+{"type":"step_event","index":21,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:41.751Z"}
+{"type":"step_event","index":21,"event":"action","detail":"Reading the appointment booking outcome message","action_type":"analyze","success":true,"v":1,"ts":"2026-11-13T07:10:41.777Z"}
+{"type":"step_event","index":21,"event":"reasoning","detail":"Reading the appointment booking outcome message","action_type":"analyze","v":1,"ts":"2026-11-13T07:10:41.777Z"}
+{"type":"step_end","index":21,"status":"passed","duration":0.1,"summary":"analyze: Reading the appointment booking outcome message","ordinal":21,"id":"0-21","kind":"analyze","screenshot":"screenshot.jpg","action_id":"ac509a0b-624a-4b0e-ad0e-e8136c893d99","v":1,"ts":"2026-11-13T07:10:41.780Z"}
+{"type":"step_start","index":22,"objective":"Step 22","v":1,"ts":"2026-11-13T07:10:41.781Z"}
+{"type":"step_event","index":22,"event":"screenshot","detail":"http://127.0.0.1:8001/appointments/new","v":1,"ts":"2026-11-13T07:10:41.868Z"}
+{"type":"step_event","index":22,"event":"assertion","detail":"the second booking was refused with a message that the 10:00 slot tomorrow is already taken","passed":true,"v":1,"ts":"2026-11-13T07:10:41.870Z"}
+{"type":"step_end","index":22,"status":"passed","duration":0.1,"summary":"assert: the second booking was refused with a message that the 10:00 slot tomorrow is al","ordinal":22,"id":"0-22","kind":"assert","screenshot":"screenshot.jpg","action_id":"fc42c2b7-3645-44b6-96e6-f152dd4f54b6","v":1,"ts":"2026-11-13T07:10:41.874Z"}
+{"type":"run_end","run_id":"run-0","status":"passed","summary":"","reason":"replay completed","duration":10.81,"final_url":"http://127.0.0.1:8001/appointments/new","actions_executed":22,"screenshot_path":"C:\\Users\\Samuel Christian\\.testmuai\\kaneai\\sessions\\4c31b4de-4cf0-4352-a73c-0144fa39a25b\\scratch\\0\\replay-test\\screenshots/step_022.png","run_dir":"C:\\Users\\Samuel Christian\\.testmuai\\kaneai\\sessions\\4c31b4de-4cf0-4352-a73c-0144fa39a25b\\scratch\\0\\replay-test","total_runs":1,"context":{"memory":{},"variables":{"second_booking_refused":{"syntax":"{{second_booking_refused}}","value":"true","secret":false},"slot_already_taken_message":{"syntax":"{{slot_already_taken_message}}","value":"true","secret":false},"what_happened":{"syntax":"{{what_happened}}","value":"The 10:00 slot on 2026-11-14 is already taken. Please choose another time. The appointment was not saved.","secret":false}},"pointer":""},"variables_out":{"second_booking_refused":{"syntax":"{{second_booking_refused}}","value":"true","secret":false},"slot_already_taken_message":{"syntax":"{{slot_already_taken_message}}","value":"true","secret":false},"what_happened":{"syntax":"{{what_happened}}","value":"The 10:00 slot on 2026-11-14 is already taken. Please choose another time. The appointment was not saved.","secret":false}},"store_out":{},"result_code":100,"reason_code":"success.complete","v":1,"ts":"2026-11-13T07:10:41.889Z"}
+{"type":"test_md_step_end","step_index":1,"status":"passed","duration_s":10.81,"ref_kind":null,"unit_kind":null,"inlined_count":null,"failed_sub_step_index":null,"v":1,"ts":"2026-11-13T07:10:41.890Z"}
+{"type":"test_md_evidence_ingest","status":"ok","evidence_id":"6c276fb9-23d1-45c8-9c2f-2352d716eda8","v":1,"ts":"2026-11-13T07:10:47.507Z"}
+{"type":"test_md_summary","overall_status":"passed","duration_s":17,"steps":{"total":1,"passed":1,"failed":0,"skipped":0,"replay_decisions":1,"author_decisions":0},"adaptive_heal":{"triggered":false},"commit":{"committed":false,"reason":"readonly_fallback"},"artifacts":{"replaced":false},"upload":{"performed":true,"succeeded":true},"cancelled":false,"v":1,"ts":"2026-11-13T07:10:47.510Z"}
+{"type":"coverage","status":"skipped","reason":"not_assurance_project","pack":"C:\\Users\\Samuel Christian\\.testmuai\\kaneai\\sessions\\4c31b4de-4cf0-4352-a73c-0144fa39a25b\\evidence\\6c276fb9-23d1-45c8-9c2f-2352d716eda8.evidence","v":1,"ts":"2026-11-13T07:10:47.519Z"}
+{"type":"test_md_done","overall_status":"passed","duration_s":17,"session_id":"4c31b4de-4cf0-4352-a73c-0144fa39a25b","coverage":{"status":"skipped"},"v":1,"ts":"2026-11-13T07:10:47.520Z"}
