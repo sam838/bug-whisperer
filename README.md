@@ -2,6 +2,11 @@
 
 **Users don't write good bug reports. Kane doesn't need them to.**
 
+> Every bug report is a case. **🕵️ Kane CLI is the detective:** it goes to the scene in a real
+> browser, retraces what the user did, checks the witness's claims, and only closes the case when
+> it sees the fix with its own eyes. **Claude** reads the case and does the repairs, but never
+> gets the last word.
+
 Bug Whisperer takes a messy complaint and a screenshot, such as *"cant book!!! button broken 😡"*,
 and works out what the user meant. Claude turns the report into a plain-English test.
 **[Kane CLI](https://www.testmuai.com/kane-cli/)** tries it in a real Chrome browser to reproduce

@@ -83,6 +83,7 @@ class Investigation:
     fix: dict = field(default_factory=dict)
     fix_history: list = field(default_factory=list)  # earlier fix runs, kept as evidence
     claim: dict = field(default_factory=dict)  # Kane's double-check of a claim the verdict relied on
+    note: str = ""  # a person's note on the case, e.g. that it was re-investigated as another case
 
     @property
     def folder(self) -> Path:

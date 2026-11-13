@@ -27,7 +27,7 @@ def save(tmp_path, **fields):
 
 def test_home_lists_the_apps(client):
     page = client.get("/").text
-    assert "Clinic Records" in page and "Investigate" in page
+    assert "Clinic Records" in page and "Send Kane to investigate" in page
 
 
 def test_report_creates_a_queued_investigation(client, tmp_path):
@@ -48,7 +48,7 @@ def test_reproduced_report_offers_a_fix(client, tmp_path):
                judgement={"explanation": "The app saved it.", "ticket": {"title": "Past dates accepted",
                           "steps": ["Book"], "expected": "Refused", "actual": "Saved"}})
     page = client.get(f"/r/{inv.id}").text
-    assert "Reproduced" in page and "Fix it" in page and "Past dates accepted" in page
+    assert "Confirmed" in page and "Repair it" in page and "Past dates accepted" in page
 
 
 def test_fixed_report_shows_reply_and_no_fix_button(client, tmp_path):
@@ -57,7 +57,7 @@ def test_fixed_report_shows_reply_and_no_fix_button(client, tmp_path):
                    {"attempt": 1, "fixer_said": "Added a check.", "patch": "+ new line",
                     "kane": {"verdict": "passed", "reason": "Objective completed"}}]})
     page = client.get(f"/r/{inv.id}").text
-    assert "Fixed and proven" in page and "Reply to the user" in page and "Fix it" not in page
+    assert "Case closed" in page and "Reply to the user" in page and "Repair it" not in page
 
 
 def test_connect_app_keeps_passwords_out_of_the_app_file(client, tmp_path, monkeypatch):

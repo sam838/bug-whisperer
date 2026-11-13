@@ -39,7 +39,8 @@ a { color: var(--accent); }
 .brand-mark { display: inline-block; transform: rotate(-12deg); }
 .topbar nav a { margin-left: 18px; color: var(--muted); text-decoration: none; font-weight: 600; }
 .topbar nav a.on, .topbar nav a:hover { color: var(--ink); }
-.foot { text-align: center; color: var(--muted); font-size: 13px; padding: 0 16px 32px; }
+.foot { text-align: center; color: var(--muted); font-size: 13px; padding: 0 16px 32px; max-width: 760px; margin: 0 auto; }
+.row-text .note { color: var(--warn); font-weight: 600; }
 
 .hero h1 { font-size: clamp(28px, 4.4vw, 44px); line-height: 1.12; letter-spacing: -.02em; margin: 18px 0 10px; }
 .hero h1 span { color: var(--accent); }
@@ -109,7 +110,18 @@ code { font-family: var(--mono); font-size: .92em; }
 .verdict.ok { background: var(--ok-soft); color: var(--ok); }
 .verdict.warn { background: var(--warn-soft); color: var(--warn); }
 .verdict.neutral { background: var(--neutral-soft); }
-.verdict b { margin-right: 6px; }
+.verdict b { margin-right: 2px; }
+/* A rubber stamp, as on a case file */
+.stamp {
+  display: inline-block; margin-right: 10px; padding: 1px 10px; transform: rotate(-3deg);
+  border: 2.5px solid currentColor; border-radius: 6px; font-weight: 900; font-size: 14px;
+  text-transform: uppercase; letter-spacing: .08em; vertical-align: 2px;
+}
+.case-title { font-size: clamp(24px, 3.4vw, 32px); letter-spacing: -.02em; margin: 6px 0 0; }
+.case-title span { display: block; font-size: .62em; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+.case-no { flex: none; font-family: var(--mono); font-weight: 700; color: var(--muted); min-width: 34px; }
+.notes { margin-top: 14px; background: var(--accent-soft); border-radius: 10px; padding: 10px 14px; }
+.notes p { margin: 4px 0 0; font-style: italic; }
 
 .claim { border: 1px solid var(--line); background: var(--card); border-radius: var(--radius); padding: 12px 16px; margin: 12px 0; }
 .claim.confirmed { border-color: var(--ok); }
@@ -132,7 +144,6 @@ code { font-family: var(--mono); font-size: .92em; }
    Zoom into the middle; clicking opens the full screenshot. */
 .shot.kane { aspect-ratio: 16 / 10; object-fit: cover; object-view-box: inset(0% 16% 22% 16%); }
 .caption { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
-.kane-says { font-style: italic; margin: 12px 0 0; }
 .tag { font-size: 12px; font-weight: 700; border-radius: 6px; padding: 2px 8px; margin-left: 6px; vertical-align: middle; }
 .tag.bug { background: var(--bug-soft); color: var(--bug); }
 .muted { color: var(--muted); }

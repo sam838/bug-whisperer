@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Report {{ inv.id }} · Bug Whisperer{% endblock %}
+{% block title %}Case #{{ case_no }} · Bug Whisperer{% endblock %}
 {% block content %}
-<div class="crumbs"><a href="/inbox">← Inbox</a> · Report {{ inv.id }} · {{ inv.app }} · {{ inv.created }}</div>
+<div class="crumbs"><a href="/inbox">← Case files</a> · {{ inv.app }} · opened {{ inv.created }}</div>
+<h1 class="case-title">Case #{{ case_no }}{% if (inv.judgement.get('ticket') or {}).get('title') %}<span>{{ inv.judgement.ticket.title }}</span>{% endif %}</h1>
+{% if inv.note %}<div class="claim">↪ {{ inv.note }}</div>{% endif %}
 <div id="live" data-url="/r/{{ inv.id }}/live" data-active="{{ 'true' if active else 'false' }}">
   {% include "_live.html" %}
 </div>

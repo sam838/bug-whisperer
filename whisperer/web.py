@@ -109,6 +109,12 @@ def list_apps() -> list[dict]:
     return out
 
 
+def case_numbers() -> dict[str, int]:
+    """Cases are numbered in the order they were opened: Case #1, #2, ..."""
+    ids = sorted(p.parent.name for p in RUNS.glob("*/investigation.json"))
+    return {inv_id: n for n, inv_id in enumerate(ids, start=1)}
+
+
 def get_inv(inv_id: str) -> Investigation:
     if not ID_RE.match(inv_id) or not (RUNS / inv_id / "investigation.json").exists():
         raise HTTPException(404, "No such report")
@@ -152,6 +158,7 @@ def view(inv: Investigation) -> dict:
     last_try = inv.fix["attempts"][-1]["kane"] if inv.fix.get("attempts") else None
     return {
         "inv": inv,
+        "case_no": case_numbers().get(inv.id),
         "app_cfg": app_cfg,
         "active": investigating or fixing,
         "queued": inv.id in waiting and (inv.status == "queued" or inv.fix.get("status") == "queued"),
@@ -180,8 +187,9 @@ def _key_shot(kane: dict | None) -> dict | None:
 def reply_for_user(inv: Investigation) -> str | None:
     expected = (inv.plan or {}).get("expected", "")
     if inv.fix.get("verdict") == "fixed":
-        return ("Thanks for telling us! We followed your steps and saw the same problem, and it's "
-                f"fixed now. {expected} We checked the fix by doing the exact same steps again.")
+        return ("Thanks for telling us! We followed your exact steps and saw the same problem, and "
+                f"it's fixed now. {expected} We checked the fix by doing the same steps again, and "
+                "we'll re-check them after every future change, so it stays fixed.")
     if inv.verdict == "not_reproduced" and inv.claim.get("outcome") == "not_true":
         return ("Thanks for telling us! We followed your steps and checked carefully, and the app "
                 "doesn't seem to work the way the report assumes. Could you send a screenshot or "
@@ -323,7 +331,8 @@ def inbox(request: Request):
             items.append(load_investigation(folder.parent))
         except (json.JSONDecodeError, TypeError):
             continue
-    return templates.TemplateResponse(request, "inbox.html", {"items": items, "page": "inbox"})
+    return templates.TemplateResponse(request, "inbox.html", {
+        "items": items, "page": "inbox", "case_no": case_numbers()})
 
 
 @app.get("/files/{inv_id}/{name:path}")

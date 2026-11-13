@@ -2,14 +2,15 @@
 {% block content %}
 <section class="hero">
   <h1>Users don't write good bug reports.<br><span>Kane doesn't need them to.</span></h1>
-  <p class="lede">Paste what the user wrote, add their screenshot if they sent one, and pick the app.
-    Kane CLI will try it in a real browser. If the bug is real and the code is connected, Claude fixes it
-    and Kane checks the fix.</p>
+  <p class="lede">Every bug report is a case. Paste what the user wrote, add their screenshot if they sent one,
+    and send <b>Detective Kane</b> to the scene. Kane retraces their steps in a real browser and brings back
+    evidence. If the code is connected, Claude repairs it, and Kane won't close the case until it sees the fix
+    with its own eyes.</p>
 </section>
 
 <form class="card form" action="/report" method="post" enctype="multipart/form-data">
   <label class="field">
-    <span>App</span>
+    <span>Which app?</span>
     <select name="app_file" required>
       {% for a in apps %}
         <option value="{{ a.file }}">{{ a.name }} · {{ a.url }}{{ ' · code connected' if a.has_code }}</option>
@@ -18,7 +19,7 @@
   </label>
 
   <label class="field">
-    <span>What the user wrote</span>
+    <span>The witness statement <em>(what the user wrote, messy is fine)</em></span>
     <textarea name="report" rows="5" required maxlength="4000"
       placeholder="cant book!!! the button does nothing. pls fix 😡"></textarea>
   </label>
@@ -35,14 +36,15 @@
     <input type="file" name="screenshot" accept="image/png,image/jpeg,image/webp,image/gif">
   </label>
 
-  <button class="btn primary big" type="submit">🔍 Investigate</button>
-  <p class="hint">Kane runs one report at a time in a real Chrome browser. A run takes about 2 minutes.</p>
+  <button class="btn primary big" type="submit">🕵️ Send Kane to investigate</button>
+  <p class="hint">Kane works one case at a time, in a real Chrome browser. A visit to the scene takes about 2 minutes.</p>
 </form>
 
 <section class="how">
-  <div><b>1 · Read</b><p>Claude reads the complaint and the screenshot and writes clear steps.</p></div>
-  <div><b>2 · Reproduce</b><p>Kane CLI does those steps in Chrome and records every screen.</p></div>
-  <div><b>3 · Fix</b><p>If the code is connected, Claude fixes it using only Kane's evidence.</p></div>
-  <div><b>4 · Prove</b><p>Kane runs the same steps again. Only a pass counts as fixed.</p></div>
+  <div><b>1 · The case</b><p>Claude reads the complaint and the screenshot, and works out what the user did.</p></div>
+  <div><b>2 · The scene</b><p>Kane retraces the user's steps in a real browser and captures every screen.</p></div>
+  <div><b>3 · The evidence</b><p>Kane checks what the user claimed. A memory or a guess doesn't count.</p></div>
+  <div><b>4 · The repair</b><p>If the code is connected, Claude fixes it, using only Kane's evidence.</p></div>
+  <div><b>5 · Case closed</b><p>Kane repeats the exact steps. Only a pass closes the case, and it stays on file.</p></div>
 </section>
 {% endblock %}
