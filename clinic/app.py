@@ -606,6 +606,14 @@ def appointment_create(
             errors.insert(0, "Please choose a patient.")
         else:
             form["patient_id"] = patient["id"]
+        if not errors and conn.execute(
+            "SELECT 1 FROM appointments WHERE clinic_id = ? AND date = ? AND time = ?",
+            (clinic["id"], form["date"], form["time"]),
+        ).fetchone():
+            errors.append(
+                f"The {form['time']} slot on {form['date']} is already taken. "
+                "Please choose another time. The appointment was not saved."
+            )
         if errors:
             ctx = _appointment_form_context(conn, clinic, form, errors)
             return render(request, "appointment_form.html", status_code=400, **ctx)
