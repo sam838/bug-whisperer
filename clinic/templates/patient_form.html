@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit patient' if patient.id else 'New patient' }} · {{ clinic.name }}{% endblock %}
+{% block content %}
+{% set back_url = '/patients/%s' % patient.id if patient.id else '/patients' %}
+<a href="{{ back_url }}" class="back">← Back</a>
+<h1>{{ 'Edit patient' if patient.id else 'New patient' }}</h1>
+
+{% if errors %}
+<div class="alert"><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>
+{% endif %}
+
+<form method="post" action="{{ '/patients/%s/edit' % patient.id if patient.id else '/patients/new' }}" class="card form form-wide">
+  <label class="span-2">Full name
+    <input type="text" name="full_name" value="{{ patient.full_name or '' }}" required autofocus>
+  </label>
+  <label>Phone
+    <input type="tel" name="phone" value="{{ patient.phone or '' }}">
+  </label>
+  <label>Date of birth
+    <input type="date" name="date_of_birth" value="{{ patient.date_of_birth or '' }}">
+  </label>
+  <label class="span-2">Diagnosis
+    <input type="text" name="diagnosis" value="{{ patient.diagnosis or '' }}">
+  </label>
+  <label class="span-2">Notes
+    <textarea name="notes" rows="6">{{ patient.notes or '' }}</textarea>
+  </label>
+  <div class="span-2 form-actions">
+    <a href="{{ back_url }}" class="btn btn-ghost">Cancel</a>
+    <button type="submit" class="btn btn-primary">{{ 'Save changes' if patient.id else 'Add patient' }}</button>
+  </div>
+</form>
+{% endblock %}

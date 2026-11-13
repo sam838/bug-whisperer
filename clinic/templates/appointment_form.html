@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Book appointment · {{ clinic.name }}{% endblock %}
+{% block content %}
+<a href="{{ '/patients/%s' % form.patient_id if form.patient_id else '/appointments' }}" class="back">← Back</a>
+<h1>Book appointment</h1>
+
+{% if errors %}
+<div class="alert"><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>
+{% endif %}
+
+{% if not patients %}
+<div class="empty">
+  <p>You need to add a patient before booking an appointment.</p>
+  <a href="/patients/new" class="btn btn-primary">Add patient</a>
+</div>
+{% else %}
+<form method="post" action="/appointments/new" class="card form form-wide">
+  <label class="span-2">Patient
+    <select name="patient_id" required>
+      <option value="">Choose a patient…</option>
+      {% for p in patients %}
+      <option value="{{ p.id }}" {{ 'selected' if form.patient_id|string == p.id|string }}>{{ p.full_name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Date
+    <input type="date" name="appt_date" value="{{ form.date }}" required>
+  </label>
+  <label>Time
+    <input type="time" name="appt_time" value="{{ form.time }}" required>
+  </label>
+  <label class="span-2">Reason
+    <input type="text" name="reason" value="{{ form.reason }}" placeholder="e.g. Follow-up, blood test">
+  </label>
+  <div class="span-2 form-actions">
+    <a href="/appointments" class="btn btn-ghost">Cancel</a>
+    <button type="submit" class="btn btn-primary">Book appointment</button>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Patients · {{ clinic.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Patients</h1>
+    <p class="muted">{{ total }} patient{{ '' if total == 1 else 's' }} · {{ upcoming }} upcoming appointment{{ '' if upcoming == 1 else 's' }}</p>
+  </div>
+  <div class="actions">
+    <a href="/patients/export.csv" class="btn btn-ghost">Export CSV</a>
+    <a href="/patients/new" class="btn btn-primary">+ Add patient</a>
+  </div>
+</div>
+
+<form method="get" action="/patients" class="search">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search by name, phone or diagnosis">
+  <button type="submit" class="btn btn-ghost">Search</button>
+  {% if q %}<a href="/patients" class="btn btn-link">Clear</a>{% endif %}
+</form>
+
+{% if patients %}
+<div class="card table-card">
+  <table class="table">
+    <thead>
+      <tr><th>Name</th><th>Phone</th><th>Date of birth</th><th>Diagnosis</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for p in patients %}
+      <tr>
+        <td><a href="/patients/{{ p.id }}" class="strong">{{ p.full_name }}</a></td>
+        <td>{{ p.phone or '—' }}</td>
+        <td>
+          {% if p.date_of_birth %}
+            {{ p.date_of_birth | pretty_date }}
+            {% set a = p.date_of_birth | age %}{% if a is not none %}<span class="muted"> ({{ a }})</span>{% endif %}
+          {% else %}—{% endif %}
+        </td>
+        <td>{% if p.diagnosis %}<span class="tag">{{ p.diagnosis }}</span>{% else %}—{% endif %}</td>
+        <td class="right"><a href="/patients/{{ p.id }}" class="btn btn-link">Open →</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% elif q %}
+<div class="empty">No patients match “{{ q }}”.</div>
+{% else %}
+<div class="empty">
+  <p>No patients yet.</p>
+  <a href="/patients/new" class="btn btn-primary">Add your first patient</a>
+</div>
+{% endif %}
+{% endblock %}

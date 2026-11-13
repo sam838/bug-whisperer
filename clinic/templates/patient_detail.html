@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ patient.full_name }} · {{ clinic.name }}{% endblock %}
+{% block content %}
+<a href="/patients" class="back">← All patients</a>
+<div class="page-head">
+  <div>
+    <h1>{{ patient.full_name }}</h1>
+    <p class="muted">
+      {% set a = patient.date_of_birth | age %}
+      {% if a is not none %}{{ a }} years old · {% endif %}Patient #{{ patient.id }}
+    </p>
+  </div>
+  <div class="actions">
+    <a href="/patients/{{ patient.id }}/print" class="btn btn-ghost" target="_blank">Print summary</a>
+    <a href="/patients/{{ patient.id }}/edit" class="btn btn-ghost">Edit</a>
+    <form method="post" action="/patients/{{ patient.id }}/delete"
+          onsubmit="return confirm('Delete this patient and all their appointments? This cannot be undone.');">
+      <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Details</h2>
+    <dl class="details">
+      <dt>Phone</dt><dd>{{ patient.phone or '—' }}</dd>
+      <dt>Date of birth</dt><dd>{{ (patient.date_of_birth | pretty_date) or '—' }}</dd>
+      <dt>Diagnosis</dt><dd>{{ patient.diagnosis or '—' }}</dd>
+      <dt>Added</dt><dd>{{ patient.created_at[:10] | pretty_date }}</dd>
+    </dl>
+    <h3>Notes</h3>
+    <div class="notes">{{ patient.notes or 'No notes.' }}</div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Appointments</h2>
+      <a href="/appointments/new?patient_id={{ patient.id }}" class="btn btn-primary btn-sm">+ Book</a>
+    </div>
+    {% if appointments %}
+    <ul class="appt-list">
+      {% for a in appointments %}
+      <li class="{{ 'past' if a.date < today }}">
+        <div>
+          <div class="strong">{{ a.date | pretty_date }} · {{ a.time }}</div>
+          <div class="muted">{{ a.reason or 'No reason given' }}</div>
+        </div>
+        <form method="post" action="/appointments/{{ a.id }}/delete"
+              onsubmit="return confirm('Cancel this appointment?');">
+          <input type="hidden" name="next" value="/patients/{{ patient.id }}">
+          <button type="submit" class="btn btn-link btn-sm danger-text">Cancel</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">No appointments yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

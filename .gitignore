@@ -1,0 +1,19 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local data
+*.db
+*.sqlite3
+.env
+
+# Kane CLI: local sessions and raw evidence packs (we commit curated copies under docs/evidence/)
+.testmuai/evidence/
+.testmuai/sessions/
+.testmuai/variables/
+output-*/
+
+# Nosy run artifacts
+runs/

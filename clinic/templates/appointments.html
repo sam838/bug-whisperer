@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Appointments · {{ clinic.name }}{% endblock %}
+
+{% macro appt_table(rows, empty_text) %}
+  {% if rows %}
+  <div class="card table-card">
+    <table class="table">
+      <thead><tr><th>Date</th><th>Time</th><th>Patient</th><th>Reason</th><th></th></tr></thead>
+      <tbody>
+        {% for a in rows %}
+        <tr>
+          <td class="nowrap">
+            {{ a.date | pretty_date }}
+            {% if a.date == today %}<span class="tag tag-accent">Today</span>{% endif %}
+          </td>
+          <td>{{ a.time }}</td>
+          <td><a href="/patients/{{ a.patient_id }}" class="strong">{{ a.patient_name }}</a></td>
+          <td>{{ a.reason or '—' }}</td>
+          <td class="right">
+            <form method="post" action="/appointments/{{ a.id }}/delete"
+                  onsubmit="return confirm('Cancel this appointment?');">
+              <button type="submit" class="btn btn-link btn-sm danger-text">Cancel</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">{{ empty_text }}</div>
+  {% endif %}
+{% endmacro %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Appointments</h1>
+    <p class="muted">{{ upcoming | length }} upcoming</p>
+  </div>
+  <div class="actions">
+    <a href="/appointments/new" class="btn btn-primary">+ Book appointment</a>
+  </div>
+</div>
+
+<h2>Upcoming</h2>
+{{ appt_table(upcoming, "No upcoming appointments.") }}
+
+{% if past %}
+<h2 class="section-gap">Past</h2>
+{{ appt_table(past, "") }}
+{% endif %}
+{% endblock %}
