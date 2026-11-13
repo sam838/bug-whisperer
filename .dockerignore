@@ -1,0 +1,13 @@
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+runs/
+apps/secrets/
+.testmuai/evidence/
+.testmuai/sessions/
+.testmuai/variables/
+**/output-*/
+clinic/clinic.db
+.env

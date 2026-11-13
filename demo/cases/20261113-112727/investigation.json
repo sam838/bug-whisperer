@@ -1,0 +1,547 @@
+{
+  "report": "hi. my receptionist booked mrs aisha for 3 march 2025 by accident (we meant 2027) and the system just saved it?? no warning nothing. it should not let us book in the past right. we are sunrise clinic",
+  "app": "Clinic Records",
+  "screenshot": null,
+  "id": "20261113-112727",
+  "status": "done",
+  "verdict": "reproduced",
+  "plan": {
+    "understanding": "A Sunrise Clinic receptionist booked an appointment for patient Aisha on 3 March 2025, a date in the past, and the app saved it without any warning or error.",
+    "enough_info": true,
+    "question": "",
+    "expected": "The app should refuse to book an appointment on a past date. It should show an error such as 'appointment date cannot be in the past' and not save the booking.",
+    "objective": "Go to http://127.0.0.1:8001/login and log in with email {{account1_email}} and password {{account1_password}}. Open the page for booking a new appointment. Select the patient named Aisha, set the date to 2025-03-03 and the time to 10:00, then click the button to book or save. Store what the page shows after that as 'what_happened'. Verify that the app shows an error saying the date is in the past and the appointment was not saved.",
+    "_cost_usd": 0.1210187
+  },
+  "kane": {
+    "verdict": "failed",
+    "exit_code": 1,
+    "status": "failed",
+    "reason": "Final verification failed: \"The app shows an error saying the date is in the past and the appointment was not saved.\"",
+    "summary": "The form did not reject the 3 March 2025 appointment date. After booking, the patient page shows the 03 Mar 2025 \u00b7 10:00 appointment, and no past-date error is shown.\nReject dates before the current date when booking, keep the user on the form, and clearly state that the appointment was not saved.\nevidence: http_error_response: POST http://127.0.0.1:8001/appointments/new -> 303\nevidence: objective_contradiction: The appointment was not saved.",
+    "final_state": {},
+    "failed_step": "assert: The app shows an error saying the date is in the past and the appointment was no",
+    "steps": [
+      "navigate: Navigate to http://127.0.0.1:8001/login",
+      "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+      "type: Type \"{{global.account1_email}}\" into \"Email\"",
+      "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+      "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+      "click: Clicking Log in with email and password",
+      "wait: Waiting confirm successful login on the Patients page",
+      "click: Clicking Appointments link in navigation",
+      "click: Clicking + Book appointment link to open new appointment booking page",
+      "wait: queued plan (4 steps): select \"Patient\"; type \"Date\"; type \"Time\"; click \"Book a",
+      "select: Select \"Aisha Rahman\" in \"Patient\"",
+      "type: Type \"2025-03-03\" into \"Date\"",
+      "type: Type \"10:00\" into \"Time\"",
+      "click: Click \"Book appointment\"",
+      "analyze: The appointment was not saved.",
+      "assert: The app shows an error saying the date is in the past and the appointment was no"
+    ],
+    "errors": [],
+    "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\28ee7e9d-5392-42c8-889f-a1716d1b2137",
+    "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M79JJNHP3KNT0A3R5HPWADDZ/dashboard/share/US_1PPDZMO16Y90LQLXTR9NLRGRU03RD3YRAO1SI421CDJ9GR0G7N7ILH9F1MJXW25X?type=summary&agentView=true&fqdn=summary-page",
+    "credits": 39.2889025,
+    "duration": 118.6,
+    "attempt": 1,
+    "shots": [
+      {
+        "ordinal": 1,
+        "file": "001.jpg",
+        "summary": "navigate: Navigate to http://127.0.0.1:8001/login",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 2,
+        "file": "002.jpg",
+        "summary": "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 3,
+        "file": "003.png",
+        "summary": "type: Type \"{{global.account1_email}}\" into \"Email\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 4,
+        "file": "004.jpg",
+        "summary": "",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 5,
+        "file": "005.jpg",
+        "summary": "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 6,
+        "file": "006.png",
+        "summary": "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 7,
+        "file": "007.jpg",
+        "summary": "",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 8,
+        "file": "008.png",
+        "summary": "click: Clicking Log in with email and password",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 9,
+        "file": "009.jpg",
+        "summary": "wait: Waiting confirm successful login on the Patients page",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients"
+      },
+      {
+        "ordinal": 10,
+        "file": "010.png",
+        "summary": "click: Clicking Appointments link in navigation",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients"
+      },
+      {
+        "ordinal": 11,
+        "file": "011.png",
+        "summary": "click: Clicking + Book appointment link to open new appointment booking page",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments"
+      },
+      {
+        "ordinal": 12,
+        "file": "012.jpg",
+        "summary": "wait: queued plan (4 steps): select \"Patient\"; type \"Date\"; type \"Time\"; click \"Book a",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments/new"
+      },
+      {
+        "ordinal": 13,
+        "file": "013.png",
+        "summary": "select: Select \"Aisha Rahman\" in \"Patient\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments/new"
+      },
+      {
+        "ordinal": 14,
+        "file": "014.png",
+        "summary": "type: Type \"2025-03-03\" into \"Date\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments/new"
+      },
+      {
+        "ordinal": 15,
+        "file": "015.png",
+        "summary": "type: Type \"10:00\" into \"Time\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments/new"
+      },
+      {
+        "ordinal": 16,
+        "file": "016.png",
+        "summary": "click: Click \"Book appointment\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments/new"
+      },
+      {
+        "ordinal": 17,
+        "file": "017.jpg",
+        "summary": "analyze: The appointment was not saved.",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients/3"
+      },
+      {
+        "ordinal": 18,
+        "file": "018.jpg",
+        "summary": "assert: The app shows an error saying the date is in the past and the appointment was no",
+        "status": "failed",
+        "url": "http://127.0.0.1:8001/patients/3"
+      }
+    ],
+    "failure_title": "Past appointment date is accepted and saved",
+    "shots_dir": "shots-reproduce-1"
+  },
+  "judgement": {
+    "reproduced": true,
+    "agent_lost": false,
+    "explanation": "The browser agent logged in, booked Aisha Rahman for 3 March 2025 at 10:00, and the app saved it without any warning. The appointment then showed on her patient page, so the app does accept bookings in the past, just as the clinic reported.",
+    "ticket": {
+      "title": "Appointments can be booked on past dates with no error",
+      "steps": [
+        "Log in to the clinic app as a Sunrise Clinic user",
+        "Go to Appointments and click '+ Book appointment'",
+        "Select patient 'Aisha Rahman'",
+        "Set the date to 2025-03-03 and the time to 10:00",
+        "Click 'Book appointment'"
+      ],
+      "expected": "The booking is refused, the user stays on the form, and an error such as 'Appointment date cannot be in the past' is shown. Nothing is saved.",
+      "actual": "The form is accepted and the user is redirected (POST /appointments/new returns 303). The patient page then shows a saved appointment on 03 Mar 2025 \u00b7 10:00, and no error or warning appears."
+    },
+    "_cost_usd": 0.1283808
+  },
+  "attempts": [
+    {
+      "objective": "Go to http://127.0.0.1:8001/login and log in with email {{account1_email}} and password {{account1_password}}. Open the page for booking a new appointment. Select the patient named Aisha, set the date to 2025-03-03 and the time to 10:00, then click the button to book or save. Store what the page shows after that as 'what_happened'. Verify that the app shows an error saying the date is in the past and the appointment was not saved.",
+      "kane": {
+        "verdict": "failed",
+        "exit_code": 1,
+        "status": "failed",
+        "reason": "Final verification failed: \"The app shows an error saying the date is in the past and the appointment was not saved.\"",
+        "summary": "The form did not reject the 3 March 2025 appointment date. After booking, the patient page shows the 03 Mar 2025 \u00b7 10:00 appointment, and no past-date error is shown.\nReject dates before the current date when booking, keep the user on the form, and clearly state that the appointment was not saved.\nevidence: http_error_response: POST http://127.0.0.1:8001/appointments/new -> 303\nevidence: objective_contradiction: The appointment was not saved.",
+        "final_state": {},
+        "failed_step": "assert: The app shows an error saying the date is in the past and the appointment was no",
+        "steps": [
+          "navigate: Navigate to http://127.0.0.1:8001/login",
+          "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+          "type: Type \"{{global.account1_email}}\" into \"Email\"",
+          "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+          "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+          "click: Clicking Log in with email and password",
+          "wait: Waiting confirm successful login on the Patients page",
+          "click: Clicking Appointments link in navigation",
+          "click: Clicking + Book appointment link to open new appointment booking page",
+          "wait: queued plan (4 steps): select \"Patient\"; type \"Date\"; type \"Time\"; click \"Book a",
+          "select: Select \"Aisha Rahman\" in \"Patient\"",
+          "type: Type \"2025-03-03\" into \"Date\"",
+          "type: Type \"10:00\" into \"Time\"",
+          "click: Click \"Book appointment\"",
+          "analyze: The appointment was not saved.",
+          "assert: The app shows an error saying the date is in the past and the appointment was no"
+        ],
+        "errors": [],
+        "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\28ee7e9d-5392-42c8-889f-a1716d1b2137",
+        "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M79JJNHP3KNT0A3R5HPWADDZ/dashboard/share/US_1PPDZMO16Y90LQLXTR9NLRGRU03RD3YRAO1SI421CDJ9GR0G7N7ILH9F1MJXW25X?type=summary&agentView=true&fqdn=summary-page",
+        "credits": 39.2889025,
+        "duration": 118.6,
+        "attempt": 1
+      }
+    }
+  ],
+  "fix": {
+    "status": "done",
+    "attempts": [
+      {
+        "attempt": 1,
+        "fixer_said": "The app was saving bookings on any valid date, including dates that had already passed, so the 3 March 2025 booking went through with no warning. I added a check in `validate_appointment` (`app.py:247`) that turns down dates before today. The booking form now stays open with \"The appointment date cannot be in the past. The appointment was not saved.\" and nothing is saved.\n\nI tried to run a quick check of the new validation, but that command needed an approval that wasn't given, so I haven't run it yet. Kane's re-run will be the first real test.",
+        "fixer_cost_usd": 0.2107256,
+        "patch": "diff --git a/clinic/app.py b/clinic/app.py\nindex 46b0718..269425d 100644\n--- a/clinic/app.py\n+++ b/clinic/app.py\n@@ -244,7 +244,8 @@ def validate_patient(full_name: str, date_of_birth: str) -> list[str]:\n def validate_appointment(appt_date: str, appt_time: str) -> list[str]:\n     errors = []\n     try:\n-        date.fromisoformat(appt_date)\n+        if date.fromisoformat(appt_date) < date.today():\n+            errors.append(\"The appointment date cannot be in the past. The appointment was not saved.\")\n     except ValueError:\n         errors.append(\"Please choose a valid date.\")\n     try:\n",
+        "kane": {
+          "verdict": "passed",
+          "exit_code": 0,
+          "reason": "Objective completed",
+          "summary": "Logged in and opened the new appointment booking page.\nSelected Aisha and entered March 3, 2025 at 10:00, then submitted the appointment request.\nThe appointment was not saved because the page reported: \u201cThe appointment date cannot be in the past.\u201d",
+          "final_state": {
+            "url": "http://127.0.0.1:8001/appointments/new",
+            "appointment_saved": "false",
+            "past_date_error_visible": "true",
+            "what_happened": "The appointment date cannot be in the past. The appointment was not saved."
+          },
+          "failed_step": null,
+          "steps": [
+            "navigate: Navigate to http://127.0.0.1:8001/login",
+            "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+            "type: Type \"{{global.account1_email}}\" into \"Email\"",
+            "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+            "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+            "click: Clicking Log in",
+            "click: Clicking Appointments in the top navigation",
+            "click: Clicking + Book appointment link in Appointments header",
+            "select: Selecting the patient named Aisha Rahman from the Patient dropdown",
+            "type: Typing the date 2025-03-03 into the Date field",
+            "type: Typing 10:00 into the time field",
+            "click: Clicking the Book appointment button in the form",
+            "analyze: The appointment was not saved.",
+            "assert: the app shows an error saying the date is in the past and the appointment was no"
+          ],
+          "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M79K8AXW2W85Z2NNM67HSPM1/dashboard/share/US_2U8E08SEXVG0SERRYGGIUT99Z6SHZ7B83OZYEXNDU5CWR34V1UNNRTJ6BSUYDAA4?type=summary&agentView=true&fqdn=summary-page",
+          "credits": 28.532435,
+          "duration": 114,
+          "shots": [
+            {
+              "ordinal": 1,
+              "file": "001.jpg",
+              "summary": "navigate: Navigate to http://127.0.0.1:8001/login",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/login"
+            },
+            {
+              "ordinal": 2,
+              "file": "002.jpg",
+              "summary": "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/login"
+            },
+            {
+              "ordinal": 3,
+              "file": "003.png",
+              "summary": "type: Type \"{{global.account1_email}}\" into \"Email\"",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/login"
+            },
+            {
+              "ordinal": 4,
+              "file": "004.jpg",
+              "summary": "",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/login"
+            },
+            {
+              "ordinal": 5,
+              "file": "005.jpg",
+              "summary": "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/login"
+            },
+            {
+              "ordinal": 6,
+              "file": "006.png",
+              "summary": "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/login"
+            },
+            {
+              "ordinal": 7,
+              "file": "007.jpg",
+              "summary": "",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/login"
+            },
+            {
+              "ordinal": 8,
+              "file": "008.png",
+              "summary": "click: Clicking Log in",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/login"
+            },
+            {
+              "ordinal": 9,
+              "file": "009.png",
+              "summary": "click: Clicking Appointments in the top navigation",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/patients"
+            },
+            {
+              "ordinal": 10,
+              "file": "010.png",
+              "summary": "click: Clicking + Book appointment link in Appointments header",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/appointments"
+            },
+            {
+              "ordinal": 11,
+              "file": "011.png",
+              "summary": "select: Selecting the patient named Aisha Rahman from the Patient dropdown",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/appointments/new"
+            },
+            {
+              "ordinal": 12,
+              "file": "012.png",
+              "summary": "type: Typing the date 2025-03-03 into the Date field",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/appointments/new"
+            },
+            {
+              "ordinal": 13,
+              "file": "013.png",
+              "summary": "type: Typing 10:00 into the time field",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/appointments/new"
+            },
+            {
+              "ordinal": 14,
+              "file": "014.png",
+              "summary": "click: Clicking the Book appointment button in the form",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/appointments/new"
+            },
+            {
+              "ordinal": 15,
+              "file": "015.jpg",
+              "summary": "analyze: The appointment was not saved.",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/appointments/new"
+            },
+            {
+              "ordinal": 16,
+              "file": "016.jpg",
+              "summary": "assert: the app shows an error saying the date is in the past and the appointment was no",
+              "status": "passed",
+              "url": "http://127.0.0.1:8001/appointments/new"
+            }
+          ],
+          "failure_title": null,
+          "shots_dir": "shots-verify-1"
+        }
+      }
+    ],
+    "verdict": "fixed",
+    "before": {
+      "kane_verdict": "failed",
+      "failed_step": "assert: The app shows an error saying the date is in the past and the appointment was no"
+    },
+    "regression_test": "bug-20261113-112727"
+  },
+  "app_file": "apps/clinic.json",
+  "created": "2026-11-13 11:27",
+  "guard": [
+    {
+      "when": "20261113-135655",
+      "verdict": "holds",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": "",
+        "failed_step": null,
+        "errors": [],
+        "duration": 19.59
+      },
+      "fresh": null
+    },
+    {
+      "when": "20261113-135825",
+      "verdict": "holds",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": "",
+        "failed_step": null,
+        "errors": [],
+        "duration": 21.64
+      },
+      "fresh": null
+    },
+    {
+      "when": "20261113-135958",
+      "verdict": "holds",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": "",
+        "failed_step": null,
+        "errors": [],
+        "duration": 19.17
+      },
+      "fresh": null
+    },
+    {
+      "when": "20261113-140123",
+      "verdict": "reopened",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 16",
+        "summary": "",
+        "failed_step": null,
+        "errors": [],
+        "duration": 59.61
+      },
+      "fresh": null
+    },
+    {
+      "when": "20261113-140347",
+      "verdict": "reopened",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 16",
+        "summary": "The app saved Aisha\u2019s appointment for 03 Mar 2025 at 10:00 instead of rejecting the past date.",
+        "failed_step": "assert: the app shows an error saying the date is in the past and the appointment was no",
+        "errors": [],
+        "duration": 59.17
+      },
+      "fresh": null
+    },
+    {
+      "when": "20261113-140603",
+      "verdict": "reopened",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 16",
+        "summary": "The application saved an appointment for 03 Mar 2025 at 10:00 instead of rejecting the past date.",
+        "failed_step": "assert: the app shows an error saying the date is in the past and the appointment was no",
+        "errors": [],
+        "duration": 58.08
+      },
+      "fresh": null
+    },
+    {
+      "when": "20261113-140856",
+      "verdict": "reopened",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 16",
+        "summary": "The app saved the 03 Mar 2025 10:00 appointment instead of showing a past-date error.",
+        "failed_step": "assert: the app shows an error saying the date is in the past and the appointment was no",
+        "errors": [],
+        "duration": 56.14
+      },
+      "fresh": null
+    },
+    {
+      "when": "20261113-141103",
+      "verdict": "holds",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 19.64
+      },
+      "fresh": null
+    },
+    {
+      "when": "20261113-141400",
+      "verdict": "holds",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 19.69
+      },
+      "fresh": null
+    },
+    {
+      "when": "20261113-142742",
+      "verdict": "holds",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 21.48
+      },
+      "fresh": null
+    },
+    {
+      "when": "20261113-142933",
+      "verdict": "holds",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 20.12
+      },
+      "fresh": null
+    }
+  ]
+}

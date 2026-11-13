@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Judges' passcode · Bug Whisperer{% endblock %}
+{% block content %}
+{% if limit_reached %}
+  <h1 class="page-title">Kane is done for today</h1>
+  <div class="card">
+    <p>The live demo runs at most <b>{{ limit }} cases a day</b>, because every case uses real Kane CLI
+      credits and a real Claude session. Please come back tomorrow, or look through the
+      <a href="/inbox">recorded case files</a>. Every one of them is a real Kane run.</p>
+    <p class="muted">To run it without limits, start it on your own machine with one command (see the README).</p>
+  </div>
+{% else %}
+  <h1 class="page-title">🕵️ Send Kane to the scene</h1>
+  <div class="card form">
+    <p>Live cases run <b>Kane CLI in a real browser</b> and <b>Claude</b> on this server, using real credits,
+      so they're for the hackathon judges. The passcode is in our submission.</p>
+    <p class="muted">Everyone can browse the <a href="/inbox">case files</a>: every case there is a real
+      recorded Kane run, with its screenshots and evidence.</p>
+    {% if wrong %}<div class="verdict warn">That passcode isn't right.</div>{% endif %}
+    <form action="/unlock" method="post" class="form">
+      <label class="field"><span>Judges' passcode</span>
+        <input name="passcode" type="password" autocomplete="off" required autofocus></label>
+      <button class="btn primary" type="submit">Unlock live cases</button>
+    </form>
+  </div>
+{% endif %}
+{% endblock %}

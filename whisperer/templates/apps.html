@@ -19,6 +19,14 @@
   {% endfor %}
 </div>
 
+{% if request.state.hosted %}
+<div class="card">
+  <h2>➕ Connect an app</h2>
+  <p>Turned off on the public demo, so our Kane only visits our own sample apps.
+    <a href="https://github.com/sam838/bug-whisperer#run-it">Run Bug Whisperer on your machine</a> to connect yours:
+    a link only (Kane reproduces and reports), or the link plus code (Claude also repairs).</p>
+</div>
+{% else %}
 <form class="card form" action="/apps" method="post">
   <h2>➕ Connect an app</h2>
   {% if errors %}<div class="verdict warn">{% for e in errors %}<div>{{ e }}</div>{% endfor %}</div>{% endif %}
@@ -66,4 +74,5 @@
 
   <button class="btn primary" type="submit">Connect</button>
 </form>
+{% endif %}
 {% endblock %}

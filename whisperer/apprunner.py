@@ -80,12 +80,22 @@ def stop(app: App) -> None:
         time.sleep(0.3)
 
 
+SECRET_ENV = ("LT_USERNAME", "LT_ACCESS_KEY", "KANE_USERNAME", "KANE_ACCESS_KEY", "DEMO_PASSCODE",
+              "ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN")
+
+
+def app_env() -> dict:
+    """The app runs code an AI may have edited, so it never gets Bug Whisperer's secrets."""
+    return {k: v for k, v in os.environ.items() if k not in SECRET_ENV}
+
+
 def start(app: App) -> bool:
     if not app.start:
         return is_up(app)
     log = open(ROOT / "runs" / f"app-{_port(app)}.log", "a", encoding="utf-8")
     _started[app.name] = subprocess.Popen(
-        _command(app.start), cwd=ROOT / (app.code_dir or "."), stdout=log, stderr=subprocess.STDOUT)
+        _command(app.start), cwd=ROOT / (app.code_dir or "."), stdout=log, stderr=subprocess.STDOUT,
+        env=app_env())
     return wait_until_up(app)
 
 
@@ -101,4 +111,4 @@ def reset(app: App) -> None:
     """Put the app's test data back to a known state, if the app has a reset command."""
     if app.reset:
         subprocess.run(_command(app.reset), cwd=ROOT / (app.code_dir or "."), capture_output=True,
-                       timeout=120)
+                       timeout=120, env=app_env())

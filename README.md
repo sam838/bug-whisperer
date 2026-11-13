@@ -100,6 +100,25 @@ python -m whisperer investigate apps/clinic.json "cant book in the past?? it jus
 python -m whisperer fix apps/clinic.json runs/<investigation-id>
 ```
 
+### The hosted demo (Render)
+
+The same website, online, with Kane CLI, Chrome and Claude Code on the server
+([Dockerfile](Dockerfile), [render.yaml](render.yaml)).
+
+- **Anyone** can browse the case files. Every case is a real recorded Kane run.
+- **Judges** unlock live cases with the passcode from our submission. They send Kane to
+  investigate and press **Repair it**.
+- The clinic sample app starts **every live case as the AI builder first wrote it, bugs
+  included** ([demo/clinic_original_app.py](demo/clinic_original_app.py)), so the bugs are there
+  to be found and repaired, and it resets for the next judge.
+- Safety: live runs need the passcode. There's a daily limit (`DEMO_DAILY_LIMIT`), and connecting
+  other apps is off. The clinic app (which runs AI-edited code) never sees the Kane key, the Claude
+  token or the passcode.
+
+To deploy it yourself: Render → New → Blueprint → this repo, then fill in `DEMO_PASSCODE`,
+`LT_USERNAME`, `LT_ACCESS_KEY` and `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`). Use at
+least 2 GB of RAM.
+
 ### The hook: Kane revisits closed cases
 
 Every case Bug Whisperer closes leaves a saved Kane test, listed in `.testmuai/closed-cases.json`.

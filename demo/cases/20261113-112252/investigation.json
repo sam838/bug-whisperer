@@ -1,0 +1,215 @@
+{
+  "report": "hi. my receptionist booked mrs aisha for 3 march 2025 by accident (we meant 2027) and the system just saved it?? no warning nothing. it should not let us book in the past right. we are sunrise clinic",
+  "app": "Clinic Records",
+  "screenshot": null,
+  "id": "20261113-112252",
+  "status": "done",
+  "verdict": "inconclusive",
+  "plan": {
+    "understanding": "A Sunrise Clinic receptionist booked an appointment for patient Aisha on 3 March 2025, a date in the past, and the app saved it with no warning or error.",
+    "enough_info": true,
+    "question": "",
+    "expected": "The app should refuse appointments dated in the past. It should show a clear error such as 'appointment date cannot be in the past' and should not save the appointment.",
+    "objective": "Go to http://127.0.0.1:8001/login. Log in with email {{account1_email}} and password {{account1_password}}. Open the patients list and open the patient named Aisha (if there is no Aisha, open the first patient in the list). Click the button or link to book a new appointment for this patient. Set the appointment date to 2025-03-03 (3 March 2025). If a time is required, set it to 10:00. Fill any other required fields with simple values, for example reason 'Check-up'. Click the button that saves or books the appointment. Store what the page shows after that as 'what_happened'. Verify that the app rejected the booking with an error message saying the date is in the past, and that no appointment on 3 March 2025 appears in this patient's appointments.",
+    "_cost_usd": 0.1369328
+  },
+  "kane": {
+    "verdict": "failed",
+    "exit_code": 1,
+    "status": "failed",
+    "reason": "Maximum steps exceeded (21/20)",
+    "summary": "The agent submitted the form with 09:00 even though the instructions said to use 10:00 when a time was required. After the submission redirected back to the patient page, it did not finish capturing the result or checking the required past-date message and absence of the appointment before its step budget was exhausted.\nReplay with the time explicitly set to 10:00. After submitting, immediately record the redirected page, look for the past-date error, and verify that no 3 March 2025 appointment was created instead of adding extra waits.",
+    "final_state": {},
+    "failed_step": "wait: Waiting verify the booking outcome on Aisha Rahman's appointments list",
+    "steps": [
+      "navigate: Navigate to http://127.0.0.1:8001/login",
+      "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+      "type: Type \"{{global.account1_email}}\" into \"Email\"",
+      "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+      "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+      "click: Clicking Log in with email and password",
+      "analyze: There is no Aisha in the patients list.",
+      "click: Clicking Aisha Rahman in the patients table",
+      "click: Clicking + Book to book a new appointment",
+      "type: Typing the appointment date 3 March 2025",
+      "analyze: ANALYZE(analyze_v3, no key)",
+      "wait: PRIMARY: wait 500 ms for the appointment time requirement checkpoint result",
+      "wait: PRIMARY: wait 1000 ms for the conditional appointment-time checkpoint to settle",
+      "type: Entering check-up reason",
+      "click: Clicking the Book appointment button",
+      "wait: PRIMARY: wait for the Aisha Rahman patient page to finish loading",
+      "analyze: ANALYZE(visual, 'The app rejected the booking with an error message saying the d",
+      "wait: Waiting verify the booking outcome on Aisha Rahman's appointments list"
+    ],
+    "errors": [],
+    "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\d479ce87-85a5-49d9-8dd3-6aa5acbf66d0",
+    "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M79JAETYRFDNS2JWZY016DS0/dashboard/share/US_AVQNTOD8DV6WPW728SZKGXLHM1PAAQYTYCTUFAMO9RMED7AEREXXGEXFCGSFCO85?type=summary&agentView=true&fqdn=summary-page",
+    "credits": 48.459394999999994,
+    "duration": 161,
+    "shots": [
+      {
+        "ordinal": 1,
+        "file": "001.jpg",
+        "summary": "navigate: Navigate to http://127.0.0.1:8001/login",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 2,
+        "file": "002.jpg",
+        "summary": "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 3,
+        "file": "003.png",
+        "summary": "type: Type \"{{global.account1_email}}\" into \"Email\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 4,
+        "file": "004.jpg",
+        "summary": "",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 5,
+        "file": "005.jpg",
+        "summary": "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 6,
+        "file": "006.png",
+        "summary": "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 7,
+        "file": "007.jpg",
+        "summary": "",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 8,
+        "file": "008.png",
+        "summary": "click: Clicking Log in with email and password",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 9,
+        "file": "009.jpg",
+        "summary": "analyze: There is no Aisha in the patients list.",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients"
+      },
+      {
+        "ordinal": 10,
+        "file": "010.png",
+        "summary": "click: Clicking Aisha Rahman in the patients table",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients"
+      },
+      {
+        "ordinal": 11,
+        "file": "011.png",
+        "summary": "click: Clicking + Book to book a new appointment",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients/3"
+      },
+      {
+        "ordinal": 12,
+        "file": "012.png",
+        "summary": "type: Typing the appointment date 3 March 2025",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments/new?patient_id=3"
+      },
+      {
+        "ordinal": 13,
+        "file": "013.jpg",
+        "summary": "analyze: ANALYZE(analyze_v3, no key)",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments/new?patient_id=3"
+      },
+      {
+        "ordinal": 14,
+        "file": "014.jpg",
+        "summary": "wait: PRIMARY: wait 500 ms for the appointment time requirement checkpoint result",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments/new?patient_id=3"
+      },
+      {
+        "ordinal": 15,
+        "file": "015.jpg",
+        "summary": "wait: PRIMARY: wait 1000 ms for the conditional appointment-time checkpoint to settle",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments/new?patient_id=3"
+      },
+      {
+        "ordinal": 16,
+        "file": "016.png",
+        "summary": "type: Entering check-up reason",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments/new?patient_id=3"
+      },
+      {
+        "ordinal": 17,
+        "file": "017.png",
+        "summary": "click: Clicking the Book appointment button",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/appointments/new?patient_id=3"
+      },
+      {
+        "ordinal": 18,
+        "file": "018.jpg",
+        "summary": "wait: PRIMARY: wait for the Aisha Rahman patient page to finish loading",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients/3"
+      },
+      {
+        "ordinal": 19,
+        "file": "019.jpg",
+        "summary": "analyze: ANALYZE(visual, 'The app rejected the booking with an error message saying the d",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients/3"
+      },
+      {
+        "ordinal": 20,
+        "file": "020.jpg",
+        "summary": "wait: Waiting verify the booking outcome on Aisha Rahman's appointments list",
+        "status": "failed",
+        "url": "http://127.0.0.1:8001/patients/3"
+      }
+    ],
+    "failure_title": "Appointment time did not follow the required value",
+    "shots_dir": "shots-reproduce-1"
+  },
+  "judgement": {
+    "reproduced": false,
+    "explanation": "The browser agent ran out of steps before it finished checking, so we can't confirm the bug from this run. After it clicked Book, the app went back to Aisha Rahman's page, which hints that the past date may have been saved, but the agent never checked for an error message or looked at the appointment list.",
+    "ticket": {
+      "title": "Sunrise Clinic: appointments can be booked for a date in the past (3 March 2025) without a warning",
+      "steps": [
+        "Log in as a Sunrise Clinic user at http://127.0.0.1:8001/login",
+        "Open the patients list and open the patient Aisha Rahman",
+        "Click '+ Book' to start a new appointment",
+        "Set the date to 3 March 2025, the time to 10:00 and the reason to 'Check-up'",
+        "Click 'Book appointment'",
+        "Look at the page that appears and at Aisha Rahman's appointments list"
+      ],
+      "expected": "The app refuses the booking, shows a clear error such as 'appointment date cannot be in the past', and no appointment on 3 March 2025 is added.",
+      "actual": "Not confirmed yet. In the automated attempt the app went back to the patient's page after the booking was submitted, with no visible error, which suggests it was saved. The agent ran out of steps before it could check the appointments list, so this needs a re-run."
+    },
+    "_cost_usd": 0.13301819999999998
+  },
+  "app_file": "apps/clinic.json",
+  "created": "2026-11-13 11:22",
+  "note": "First try: Kane ran out of steps, so nothing was claimed. Re-investigated as case #2."
+}

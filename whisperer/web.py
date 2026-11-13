@@ -9,6 +9,8 @@ Kane steps are read from the NDJSON log Kane is writing.
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
 import queue
 import re
@@ -20,6 +22,7 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from . import demo
 from .detective import ROOT, RUNS, App, Investigation, investigate
 from .fixer import fix, load_investigation
 
@@ -57,6 +60,11 @@ def worker() -> None:
             inv = load_investigation(RUNS / inv_id)
             app_cfg = App.load(ROOT / inv.app_file)
             if kind == "investigate":
+                if demo.hosted() and app_cfg.code_dir:
+                    # Every live case starts from the clinic as the AI builder first wrote it.
+                    from . import apprunner
+                    demo.reset_clinic()
+                    apprunner.restart(app_cfg)
                 investigate(app_cfg, inv.report, inv.screenshot, inv=inv)
             elif kind == "fix":
                 fix(app_cfg, inv)
@@ -83,6 +91,10 @@ def boot_apps() -> None:
         if cfg.start and not apprunner.is_up(cfg):
             apprunner.start(cfg)
 
+
+if demo.hosted():
+    demo.seed_runs()      # recorded cases, so the site isn't empty on a fresh server
+    demo.reset_clinic()   # the clinic as the AI builder first wrote it, bugs included
 
 threading.Thread(target=worker, daemon=True).start()
 if not __import__("os").environ.get("WHISPERER_NO_BOOT"):
@@ -217,6 +229,50 @@ def ticket_markdown(inv: Investigation) -> str | None:
 # ---------------------------------------------------------------------------------------------
 
 
+PASS_COOKIE = "bw_pass"
+
+
+def unlocked(request: Request) -> bool:
+    """Live runs are open locally; on the hosted demo they need the judges' passcode."""
+    if not demo.hosted():
+        return True
+    token = demo.passcode_token()
+    return bool(token) and request.cookies.get(PASS_COOKIE) == token
+
+
+def live_gate(request: Request):
+    """None if a live job may start, else a page explaining why not."""
+    if not unlocked(request):
+        return RedirectResponse("/unlock", status_code=303)
+    if demo.hosted() and demo.used_today() >= demo.daily_limit():
+        return templates.TemplateResponse(request, "unlock.html", {
+            "page": "report", "limit_reached": True, "limit": demo.daily_limit()}, status_code=429)
+    return None
+
+
+@app.middleware("http")
+async def demo_context(request: Request, call_next):
+    request.state.hosted = demo.hosted()
+    request.state.unlocked = unlocked(request)
+    return await call_next(request)
+
+
+@app.get("/unlock", response_class=HTMLResponse)
+def unlock_page(request: Request, wrong: int = 0):
+    return templates.TemplateResponse(request, "unlock.html", {"page": "report", "wrong": wrong})
+
+
+@app.post("/unlock")
+def unlock(passcode: str = Form("")):
+    token = demo.passcode_token()
+    tried = hashlib.sha256(("bug-whisperer:" + passcode).encode()).hexdigest()
+    if not token or not hmac.compare_digest(tried, token):
+        return RedirectResponse("/unlock?wrong=1", status_code=303)
+    response = RedirectResponse("/", status_code=303)
+    response.set_cookie(PASS_COOKIE, token, httponly=True, samesite="lax", max_age=7 * 24 * 3600)
+    return response
+
+
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse(request, "report.html", {
@@ -226,6 +282,9 @@ def home(request: Request):
 @app.post("/report")
 async def submit(request: Request, app_file: str = Form(...), report: str = Form(...),
                  screenshot: UploadFile | None = File(None)):
+    gate = live_gate(request)
+    if gate is not None:
+        return gate
     valid = {a["file"] for a in list_apps()}
     if app_file not in valid or not report.strip():
         raise HTTPException(400, "Choose an app and describe the problem")
@@ -242,6 +301,8 @@ async def submit(request: Request, app_file: str = Form(...), report: str = Form
         path.write_bytes(data)
         inv.screenshot = str(path)
     inv.save()
+    if demo.hosted():
+        demo.count_job()
     enqueue("investigate", inv.id)
     return RedirectResponse(f"/r/{inv.id}", status_code=303)
 
@@ -257,7 +318,10 @@ def report_live(request: Request, inv_id: str):
 
 
 @app.post("/r/{inv_id}/fix")
-def start_fix(inv_id: str):
+def start_fix(request: Request, inv_id: str):
+    gate = live_gate(request)
+    if gate is not None:
+        return gate
     v = view(get_inv(inv_id))
     if not v["can_fix"]:
         raise HTTPException(400, "This report can't be fixed automatically")
@@ -266,6 +330,8 @@ def start_fix(inv_id: str):
         inv.fix_history.append(inv.fix)  # keep the earlier try as evidence
     inv.fix = {"status": "queued", "attempts": [], "verdict": None}
     inv.save()
+    if demo.hosted():
+        demo.count_job()
     enqueue("fix", inv.id)
     return RedirectResponse(f"/r/{inv.id}", status_code=303)
 
@@ -281,6 +347,9 @@ SLUG_RE = re.compile(r"[^a-z0-9]+")
 
 @app.post("/apps", response_class=HTMLResponse)
 async def connect_app(request: Request):
+    if demo.hosted():
+        # The public demo only tests our own sample apps: no strangers' sites through our Kane.
+        raise HTTPException(403, "Connecting apps is turned off on the public demo. Run Bug Whisperer locally to connect your own.")
     form = dict(await request.form())
     errors = []
     name = form.get("name", "").strip()

@@ -16,6 +16,13 @@
       <a href="/apps" class="{{ 'on' if page == 'apps' }}">Apps</a>
     </nav>
   </header>
+  {% if request.state.hosted %}
+    <div class="demo-bar">
+      🎬 <b>Live demo.</b> The clinic sample app starts every case as the AI first built it, <b>bugs included</b>,
+      so you can watch Kane find them and Claude repair them. Every case runs Kane CLI for real.
+      {% if not request.state.unlocked %}<a href="/unlock">Judges: unlock live cases →</a>{% endif %}
+    </div>
+  {% endif %}
   <main class="wrap">
     {% block content %}{% endblock %}
   </main>
