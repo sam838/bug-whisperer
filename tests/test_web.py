@@ -60,6 +60,32 @@ def test_fixed_report_shows_reply_and_no_fix_button(client, tmp_path):
     assert "Fixed and proven" in page and "Reply to the user" in page and "Fix it" not in page
 
 
+def test_connect_app_keeps_passwords_out_of_the_app_file(client, tmp_path, monkeypatch):
+    apps = tmp_path / "apps"
+    apps.mkdir()
+    monkeypatch.setattr(web, "APPS", apps)
+    response = client.post("/apps", data={
+        "name": "My Shop", "url": "https://shop.example.com/", "permission": "yes",
+        "label1": "Customer", "email1": "c@example.com", "password1": "hunter2"},
+        follow_redirects=False)
+    assert response.status_code == 303
+    saved = (apps / "my-shop.json").read_text(encoding="utf-8")
+    assert "hunter2" not in saved and "c@example.com" in saved
+    loaded = detective.App.load(apps / "my-shop.json")
+    assert loaded.accounts["Customer"]["password"] == "hunter2"
+    assert loaded.base_url == "https://shop.example.com" and loaded.code_dir is None
+
+
+def test_connect_app_needs_permission_and_a_real_link(client, tmp_path, monkeypatch):
+    apps = tmp_path / "apps"
+    apps.mkdir()
+    monkeypatch.setattr(web, "APPS", apps)
+    page = client.post("/apps", data={"name": "X", "url": "javascript:alert(1)"})
+    assert page.status_code == 400
+    assert "permission" in page.text and "http" in page.text
+    assert not list(apps.glob("*.json"))
+
+
 def test_files_only_serves_images_inside_the_report(client, tmp_path):
     inv = save(tmp_path, status="done")
     (inv.folder / "notes.txt").write_text("private", encoding="utf-8")

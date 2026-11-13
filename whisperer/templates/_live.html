@@ -6,7 +6,7 @@
   {% set stage = 0 %}
   {% if inv.status in ('planning', 're-planning') %}{% set stage = 1 %}
   {% elif inv.status == 'reproducing' %}{% set stage = 2 %}
-  {% elif inv.status == 'judging' %}{% set stage = 3 %}
+  {% elif inv.status in ('judging', 'double-checking') %}{% set stage = 3 %}
   {% elif inv.status == 'done' %}{% set stage = 4 %}{% endif %}
   {% if inv.fix %}
     {% if fixs.startswith('fixing') or fixs == 'queued' %}{% set stage = 5 %}
@@ -27,6 +27,7 @@
       {% elif inv.status == 're-planning' %}🧠 Kane got lost last time. Claude is rewriting the steps with Kane's advice…
       {% elif inv.status == 'reproducing' %}🕵️ Kane CLI is trying it in a real Chrome browser…
       {% elif inv.status == 'judging' %}⚖️ Kane's check failed. Claude is checking it matches the complaint…
+      {% elif inv.status == 'double-checking' %}🔎 Kane is double-checking what the user claimed, so the verdict rests on evidence and not on memory…
       {% elif fixs.startswith('fixing') %}🛠️ Claude is fixing the code, using only Kane's evidence ({{ fixs.split('(')[-1].rstrip(')') }})…
       {% elif fixs.startswith('waiting') %}🔄 The app is reloading with the fix…
       {% elif fixs.startswith('Kane') %}🕵️ Kane is running the exact same steps again…
@@ -42,6 +43,8 @@
       <div class="verdict warn"><b>🙋 Needs a person.</b> Three fixes didn't make Kane's check pass.</div>
     {% elif fixv in ('inconclusive', 'error') %}
       <div class="verdict warn"><b>⚠️ Couldn't confirm the fix.</b> Kane couldn't finish the re-check{{ ': ' ~ inv.fix.get('error') if inv.fix.get('error') }}.</div>
+    {% elif inv.verdict == 'reproduced' and inv.claim.get('outcome') == 'confirmed' %}
+      <div class="verdict bug"><b>🐛 Reproduced.</b> Kane did what the user did and hit the same problem, then double-checked the user's claim and found it true. {{ inv.plan.get('understanding', '') }}</div>
     {% elif inv.verdict == 'reproduced' %}
       <div class="verdict bug"><b>🐛 Reproduced.</b> {{ inv.judgement.get('explanation', '') }}</div>
     {% elif inv.verdict == 'not_reproduced' %}
@@ -52,6 +55,20 @@
       <div class="verdict warn"><b>⚠️ Inconclusive.</b> {{ inv.judgement.get('explanation') or 'Kane could not finish the check, so nothing is claimed.' }}</div>
     {% endif %}
   {% endif %}
+
+  {% if inv.claim %}
+    <div class="claim {{ inv.claim.get('outcome') }}">
+      <b>🔎 Kane double-checked the user's claim:</b>
+      {% if inv.claim.get('outcome') == 'confirmed' %}✅ true.
+      {% elif inv.claim.get('outcome') == 'not_true' %}❌ not true in the app, so this isn't the bug the user thinks it is.
+      {% else %}⚠️ Kane couldn't finish the check.{% endif %}
+      <span class="muted">“{{ inv.claim.get('objective') }}”</span>
+    </div>
+  {% endif %}
+
+  {% if not app_cfg or not app_cfg.code_dir %}{% if inv.verdict == 'reproduced' and not active %}
+    <div class="claim">🔗 <b>Link-only app:</b> Bug Whisperer can reproduce and report this bug, but can't fix it, because its code isn't connected. Copy the ticket below for the team that owns it.</div>
+  {% endif %}{% endif %}
 
   {% if can_fix and not active %}
     <form method="post" action="/r/{{ inv.id }}/fix" class="fixbar">
@@ -78,7 +95,8 @@
     </section>
 
     <section class="card">
-      <h2>What Kane saw {% if inv.kane.get('failure_title') %}<span class="tag bug">{{ inv.kane.get('failure_title') }}</span>{% endif %}</h2>
+      {# Kane's own failure label is shown, unless Kane's double-check later settled the question. #}
+      <h2>What Kane saw {% if inv.kane.get('failure_title') and not inv.claim %}<span class="tag bug">{{ inv.kane.get('failure_title') }}</span>{% endif %}</h2>
       {% if before %}
         <a href="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" target="_blank"><img class="shot kane" src="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" alt="Kane's screenshot"></a>
         <p class="caption">{{ before.summary }}</p>

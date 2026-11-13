@@ -35,7 +35,16 @@ class App:
 
     @classmethod
     def load(cls, path: str | Path) -> "App":
-        return cls(**json.loads(Path(path).read_text(encoding="utf-8")))
+        path = Path(path)
+        data = json.loads(path.read_text(encoding="utf-8"))
+        # Passwords of apps connected through the website live in apps/secrets/ (never committed).
+        secrets_file = path.parent / "secrets" / path.name
+        if secrets_file.exists():
+            passwords = json.loads(secrets_file.read_text(encoding="utf-8"))
+            for label, acct in data.get("accounts", {}).items():
+                if label in passwords:
+                    acct["password"] = passwords[label]
+        return cls(**data)
 
     def variables(self) -> dict:
         out = {}
@@ -73,6 +82,7 @@ class Investigation:
     attempts: list = field(default_factory=list)
     fix: dict = field(default_factory=dict)
     fix_history: list = field(default_factory=list)  # earlier fix runs, kept as evidence
+    claim: dict = field(default_factory=dict)  # Kane's double-check of a claim the verdict relied on
 
     @property
     def folder(self) -> Path:
@@ -144,8 +154,16 @@ Reply with ONLY a JSON object:
   "reproduced": true or false,
   "agent_lost": true if the run ended before it could show anything about the bug, else false,
   "explanation": "one or two plain sentences for a non-developer",
+  "claim_check": "see below, or empty",
   "ticket": {{"title": "...", "steps": ["..."], "expected": "...", "actual": "..."}}
 }}
+
+claim_check: if your verdict relies on something the user CLAIMED that Kane did not show (for
+example "you sell Canon cameras", "it worked yesterday", "my account has 3 orders"), write ONE
+short Kane objective that checks that claim in the app: start at a full URL, at most 4 actions,
+end with "Verify that <the claim is true>." Use the same login placeholders as the objective
+above. If the verdict doesn't rely on such a claim, leave it empty. Don't rely on your own memory
+of the app: if you're tempted to, that's exactly what claim_check is for.
 """
 
 
@@ -203,6 +221,9 @@ def investigate(app: App, report: str, screenshot: str | None = None,
             result=json.dumps(inv.kane, indent=1, default=str)))
         if inv.judgement.get("reproduced") is True:
             inv.verdict = "reproduced"
+            claim = (inv.judgement.get("claim_check") or "").strip()
+            if claim:
+                inv.verdict = check_claim(app, inv, claim, step)
             break
         inv.verdict = "inconclusive"
         if not inv.judgement.get("agent_lost"):
@@ -213,6 +234,22 @@ def investigate(app: App, report: str, screenshot: str | None = None,
             judge_note=inv.judgement.get("explanation", ""))
     step("done")
     return inv
+
+
+def check_claim(app: App, inv: Investigation, objective: str, step) -> str:
+    """Kane double-checks a claim the verdict relies on. Returns the final verdict."""
+    step("double-checking")
+    result = kane.run(objective, variables=app.variables(), max_steps=15, timeout=180,
+                      log_path=inv.folder / "claim-check.ndjson")
+    inv.claim = {"objective": objective, **_brief(result)}
+    if result.verdict == "passed":
+        inv.claim["outcome"] = "confirmed"
+        return "reproduced"
+    if result.verdict == "failed":
+        inv.claim["outcome"] = "not_true"
+        return "not_reproduced"  # the user's premise isn't true in the app: not this bug
+    inv.claim["outcome"] = "unknown"
+    return "inconclusive"
 
 
 def _brief(result: kane.KaneResult) -> dict:

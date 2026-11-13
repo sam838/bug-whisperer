@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Apps · Bug Whisperer{% endblock %}
+{% block content %}
+<h1 class="page-title">Apps</h1>
+<p class="lede">Bug Whisperer works on any web app. With only a link, Kane reproduces bugs and writes the
+  ticket. Connect the code too, and Claude fixes them while Kane proves each fix.</p>
+
+{% if added %}<div class="verdict ok"><b>✅ Connected.</b> <a href="/">Report a bug for it →</a></div>{% endif %}
+
+<div class="list">
+  {% for a in apps %}
+    <div class="row card">
+      <span class="badge {{ 'ok' if a.has_code else 'neutral' }}">{{ '🛠️ Code connected' if a.has_code else '🔗 Link only' }}</span>
+      <span class="row-text">
+        <b>{{ a.name }}</b>
+        <small><a href="{{ a.url }}" target="_blank">{{ a.url }}</a>{% if a.accounts %} · test accounts: {{ a.accounts|join(', ') }}{% endif %}{% if a.about %} · {{ a.about }}{% endif %}</small>
+      </span>
+    </div>
+  {% endfor %}
+</div>
+
+<form class="card form" action="/apps" method="post">
+  <h2>➕ Connect an app</h2>
+  {% if errors %}<div class="verdict warn">{% for e in errors %}<div>{{ e }}</div>{% endfor %}</div>{% endif %}
+
+  <div class="grid2 tight">
+    <label class="field"><span>Name</span>
+      <input name="name" required value="{{ form.get('name', '') }}" placeholder="My Shop"></label>
+    <label class="field"><span>Link</span>
+      <input name="url" required value="{{ form.get('url', '') }}" placeholder="https://staging.myshop.com"></label>
+  </div>
+  <label class="field"><span>What is it? <em>(one line, helps Claude understand complaints)</em></span>
+    <input name="about" value="{{ form.get('about', '') }}" placeholder="An online shop where people buy shoes"></label>
+
+  <details {{ 'open' if form.get('email1') }}>
+    <summary><b>Login</b> <span class="muted">(if bugs happen after logging in)</span></summary>
+    <label class="field"><span>Login page <em>(path or full link)</em></span>
+      <input name="login_path" value="{{ form.get('login_path', '') }}" placeholder="/login"></label>
+    {% for i in (1, 2) %}
+      <div class="grid3">
+        <label class="field"><span>Test account {{ i }}</span>
+          <input name="label{{ i }}" value="{{ form.get('label' ~ i, '') }}" placeholder="{{ 'Customer' if i == 1 else 'Admin' }}"></label>
+        <label class="field"><span>Email or username</span>
+          <input name="email{{ i }}" value="{{ form.get('email' ~ i, '') }}" autocomplete="off"></label>
+        <label class="field"><span>Password</span>
+          <input name="password{{ i }}" type="password" autocomplete="new-password"></label>
+      </div>
+    {% endfor %}
+    <p class="hint">Use test accounts only. Passwords are kept in <code>apps/secrets/</code>, which is never committed, and Kane masks them in its logs.</p>
+  </details>
+
+  <details {{ 'open' if form.get('code_dir') }}>
+    <summary><b>Code</b> <span class="muted">(so Claude can fix bugs, not just report them)</span></summary>
+    <label class="field"><span>Code folder <em>(a git repo on this computer, relative to Bug Whisperer or a full path)</em></span>
+      <input name="code_dir" value="{{ form.get('code_dir', '') }}" placeholder="D:\projects\my-shop"></label>
+    <div class="grid2 tight">
+      <label class="field"><span>Start command <em>(run in the code folder)</em></span>
+        <input name="start" value="{{ form.get('start', '') }}" placeholder="python -m uvicorn app:app --port 8002"></label>
+      <label class="field"><span>Reset test data <em>(optional)</em></span>
+        <input name="reset" value="{{ form.get('reset', '') }}" placeholder="python seed.py"></label>
+    </div>
+  </details>
+
+  <label class="check"><input type="checkbox" name="permission" value="yes" required>
+    I own this app or have permission to test it. Kane only does normal user actions, but please use a test or staging version: no real payments.</label>
+
+  <button class="btn primary" type="submit">Connect</button>
+</form>
+{% endblock %}

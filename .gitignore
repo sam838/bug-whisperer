@@ -15,5 +15,8 @@ __pycache__/
 .testmuai/variables/
 output-*/
 
-# Nosy run artifacts
+# Bug Whisperer run artifacts (investigations, Kane logs, app logs)
 runs/
+
+# Passwords for apps connected through the website
+apps/secrets/

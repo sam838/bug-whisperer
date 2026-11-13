@@ -56,11 +56,19 @@ a { color: var(--accent); }
 .form { display: grid; gap: 16px; }
 .field { display: grid; gap: 6px; font-weight: 600; }
 .field em { font-weight: 400; color: var(--muted); font-style: normal; }
-select, textarea, input[type=file] {
+input:not([type=checkbox]):not([type=file]), select, textarea, input[type=file] {
   font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
   border-radius: 10px; padding: 10px 12px; width: 100%;
 }
 textarea { resize: vertical; }
+.form details { border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 12px; }
+.form details summary { cursor: pointer; margin-bottom: 4px; }
+.form details[open] > *:not(summary) { margin-top: 10px; }
+.grid2.tight { margin: 0; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; }
+.check input { margin-top: 5px; }
+code { font-family: var(--mono); font-size: .92em; }
 .examples { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; }
 .chip {
   font: inherit; font-size: 13px; border: 1px dashed var(--line); background: transparent; color: var(--ink);
@@ -103,6 +111,10 @@ textarea { resize: vertical; }
 .verdict.neutral { background: var(--neutral-soft); }
 .verdict b { margin-right: 6px; }
 
+.claim { border: 1px solid var(--line); background: var(--card); border-radius: var(--radius); padding: 12px 16px; margin: 12px 0; }
+.claim.confirmed { border-color: var(--ok); }
+.claim.not_true { border-color: var(--bug); }
+.claim .muted { display: block; font-size: 13px; margin-top: 4px; font-family: var(--mono); }
 .fixbar {
   display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
   border: 2px dashed var(--accent); border-radius: var(--radius); padding: 14px 18px;

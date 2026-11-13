@@ -103,8 +103,9 @@ def list_apps() -> list[dict]:
     out = []
     for path in sorted(APPS.glob("*.json")):
         cfg = App.load(path)
-        out.append({"file": f"apps/{path.name}", "name": cfg.name, "url": cfg.base_url,
-                    "has_code": bool(cfg.code_dir)})
+        out.append({"file": f"apps/{path.name}", "slug": path.stem, "name": cfg.name,
+                    "url": cfg.base_url, "has_code": bool(cfg.code_dir), "about": cfg.about,
+                    "accounts": list(cfg.accounts)})
     return out
 
 
@@ -181,6 +182,10 @@ def reply_for_user(inv: Investigation) -> str | None:
     if inv.fix.get("verdict") == "fixed":
         return ("Thanks for telling us! We followed your steps and saw the same problem, and it's "
                 f"fixed now. {expected} We checked the fix by doing the exact same steps again.")
+    if inv.verdict == "not_reproduced" and inv.claim.get("outcome") == "not_true":
+        return ("Thanks for telling us! We followed your steps and checked carefully, and the app "
+                "doesn't seem to work the way the report assumes. Could you send a screenshot or "
+                "the exact page you were on, so we can look again?")
     if inv.verdict == "not_reproduced":
         return ("Thanks for telling us! We followed your steps and it worked for us. Could you tell "
                 "us the exact day and time you tried, and what you saw on the screen?")
@@ -255,6 +260,59 @@ def start_fix(inv_id: str):
     inv.save()
     enqueue("fix", inv.id)
     return RedirectResponse(f"/r/{inv.id}", status_code=303)
+
+
+@app.get("/apps", response_class=HTMLResponse)
+def apps_page(request: Request, added: str | None = None):
+    return templates.TemplateResponse(request, "apps.html", {
+        "apps": list_apps(), "added": added, "page": "apps", "form": {}, "errors": []})
+
+
+SLUG_RE = re.compile(r"[^a-z0-9]+")
+
+
+@app.post("/apps", response_class=HTMLResponse)
+async def connect_app(request: Request):
+    form = dict(await request.form())
+    errors = []
+    name = form.get("name", "").strip()
+    url = form.get("url", "").strip()
+    if not name:
+        errors.append("Give the app a name.")
+    if not re.match(r"^https?://[^\s/]+", url):
+        errors.append("The link must start with http:// or https://")
+    if form.get("permission") != "yes":
+        errors.append("Only connect apps you own or have permission to test.")
+    slug = SLUG_RE.sub("-", name.lower()).strip("-")[:40] or "app"
+    path = APPS / f"{slug}.json"
+    if path.exists():
+        errors.append(f"An app called {name!r} is already connected.")
+    code_dir = form.get("code_dir", "").strip()
+    if code_dir and not (ROOT / code_dir).is_dir():
+        errors.append(f"The code folder {code_dir!r} doesn't exist on this computer.")
+    if errors:
+        return templates.TemplateResponse(request, "apps.html", {
+            "apps": list_apps(), "page": "apps", "form": form, "errors": errors}, status_code=400)
+
+    accounts, passwords = {}, {}
+    for i in (1, 2):
+        label = form.get(f"label{i}", "").strip()
+        email = form.get(f"email{i}", "").strip()
+        if label and email:
+            accounts[label] = {"email": email, "password": ""}
+            passwords[label] = form.get(f"password{i}", "")
+    config = {
+        "name": name, "base_url": url.rstrip("/"), "login_path": form.get("login_path", "").strip(),
+        "accounts": accounts, "about": form.get("about", "").strip()[:500],
+        "code_dir": code_dir or None,
+        "start": form.get("start", "").split() or None,
+        "reset": form.get("reset", "").split() or None,
+    }
+    path.write_text(json.dumps(config, indent=2), encoding="utf-8")
+    if passwords:
+        (APPS / "secrets").mkdir(exist_ok=True)
+        (APPS / "secrets" / path.name).write_text(json.dumps(passwords, indent=2), encoding="utf-8")
+    return RedirectResponse(f"/apps?added={slug}", status_code=303)
 
 
 @app.get("/inbox", response_class=HTMLResponse)
