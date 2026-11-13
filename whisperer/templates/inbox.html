@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Inbox · Bug Whisperer{% endblock %}
+{% block content %}
+<h1 class="page-title">Inbox</h1>
+{% if not items %}
+  <div class="card"><p>No reports yet. <a href="/">Report the first bug →</a></p></div>
+{% else %}
+  <div class="list">
+    {% for i in items %}
+      {% set fv = i.fix.get('verdict') if i.fix else None %}
+      <a class="row card" href="/r/{{ i.id }}">
+        <span class="badge
+          {% if fv == 'fixed' %}ok{% elif i.verdict == 'reproduced' %}bug{% elif i.status != 'done' or (i.fix and i.fix.get('status') != 'done') %}work{% elif i.verdict in ('inconclusive',) or fv in ('needs_human', 'inconclusive', 'error') %}warn{% else %}neutral{% endif %}">
+          {% if fv == 'fixed' %}✅ Fixed
+          {% elif i.fix and i.fix.get('status') != 'done' %}🛠️ Fixing
+          {% elif i.status != 'done' %}🕵️ {{ i.status|capitalize }}
+          {% elif i.verdict == 'reproduced' %}🐛 Reproduced
+          {% elif i.verdict == 'not_reproduced' %}❓ Not reproduced
+          {% elif i.verdict == 'needs_info' %}❓ Needs info
+          {% else %}⚠️ Inconclusive{% endif %}
+        </span>
+        <span class="row-text">
+          <b>{{ (i.judgement.get('ticket') or {}).get('title') or i.report[:90] }}</b>
+          <small>“{{ i.report[:110] }}{{ '…' if i.report|length > 110 }}” · {{ i.app }} · {{ i.created }}</small>
+        </span>
+      </a>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

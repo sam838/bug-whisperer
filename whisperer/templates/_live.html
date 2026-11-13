@@ -1,0 +1,179 @@
+{% set fixv = inv.fix.get('verdict') if inv.fix else None %}
+{% set fixs = inv.fix.get('status', '') if inv.fix else '' %}
+<div class="live-root" data-active="{{ 'true' if active else 'false' }}">
+
+  {# ------------------------------------------------ progress ------------------------------------------------ #}
+  {% set stage = 0 %}
+  {% if inv.status in ('planning', 're-planning') %}{% set stage = 1 %}
+  {% elif inv.status == 'reproducing' %}{% set stage = 2 %}
+  {% elif inv.status == 'judging' %}{% set stage = 3 %}
+  {% elif inv.status == 'done' %}{% set stage = 4 %}{% endif %}
+  {% if inv.fix %}
+    {% if fixs.startswith('fixing') or fixs == 'queued' %}{% set stage = 5 %}
+    {% elif fixs.startswith('waiting') or fixs.startswith('Kane') %}{% set stage = 6 %}
+    {% elif fixs == 'done' %}{% set stage = 7 %}{% endif %}
+  {% endif %}
+  <ol class="track">
+    {% for label in ['Read', 'Reproduce', 'Judge', 'Verdict', 'Fix', 'Re-check', 'Done'] %}
+      <li class="{{ 'done' if loop.index < stage or (stage == 7 and loop.index == 7) }} {{ 'now' if loop.index == stage and active }}">{{ label }}</li>
+    {% endfor %}
+  </ol>
+
+  {% if active %}
+    <div class="banner working">
+      <span class="pulse"></span>
+      {% if queued %}Waiting in line: Kane runs one report at a time.
+      {% elif inv.status == 'planning' %}🧠 Claude is reading the report{{ ' and the screenshot' if inv.screenshot }}…
+      {% elif inv.status == 're-planning' %}🧠 Kane got lost last time. Claude is rewriting the steps with Kane's advice…
+      {% elif inv.status == 'reproducing' %}🕵️ Kane CLI is trying it in a real Chrome browser…
+      {% elif inv.status == 'judging' %}⚖️ Kane's check failed. Claude is checking it matches the complaint…
+      {% elif fixs.startswith('fixing') %}🛠️ Claude is fixing the code, using only Kane's evidence ({{ fixs.split('(')[-1].rstrip(')') }})…
+      {% elif fixs.startswith('waiting') %}🔄 The app is reloading with the fix…
+      {% elif fixs.startswith('Kane') %}🕵️ Kane is running the exact same steps again…
+      {% else %}Working…{% endif %}
+    </div>
+  {% endif %}
+
+  {# ------------------------------------------------ verdict ------------------------------------------------ #}
+  {% if not active or inv.verdict %}
+    {% if fixv == 'fixed' %}
+      <div class="verdict ok"><b>✅ Fixed and proven.</b> Kane reproduced the bug, Claude fixed it, and the same Kane steps now pass.</div>
+    {% elif fixv == 'needs_human' %}
+      <div class="verdict warn"><b>🙋 Needs a person.</b> Three fixes didn't make Kane's check pass.</div>
+    {% elif fixv in ('inconclusive', 'error') %}
+      <div class="verdict warn"><b>⚠️ Couldn't confirm the fix.</b> Kane couldn't finish the re-check{{ ': ' ~ inv.fix.get('error') if inv.fix.get('error') }}.</div>
+    {% elif inv.verdict == 'reproduced' %}
+      <div class="verdict bug"><b>🐛 Reproduced.</b> {{ inv.judgement.get('explanation', '') }}</div>
+    {% elif inv.verdict == 'not_reproduced' %}
+      <div class="verdict neutral"><b>❓ Couldn't reproduce.</b> Kane followed the steps and the app behaved correctly.</div>
+    {% elif inv.verdict == 'needs_info' %}
+      <div class="verdict neutral"><b>❓ Not enough to go on.</b> Ask the user: <em>{{ inv.plan.get('question') }}</em></div>
+    {% elif inv.verdict == 'inconclusive' %}
+      <div class="verdict warn"><b>⚠️ Inconclusive.</b> {{ inv.judgement.get('explanation') or 'Kane could not finish the check, so nothing is claimed.' }}</div>
+    {% endif %}
+  {% endif %}
+
+  {% if can_fix and not active %}
+    <form method="post" action="/r/{{ inv.id }}/fix" class="fixbar">
+      {% if retry %}
+        <div><b>The last fix wasn't proven.</b> Try again: Claude gets Kane's newest evidence, and the earlier attempt stays on record below.</div>
+        <button class="btn primary">🛠️ Try fixing again</button>
+      {% else %}
+        <div><b>The code for {{ inv.app }} is connected.</b> Claude can fix this, and Kane will run the same steps to prove it.</div>
+        <button class="btn primary">🛠️ Fix it</button>
+      {% endif %}
+    </form>
+  {% endif %}
+
+  {# ------------------------------------------------ the two views ------------------------------------------------ #}
+  <div class="grid2">
+    <section class="card">
+      <h2>What the user said</h2>
+      <blockquote class="complaint">{{ inv.report }}</blockquote>
+      {% if user_shot %}<a href="/files/{{ inv.id }}/{{ user_shot }}" target="_blank"><img class="shot" src="/files/{{ inv.id }}/{{ user_shot }}" alt="The user's screenshot"></a>{% endif %}
+      {% if inv.plan.get('understanding') %}
+        <h3>What Claude thinks happened</h3>
+        <p>{{ inv.plan.get('understanding') }}</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <h2>What Kane saw {% if inv.kane.get('failure_title') %}<span class="tag bug">{{ inv.kane.get('failure_title') }}</span>{% endif %}</h2>
+      {% if before %}
+        <a href="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" target="_blank"><img class="shot kane" src="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" alt="Kane's screenshot"></a>
+        <p class="caption">{{ before.summary }}</p>
+      {% elif steps %}
+        <ol class="steps live">
+          {% for s in steps %}<li class="{{ s.status }}">{{ s.remark }}</li>{% endfor %}
+        </ol>
+      {% else %}
+        <p class="muted">Kane hasn't started yet.</p>
+      {% endif %}
+      {% if inv.kane.get('summary') %}<p class="kane-says">“{{ inv.kane.get('summary').split('\n')[0] }}”</p>{% endif %}
+    </section>
+  </div>
+
+  {# ------------------------------------------------ live steps during fix ------------------------------------------------ #}
+  {% if inv.fix and active and steps %}
+    <section class="card">
+      <h2>Kane, re-checking</h2>
+      <ol class="steps live">{% for s in steps %}<li class="{{ s.status }}">{{ s.remark }}</li>{% endfor %}</ol>
+    </section>
+  {% endif %}
+
+  {# ------------------------------------------------ before / after ------------------------------------------------ #}
+  {% if after %}
+    <section class="card">
+      <h2>Before and after: the same Kane steps</h2>
+      <div class="ba">
+        <figure><figcaption class="bad">❌ Before the fix</figcaption>
+          {% if before %}<img class="shot kane" src="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" alt="Before">{% endif %}
+          <p class="caption">{{ inv.kane.get('reason') }}</p></figure>
+        <figure><figcaption class="good">{{ '✅' if fixv == 'fixed' else '❌' }} After the fix</figcaption>
+          <img class="shot kane" src="/files/{{ inv.id }}/{{ after.dir }}/{{ after.file }}" alt="After">
+          <p class="caption">{{ inv.fix.attempts[-1].kane.get('reason') }}</p></figure>
+      </div>
+    </section>
+  {% endif %}
+
+  {% if inv.fix and inv.fix.get('attempts') %}
+    {% set last = inv.fix.attempts[-1] %}
+    <section class="card">
+      <h2>What Claude changed <span class="muted">· attempt {{ last.attempt }} of 3</span></h2>
+      <p>{{ last.fixer_said.strip().split('\n')[0] }}</p>
+      {% if last.patch %}<pre class="diff">{% for line in last.patch.splitlines() if not line.startswith(('diff --git', 'index ')) %}<span class="{{ 'add' if line.startswith('+') and not line.startswith('+++') else 'del' if line.startswith('-') and not line.startswith('---') else 'ctx' }}">{{ line or ' ' }}</span>{% endfor %}</pre>{% endif %}
+      {% if inv.fix.get('regression_test') %}<p class="muted">Saved as a Kane test: <code>{{ inv.fix.get('regression_test') }}</code>. It replays in about 20 seconds after every change, and fails if this bug ever comes back.</p>{% endif %}
+    </section>
+  {% endif %}
+
+  {% if inv.fix_history %}
+    <details class="card">
+      <summary>Earlier fix attempts ({{ inv.fix_history|length }}), kept on record</summary>
+      {% for h in inv.fix_history %}
+        <p><b>{{ 'Proven' if h.get('verdict') == 'fixed' else 'Not proven' }}</b> after {{ h.get('attempts', [])|length }} attempt(s).
+          {% if h.get('note') %}{{ h.get('note') }}{% endif %}</p>
+        <ol class="steps">{% for a in h.get('attempts', []) %}<li class="{{ 'failed' if a.kane.get('verdict') != 'passed' }}">Attempt {{ a.attempt }}: Kane {{ a.kane.get('verdict') }}. {{ (a.kane.get('summary') or '').split('\n')[0] }}</li>{% endfor %}</ol>
+      {% endfor %}
+    </details>
+  {% endif %}
+
+  {# ------------------------------------------------ outputs ------------------------------------------------ #}
+  {% if reply or ticket_md %}
+    <div class="grid2">
+      {% if reply %}
+        <section class="card">
+          <h2>Reply to the user</h2>
+          <p class="reply" id="reply-{{ inv.id }}">{{ reply }}</p>
+          <button class="btn" data-copy="reply-{{ inv.id }}">Copy reply</button>
+        </section>
+      {% endif %}
+      {% if ticket_md %}
+        <section class="card">
+          <h2>Bug ticket</h2>
+          <pre class="ticket" id="ticket-{{ inv.id }}">{{ ticket_md }}</pre>
+          <button class="btn" data-copy="ticket-{{ inv.id }}">Copy for GitHub / Jira</button>
+        </section>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {# ------------------------------------------------ details ------------------------------------------------ #}
+  {% if inv.plan.get('objective') %}
+    <details class="card">
+      <summary>Kane's instructions and every step it took</summary>
+      <h3>Objective given to Kane</h3>
+      <p class="objective">{{ inv.plan.get('objective') }}</p>
+      {% if inv.kane.get('shots') %}
+        <h3>Kane's screens</h3>
+        <div class="film">
+          {% for s in inv.kane.get('shots') %}
+            <a href="/files/{{ inv.id }}/{{ inv.kane.get('shots_dir') }}/{{ s.file }}" target="_blank" class="{{ s.status }}">
+              <img src="/files/{{ inv.id }}/{{ inv.kane.get('shots_dir') }}/{{ s.file }}" alt="" loading="lazy"><span>{{ s.summary.split(': ', 1)[-1][:60] }}</span></a>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if inv.attempts|length > 1 %}<p class="muted">Kane needed {{ inv.attempts|length }} tries: the first one got lost, so Claude re-planned from Kane's own advice.</p>{% endif %}
+      {% if inv.kane.get('credits') %}<p class="muted">Kane CLI: {{ '%.0f'|format(inv.kane.get('credits')) }} credits · {{ '%.0f'|format(inv.kane.get('duration') or 0) }} s{% if inv.kane.get('test_url') %} · <a href="{{ inv.kane.get('test_url') }}" target="_blank">open in TestMu AI</a>{% endif %}</p>{% endif %}
+    </details>
+  {% endif %}
+</div>

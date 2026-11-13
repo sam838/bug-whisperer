@@ -103,6 +103,7 @@ def _execute(argv, *, timeout, log_path, on_event) -> KaneResult:
         for line in proc.stdout:  # type: ignore[union-attr]
             if log:
                 log.write(line)
+                log.flush()  # the website reads this file while Kane is still running
             event = _parse(line)
             if event is None:
                 continue

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Bug Whisperer{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐛</text></svg>">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">🐛</span> Bug Whisperer</a>
+    <nav>
+      <a href="/" class="{{ 'on' if page == 'report' }}">Report a bug</a>
+      <a href="/inbox" class="{{ 'on' if page == 'inbox' }}">Inbox</a>
+    </nav>
+  </header>
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="foot">
+    Claude Code reads the report · <strong>Kane CLI</strong> reproduces it in a real browser · Claude fixes it · Kane checks again
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>

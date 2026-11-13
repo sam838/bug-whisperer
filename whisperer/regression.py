@@ -9,6 +9,7 @@ when it replays the test.
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 from . import kane
@@ -45,6 +46,18 @@ def strip_secrets(text: str) -> str:
             out.append(line)
     flush()
     return "".join(out)
+
+
+def saved_name(name: str) -> str:
+    """The name Kane really saved under. If <name> already existed, Kane adds -2, -3, ..."""
+    matches = sorted(TESTS.glob(f"{name}*_test.md"), key=lambda p: p.stat().st_mtime)
+    return matches[-1].name[: -len("_test.md")] if matches else name
+
+
+def discard(name: str) -> None:
+    """Remove a saved run that is not a regression test (for example a re-check that failed)."""
+    (TESTS / f"{name}_test.md").unlink(missing_ok=True)
+    shutil.rmtree(TESTS / f"output-{name}", ignore_errors=True)
 
 
 def sanitize(name: str) -> Path:

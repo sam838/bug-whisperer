@@ -1,4 +1,26 @@
+import os
+import time
+
+from whisperer import regression
 from whisperer.regression import strip_secrets
+
+
+def test_saved_name_finds_the_suffix_kane_added(tmp_path, monkeypatch):
+    monkeypatch.setattr(regression, "TESTS", tmp_path)
+    (tmp_path / "bug-1_test.md").write_text("old failed run", encoding="utf-8")
+    newer = tmp_path / "bug-1-2_test.md"
+    newer.write_text("the run that just happened", encoding="utf-8")
+    later = time.time() + 5
+    os.utime(newer, (later, later))
+    assert regression.saved_name("bug-1") == "bug-1-2"
+
+
+def test_discard_removes_a_failed_run(tmp_path, monkeypatch):
+    monkeypatch.setattr(regression, "TESTS", tmp_path)
+    (tmp_path / "bug-2_test.md").write_text("x", encoding="utf-8")
+    (tmp_path / "output-bug-2").mkdir()
+    regression.discard("bug-2")
+    assert not any(tmp_path.iterdir())
 
 FRONT = """---
 mode: testing

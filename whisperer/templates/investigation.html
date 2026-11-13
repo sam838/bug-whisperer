@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Report {{ inv.id }} · Bug Whisperer{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="/inbox">← Inbox</a> · Report {{ inv.id }} · {{ inv.app }} · {{ inv.created }}</div>
+<div id="live" data-url="/r/{{ inv.id }}/live" data-active="{{ 'true' if active else 'false' }}">
+  {% include "_live.html" %}
+</div>
+{% endblock %}

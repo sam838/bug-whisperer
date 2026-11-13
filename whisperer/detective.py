@@ -10,12 +10,13 @@
 from __future__ import annotations
 
 import json
+import secrets
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from urllib.parse import urljoin
 
-from . import claude, kane
+from . import claude, evidence, kane
 
 ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "runs"
@@ -29,6 +30,8 @@ class App:
     accounts: dict = field(default_factory=dict)  # label -> {"email", "password"}
     code_dir: str | None = None
     about: str = ""
+    start: list | None = None  # command that starts the app, run in code_dir ("python" = this venv)
+    reset: list | None = None  # command that resets the app's test data, run in code_dir
 
     @classmethod
     def load(cls, path: str | Path) -> "App":
@@ -50,12 +53,18 @@ class App:
         return f"Login page: {login}\nTest accounts (use these placeholders exactly):\n" + "\n".join(lines)
 
 
+def new_id() -> str:
+    return time.strftime("%Y%m%d-%H%M%S") + "-" + secrets.token_hex(2)
+
+
 @dataclass
 class Investigation:
     report: str
     app: str
     screenshot: str | None = None
-    id: str = field(default_factory=lambda: time.strftime("%Y%m%d-%H%M%S"))
+    id: str = field(default_factory=new_id)
+    app_file: str | None = None
+    created: str = field(default_factory=lambda: time.strftime("%Y-%m-%d %H:%M"))
     status: str = "planning"  # planning, reproducing, judging, done
     verdict: str | None = None  # reproduced, not_reproduced, needs_info, inconclusive
     plan: dict = field(default_factory=dict)
@@ -63,6 +72,7 @@ class Investigation:
     judgement: dict = field(default_factory=dict)
     attempts: list = field(default_factory=list)
     fix: dict = field(default_factory=dict)
+    fix_history: list = field(default_factory=list)  # earlier fix runs, kept as evidence
 
     @property
     def folder(self) -> Path:
@@ -143,8 +153,8 @@ MAX_ATTEMPTS = 2
 
 
 def investigate(app: App, report: str, screenshot: str | None = None,
-                on_update=None) -> Investigation:
-    inv = Investigation(report=report, app=app.name, screenshot=screenshot)
+                on_update=None, inv: Investigation | None = None) -> Investigation:
+    inv = inv or Investigation(report=report, app=app.name, screenshot=screenshot)
     notify = on_update or (lambda _inv: None)
 
     def step(status: str) -> None:
@@ -167,10 +177,17 @@ def investigate(app: App, report: str, screenshot: str | None = None,
             break
 
         step("reproducing")
+        from . import apprunner  # imported here: apprunner imports this module
+        apprunner.reset(app)
+        if not apprunner.is_up(app):
+            apprunner.start(app)
         result = kane.run(inv.plan["objective"], variables=app.variables(), max_steps=30,
                           timeout=300, log_path=inv.folder / f"reproduce-{attempt}.ndjson")
         inv.kane = _brief(result)
         inv.kane["attempt"] = attempt
+        inv.kane.update(evidence.extract_shots(result.session_dir,
+                                               inv.folder / f"shots-reproduce-{attempt}"))
+        inv.kane["shots_dir"] = f"shots-reproduce-{attempt}"
         inv.attempts.append({"objective": inv.plan["objective"], "kane": inv.kane})
 
         if result.verdict == "error":
