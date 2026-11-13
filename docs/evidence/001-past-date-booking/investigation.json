@@ -1,0 +1,105 @@
+{
+  "report": "hi. my receptionist booked mrs aisha for 3 march 2025 by accident (we meant 2027) and the system just saved it?? no warning nothing. it should not let us book in the past right. we are sunrise clinic",
+  "app": "Clinic Records",
+  "screenshot": null,
+  "id": "20261113-112727",
+  "status": "done",
+  "verdict": "reproduced",
+  "plan": {
+    "understanding": "A Sunrise Clinic receptionist booked an appointment for patient Aisha on 3 March 2025, a date in the past, and the app saved it without any warning or error.",
+    "enough_info": true,
+    "question": "",
+    "expected": "The app should refuse to book an appointment on a past date. It should show an error such as 'appointment date cannot be in the past' and not save the booking.",
+    "objective": "Go to http://127.0.0.1:8001/login and log in with email {{account1_email}} and password {{account1_password}}. Open the page for booking a new appointment. Select the patient named Aisha, set the date to 2025-03-03 and the time to 10:00, then click the button to book or save. Store what the page shows after that as 'what_happened'. Verify that the app shows an error saying the date is in the past and the appointment was not saved.",
+    "_cost_usd": 0.1210187
+  },
+  "kane": {
+    "verdict": "failed",
+    "exit_code": 1,
+    "status": "failed",
+    "reason": "Final verification failed: \"The app shows an error saying the date is in the past and the appointment was not saved.\"",
+    "summary": "The form did not reject the 3 March 2025 appointment date. After booking, the patient page shows the 03 Mar 2025 \u00b7 10:00 appointment, and no past-date error is shown.\nReject dates before the current date when booking, keep the user on the form, and clearly state that the appointment was not saved.\nevidence: http_error_response: POST http://127.0.0.1:8001/appointments/new -> 303\nevidence: objective_contradiction: The appointment was not saved.",
+    "final_state": {},
+    "failed_step": "assert: The app shows an error saying the date is in the past and the appointment was no",
+    "steps": [
+      "navigate: Navigate to http://127.0.0.1:8001/login",
+      "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+      "type: Type \"{{global.account1_email}}\" into \"Email\"",
+      "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+      "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+      "click: Clicking Log in with email and password",
+      "wait: Waiting confirm successful login on the Patients page",
+      "click: Clicking Appointments link in navigation",
+      "click: Clicking + Book appointment link to open new appointment booking page",
+      "wait: queued plan (4 steps): select \"Patient\"; type \"Date\"; type \"Time\"; click \"Book a",
+      "select: Select \"Aisha Rahman\" in \"Patient\"",
+      "type: Type \"2025-03-03\" into \"Date\"",
+      "type: Type \"10:00\" into \"Time\"",
+      "click: Click \"Book appointment\"",
+      "analyze: The appointment was not saved.",
+      "assert: The app shows an error saying the date is in the past and the appointment was no"
+    ],
+    "errors": [],
+    "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\28ee7e9d-5392-42c8-889f-a1716d1b2137",
+    "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M79JJNHP3KNT0A3R5HPWADDZ/dashboard/share/US_1PPDZMO16Y90LQLXTR9NLRGRU03RD3YRAO1SI421CDJ9GR0G7N7ILH9F1MJXW25X?type=summary&agentView=true&fqdn=summary-page",
+    "credits": 39.2889025,
+    "duration": 118.6,
+    "attempt": 1
+  },
+  "judgement": {
+    "reproduced": true,
+    "agent_lost": false,
+    "explanation": "The browser agent logged in, booked Aisha Rahman for 3 March 2025 at 10:00, and the app saved it without any warning. The appointment then showed on her patient page, so the app does accept bookings in the past, just as the clinic reported.",
+    "ticket": {
+      "title": "Appointments can be booked on past dates with no error",
+      "steps": [
+        "Log in to the clinic app as a Sunrise Clinic user",
+        "Go to Appointments and click '+ Book appointment'",
+        "Select patient 'Aisha Rahman'",
+        "Set the date to 2025-03-03 and the time to 10:00",
+        "Click 'Book appointment'"
+      ],
+      "expected": "The booking is refused, the user stays on the form, and an error such as 'Appointment date cannot be in the past' is shown. Nothing is saved.",
+      "actual": "The form is accepted and the user is redirected (POST /appointments/new returns 303). The patient page then shows a saved appointment on 03 Mar 2025 \u00b7 10:00, and no error or warning appears."
+    },
+    "_cost_usd": 0.1283808
+  },
+  "attempts": [
+    {
+      "objective": "Go to http://127.0.0.1:8001/login and log in with email {{account1_email}} and password {{account1_password}}. Open the page for booking a new appointment. Select the patient named Aisha, set the date to 2025-03-03 and the time to 10:00, then click the button to book or save. Store what the page shows after that as 'what_happened'. Verify that the app shows an error saying the date is in the past and the appointment was not saved.",
+      "kane": {
+        "verdict": "failed",
+        "exit_code": 1,
+        "status": "failed",
+        "reason": "Final verification failed: \"The app shows an error saying the date is in the past and the appointment was not saved.\"",
+        "summary": "The form did not reject the 3 March 2025 appointment date. After booking, the patient page shows the 03 Mar 2025 \u00b7 10:00 appointment, and no past-date error is shown.\nReject dates before the current date when booking, keep the user on the form, and clearly state that the appointment was not saved.\nevidence: http_error_response: POST http://127.0.0.1:8001/appointments/new -> 303\nevidence: objective_contradiction: The appointment was not saved.",
+        "final_state": {},
+        "failed_step": "assert: The app shows an error saying the date is in the past and the appointment was no",
+        "steps": [
+          "navigate: Navigate to http://127.0.0.1:8001/login",
+          "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+          "type: Type \"{{global.account1_email}}\" into \"Email\"",
+          "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+          "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+          "click: Clicking Log in with email and password",
+          "wait: Waiting confirm successful login on the Patients page",
+          "click: Clicking Appointments link in navigation",
+          "click: Clicking + Book appointment link to open new appointment booking page",
+          "wait: queued plan (4 steps): select \"Patient\"; type \"Date\"; type \"Time\"; click \"Book a",
+          "select: Select \"Aisha Rahman\" in \"Patient\"",
+          "type: Type \"2025-03-03\" into \"Date\"",
+          "type: Type \"10:00\" into \"Time\"",
+          "click: Click \"Book appointment\"",
+          "analyze: The appointment was not saved.",
+          "assert: The app shows an error saying the date is in the past and the appointment was no"
+        ],
+        "errors": [],
+        "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\28ee7e9d-5392-42c8-889f-a1716d1b2137",
+        "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M79JJNHP3KNT0A3R5HPWADDZ/dashboard/share/US_1PPDZMO16Y90LQLXTR9NLRGRU03RD3YRAO1SI421CDJ9GR0G7N7ILH9F1MJXW25X?type=summary&agentView=true&fqdn=summary-page",
+        "credits": 39.2889025,
+        "duration": 118.6,
+        "attempt": 1
+      }
+    }
+  ]
+}

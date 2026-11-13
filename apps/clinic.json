@@ -1,0 +1,11 @@
+{
+  "name": "Clinic Records",
+  "base_url": "http://127.0.0.1:8001",
+  "login_path": "/login",
+  "accounts": {
+    "Sunrise Clinic": {"email": "sunrise@example.com", "password": "sunrise123"},
+    "Harbor Clinic": {"email": "harbor@example.com", "password": "harbor123"}
+  },
+  "code_dir": "clinic",
+  "about": "Small clinics keep patient records and book appointments for their patients."
+}
