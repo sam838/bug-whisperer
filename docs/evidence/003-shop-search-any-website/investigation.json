@@ -1,0 +1,208 @@
+{
+  "report": "your search is broken. i typed canon camera and it says no products?? you literally sell canon cameras, i saw them yesterday. lost a sale because of this",
+  "app": "LambdaTest eCommerce Playground",
+  "screenshot": null,
+  "id": "20261113-132848-dbff",
+  "app_file": "apps/lambdatest-ecommerce-playground.json",
+  "created": "2026-11-13 13:28",
+  "status": "done",
+  "verdict": "reproduced",
+  "plan": {
+    "understanding": "The user typed 'canon camera' into the shop's search box, submitted it, and got a 'no products' message even though the shop sells Canon cameras.",
+    "enough_info": true,
+    "question": "",
+    "expected": "Searching for 'canon camera' should list the Canon camera products the shop sells, not a 'no products' message.",
+    "objective": "Go to https://ecommerce-playground.lambdatest.io. Type 'canon camera' into the search box at the top of the page. Click the Search button. Store what the page shows after that as 'what_happened'. Verify that the search results list at least one product with 'Canon' in its name.",
+    "_cost_usd": 0.11940819999999999
+  },
+  "kane": {
+    "verdict": "failed",
+    "exit_code": 1,
+    "status": "failed",
+    "reason": "Final verification failed: \"The search results list contains at least one product with 'Canon' in its name.\"",
+    "summary": "The test expected a Canon product for a search phrase that currently has no matching product in the catalog. The results page plainly says that no product matches the search criteria.\nUse a search phrase known to match a seeded Canon catalog item, or seed a matching Canon product before running this verification.",
+    "final_state": {},
+    "failed_step": "assert: The search results list contains at least one product with 'Canon' in its name.",
+    "steps": [
+      "navigate: Navigate to https://ecommerce-playground.lambdatest.io",
+      "type: Typing canon camera into the search box",
+      "click: Clicking the Search button",
+      "wait: PRIMARY: wait for the search results page to load",
+      "analyze: ANALYZE(textual_visual, \"The search results list contains at least one product w",
+      "assert: The search results list contains at least one product with 'Canon' in its name."
+    ],
+    "errors": [],
+    "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\346c9bc5-b9da-493c-a52d-4bfdc43ee24a",
+    "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M79SGTNXY5WJR0ZYC58GK2VX/dashboard/share/US_G1TGGYFWKGBSBFASCZKFFGO0DHVL5CUSFHJ24ENSGDN7Q36N8NOC4CLCKZ4AULXV?type=summary&agentView=true&fqdn=summary-page",
+    "credits": 23.482054999999995,
+    "duration": 65.4,
+    "attempt": 1,
+    "shots": [
+      {
+        "ordinal": 1,
+        "file": "001.jpg",
+        "summary": "navigate: Navigate to https://ecommerce-playground.lambdatest.io",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/"
+      },
+      {
+        "ordinal": 2,
+        "file": "002.png",
+        "summary": "type: Typing canon camera into the search box",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/"
+      },
+      {
+        "ordinal": 3,
+        "file": "003.png",
+        "summary": "click: Clicking the Search button",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/"
+      },
+      {
+        "ordinal": 4,
+        "file": "004.jpg",
+        "summary": "wait: PRIMARY: wait for the search results page to load",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=canon+camera"
+      },
+      {
+        "ordinal": 5,
+        "file": "005.jpg",
+        "summary": "analyze: ANALYZE(textual_visual, \"The search results list contains at least one product w",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=canon+camera"
+      },
+      {
+        "ordinal": 6,
+        "file": "006.jpg",
+        "summary": "assert: The search results list contains at least one product with 'Canon' in its name.",
+        "status": "failed",
+        "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=canon+camera"
+      }
+    ],
+    "failure_title": "Canon search expectation lacks matching catalog data",
+    "shots_dir": "shots-reproduce-1"
+  },
+  "judgement": {
+    "reproduced": true,
+    "agent_lost": false,
+    "explanation": "The browser agent searched the shop for 'canon camera' and the results page said no products matched, which is exactly what the user saw. This only counts as a bug if the shop really sells Canon products. The agent did not confirm that, so the claim check below needs to run.",
+    "claim_check": "Go to https://ecommerce-playground.lambdatest.io. Type 'canon' into the search box at the top of the page. Click the Search button. Verify that the search results list at least one product with 'Canon' in its name.",
+    "ticket": {
+      "title": "Searching for 'canon camera' returns no products",
+      "steps": [
+        "Go to https://ecommerce-playground.lambdatest.io",
+        "Type 'canon camera' into the search box at the top of the page",
+        "Click the Search button"
+      ],
+      "expected": "The search results list the Canon camera products the shop sells.",
+      "actual": "The results page (index.php?route=product/search&search=canon+camera) says no product matches the search criteria and lists nothing."
+    },
+    "_cost_usd": 0.1392429
+  },
+  "attempts": [
+    {
+      "objective": "Go to https://ecommerce-playground.lambdatest.io. Type 'canon camera' into the search box at the top of the page. Click the Search button. Store what the page shows after that as 'what_happened'. Verify that the search results list at least one product with 'Canon' in its name.",
+      "kane": {
+        "verdict": "failed",
+        "exit_code": 1,
+        "status": "failed",
+        "reason": "Final verification failed: \"The search results list contains at least one product with 'Canon' in its name.\"",
+        "summary": "The test expected a Canon product for a search phrase that currently has no matching product in the catalog. The results page plainly says that no product matches the search criteria.\nUse a search phrase known to match a seeded Canon catalog item, or seed a matching Canon product before running this verification.",
+        "final_state": {},
+        "failed_step": "assert: The search results list contains at least one product with 'Canon' in its name.",
+        "steps": [
+          "navigate: Navigate to https://ecommerce-playground.lambdatest.io",
+          "type: Typing canon camera into the search box",
+          "click: Clicking the Search button",
+          "wait: PRIMARY: wait for the search results page to load",
+          "analyze: ANALYZE(textual_visual, \"The search results list contains at least one product w",
+          "assert: The search results list contains at least one product with 'Canon' in its name."
+        ],
+        "errors": [],
+        "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\346c9bc5-b9da-493c-a52d-4bfdc43ee24a",
+        "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M79SGTNXY5WJR0ZYC58GK2VX/dashboard/share/US_G1TGGYFWKGBSBFASCZKFFGO0DHVL5CUSFHJ24ENSGDN7Q36N8NOC4CLCKZ4AULXV?type=summary&agentView=true&fqdn=summary-page",
+        "credits": 23.482054999999995,
+        "duration": 65.4,
+        "attempt": 1,
+        "shots": [
+          {
+            "ordinal": 1,
+            "file": "001.jpg",
+            "summary": "navigate: Navigate to https://ecommerce-playground.lambdatest.io",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/"
+          },
+          {
+            "ordinal": 2,
+            "file": "002.png",
+            "summary": "type: Typing canon camera into the search box",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/"
+          },
+          {
+            "ordinal": 3,
+            "file": "003.png",
+            "summary": "click: Clicking the Search button",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/"
+          },
+          {
+            "ordinal": 4,
+            "file": "004.jpg",
+            "summary": "wait: PRIMARY: wait for the search results page to load",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=canon+camera"
+          },
+          {
+            "ordinal": 5,
+            "file": "005.jpg",
+            "summary": "analyze: ANALYZE(textual_visual, \"The search results list contains at least one product w",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=canon+camera"
+          },
+          {
+            "ordinal": 6,
+            "file": "006.jpg",
+            "summary": "assert: The search results list contains at least one product with 'Canon' in its name.",
+            "status": "failed",
+            "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=canon+camera"
+          }
+        ],
+        "failure_title": "Canon search expectation lacks matching catalog data",
+        "shots_dir": "shots-reproduce-1"
+      }
+    }
+  ],
+  "fix": {},
+  "fix_history": [],
+  "claim": {
+    "objective": "Go to https://ecommerce-playground.lambdatest.io. Type 'canon' into the search box at the top of the page. Click the Search button. Verify that the search results list at least one product with 'Canon' in its name.",
+    "verdict": "passed",
+    "exit_code": 0,
+    "status": "passed",
+    "reason": "Objective completed",
+    "summary": "Searched for \u201ccanon\u201d using the search box and Search button on the ecommerce site.\nThe search results page displayed at least one product with \u201cCanon\u201d in its name, including Canon EOS 5D.",
+    "final_state": {
+      "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=canon",
+      "canon_product_in_search_results": "true"
+    },
+    "failed_step": null,
+    "steps": [
+      "navigate: Navigate to https://ecommerce-playground.lambdatest.io",
+      "wait: queued plan (2 steps): type \"Search For Products\"; click \"\uf002 Search\"",
+      "type: Type \"canon\" into \"Search For Products\"",
+      "click: Click \"\uf002 Search\"",
+      "wait: PRIMARY: confirm the completed search results page is stable",
+      "analyze: ANALYZE(textual_visual, \"the search results list contains at least one product w",
+      "assert: the search results list contains at least one product with 'Canon' in its name"
+    ],
+    "errors": [],
+    "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\b49c2815-e4a2-47a5-9bf1-9b35f864a5fc",
+    "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M79SM07BWCFAFQP81SS00QGA/dashboard/share/US_4FMR8M33W736I9CHH59439MFW0C0NBV7MUH8Q8TE4U2QXG8E068S4OWFZWZK6ZXR?type=summary&agentView=true&fqdn=summary-page",
+    "credits": 17.7886475,
+    "duration": 39.9,
+    "outcome": "confirmed"
+  }
+}

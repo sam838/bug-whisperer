@@ -1,0 +1,10 @@
+{
+  "name": "LambdaTest eCommerce Playground",
+  "base_url": "https://ecommerce-playground.lambdatest.io",
+  "login_path": "",
+  "accounts": {},
+  "about": "A public demo online shop (phones, laptops, cameras) made by LambdaTest for practising test automation.",
+  "code_dir": null,
+  "start": null,
+  "reset": null
+}

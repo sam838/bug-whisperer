@@ -31,6 +31,8 @@ with Claude Code as the coding agent.
 | Saved regression tests, with no secrets stored, replayed with no adaptive heal | ✅ Works |
 | Website: submit a report and screenshot, watch Kane live, "Fix it", before/after, reply, ticket | ✅ Works ([evidence 002](docs/evidence/002-double-booking/)) |
 | Restarts the app after a fix, and resets test data before every Kane run | ✅ Works |
+| **Any website:** connect an app on the Apps page (link only, or link + code). Passwords are kept out of git | ✅ Works ([evidence 003](docs/evidence/003-shop-search-any-website/): LambdaTest's demo shop) |
+| **Claim double-check:** if a verdict relies on what the user claimed, Kane checks the claim too | ✅ Works |
 | Connect any app (link only, or link + code) | ⏳ Planned |
 | "Report a problem" button for any website | ⏳ Planned |
 
