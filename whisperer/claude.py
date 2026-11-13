@@ -34,8 +34,10 @@ def ask(prompt: str, *, cwd: str | Path | None = None, model: str | None = None,
         argv += ["--permission-mode", "acceptEdits"]
     if model:
         argv += ["--model", model]
+    # WHISPERER_INTERNAL: Bug Whisperer's own Claude sessions must not trigger its Stop hook.
+    env = {**os.environ, "WHISPERER_INTERNAL": "1"}
     proc = subprocess.run(argv, input=prompt, capture_output=True, text=True, encoding="utf-8",
-                          errors="replace", cwd=str(cwd) if cwd else None, timeout=timeout)
+                          errors="replace", cwd=str(cwd) if cwd else None, timeout=timeout, env=env)
     try:
         return json.loads(proc.stdout)
     except json.JSONDecodeError:

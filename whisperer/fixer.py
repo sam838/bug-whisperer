@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import time
 from pathlib import Path
 
 
@@ -114,6 +115,13 @@ def fix(app: App, inv: Investigation, on_update=None) -> dict:
             test_file = regression.sanitize(name)
             record.update(verdict="fixed", regression_test=name,
                           regression_file=str(test_file.relative_to(ROOT)))
+            from . import guard  # imported here: guard imports this module's neighbours
+            guard.register({
+                "case_id": inv.id, "app_file": inv.app_file, "test": name,
+                "title": (inv.judgement.get("ticket") or {}).get("title") or inv.report[:80],
+                "report": inv.report, "objective": objective,
+                "closed": time.strftime("%Y-%m-%d %H:%M"),
+            })
             break
         regression.discard(name)  # a re-check that didn't pass is not a regression test
         if result.verdict == "error":

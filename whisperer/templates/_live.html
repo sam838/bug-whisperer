@@ -148,6 +148,18 @@
     </section>
   {% endif %}
 
+  {% if inv.guard %}
+    <section class="card">
+      <h2>📁 Kane revisits this scene <span class="muted">· after code changes, before Claude may finish</span></h2>
+      <ol class="steps">
+        {% for g in inv.guard[-6:]|reverse %}
+          <li class="{{ 'failed' if g.verdict == 'reopened' }}">{{ g.when[:4] }}-{{ g.when[4:6] }}-{{ g.when[6:8] }} {{ g.when[9:11] }}:{{ g.when[11:13] }} ·
+            {% if g.verdict == 'holds' %}✅ still closed{% elif g.verdict == 'reopened' %}🔁 REOPENED: {{ (g.fresh or g.replay).get('summary') or (g.fresh or g.replay).get('reason') }}{% else %}⚠️ Kane couldn't tell{% endif %}</li>
+        {% endfor %}
+      </ol>
+    </section>
+  {% endif %}
+
   {% if inv.fix_history %}
     <details class="card">
       <summary>Earlier repair attempts ({{ inv.fix_history|length }}), kept on file</summary>

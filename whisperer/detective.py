@@ -84,6 +84,7 @@ class Investigation:
     fix_history: list = field(default_factory=list)  # earlier fix runs, kept as evidence
     claim: dict = field(default_factory=dict)  # Kane's double-check of a claim the verdict relied on
     note: str = ""  # a person's note on the case, e.g. that it was re-investigated as another case
+    guard: list = field(default_factory=list)  # Kane's later revisits of this closed case
 
     @property
     def folder(self) -> Path:
@@ -122,6 +123,9 @@ Rules for the objective:
   like {{{{account1_email}}}}. Never write real passwords.
 - Then the user's steps, concretely: which page, which fields, which exact values, which button.
 - No "if" or "for example": choose every value yourself. Fewer words means fewer steps for Kane.
+- Dates: write exact dates (YYYY-MM-DD), never "today" or "tomorrow". Unless the report is about a
+  specific date, pick one well in the future (at least a year ahead), so the steps still mean the
+  same thing when they are replayed months later.
 - Then: "Store what the page shows after that as 'what_happened'."
 - End with ONE check: "Verify that <the correct behaviour>." It must FAIL if the bug is real.
 - Only normal user actions. At most 8 actions.

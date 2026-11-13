@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && { if [ -x .venv/Scripts/python.exe ]; then PY=.venv/Scripts/python.exe; else PY=.venv/bin/python; fi; \"$PY\" -m whisperer hook; }",
+            "timeout": 900,
+            "statusMessage": "🕵️ Kane is revisiting the closed cases…"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -116,6 +116,11 @@ def _execute(argv, *, timeout, log_path, on_event) -> KaneResult:
                 errors.append(str(event.get("message", "")))
             elif kind == "test_md_bug_verdict":
                 diagnosis = event
+            elif kind == "step_end" and event.get("status") in ("passed", "failed"):
+                # testmd replays report steps as typed events with a summary, not progress lines
+                steps.append({"step": event.get("index"),
+                              "status": "done" if event["status"] == "passed" else "failed",
+                              "remark": event.get("summary", "")})
             elif kind is None and "step" in event and event.get("status") in ("done", "failed"):
                 steps.append(event)
             if time.time() - started > timeout:

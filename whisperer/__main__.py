@@ -17,7 +17,23 @@ def main(argv=None) -> int:
     fx = sub.add_parser("fix", help="Fix a reproduced bug, then re-check it with Kane CLI")
     fx.add_argument("app", help="Path to the app JSON file (its code_dir is what gets edited)")
     fx.add_argument("run", help="Folder of a reproduced investigation, e.g. runs/20261113-112727")
+    gd = sub.add_parser("guard", help="Kane revisits every closed case: is any old bug back?")
+    gd.add_argument("--app", help="Only this app's cases, e.g. apps/clinic.json")
+    sub.add_parser("hook", help="Claude Code Stop hook (reads the hook JSON on stdin)")
     args = parser.parse_args(argv)
+
+    if args.cmd == "hook":
+        from .hook import main as hook_main
+        return hook_main()
+
+    if args.cmd == "guard":
+        from .guard import revisit
+        report = revisit(args.app, on_update=lambda m: print(f"[kane] {m}", flush=True))
+        marks = {"holds": "✅ still closed", "reopened": "🔁 REOPENED", "unknown": "⚠️ unknown"}
+        for r in report["results"]:
+            print(f"  {marks[r['verdict']]:16} case {r['case_id']}: {r['title']}")
+        print(f"[kane] {len(report['results'])} case(s) revisited, {len(report['reopened'])} reopened")
+        return 1 if report["reopened"] else 0
 
     if args.cmd == "fix":
         from .fixer import fix, load_investigation

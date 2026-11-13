@@ -1,0 +1,22 @@
+{
+  "cases": [
+    {
+      "case_id": "20261113-112727",
+      "app_file": "apps/clinic.json",
+      "test": "bug-20261113-112727",
+      "title": "Appointments can be booked on past dates with no error",
+      "report": "hi. my receptionist booked mrs aisha for 3 march 2025 by accident (we meant 2027) and the system just saved it?? no warning nothing. it should not let us book in the past right. we are sunrise clinic",
+      "objective": "Go to http://127.0.0.1:8001/login and log in with email {{account1_email}} and password {{account1_password}}. Open the page for booking a new appointment. Select the patient named Aisha, set the date to 2025-03-03 and the time to 10:00, then click the button to book or save. Store what the page shows after that as 'what_happened'. Verify that the app shows an error saying the date is in the past and the appointment was not saved.",
+      "closed": "2026-11-13 11:40"
+    },
+    {
+      "case_id": "20261113-124324-d930",
+      "app_file": "apps/clinic.json",
+      "test": "bug-20261113-124324-d930-4",
+      "title": "Two patients can be booked into the same appointment slot",
+      "report": "we have 2 patients booked at 10:00 tomorrow?? how did the system allow that. sunrise clinic. the 2nd one should be blocked",
+      "objective": "Go to http://127.0.0.1:8001/login and log in with email {{account1_email}} and password {{account1_password}}. Open the appointment booking page. Book an appointment for the first patient in the patient list on tomorrow's date at 10:00 and submit. Open the appointment booking page again. Book an appointment for the second patient in the patient list on tomorrow's date at 10:00 and submit. Store what the page shows after that as 'what_happened'. Verify that the second booking was refused with a message that the 10:00 slot tomorrow is already taken.",
+      "closed": "2026-11-13 13:05"
+    }
+  ]
+}
