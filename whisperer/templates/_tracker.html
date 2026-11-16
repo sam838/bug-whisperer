@@ -1,0 +1,24 @@
+{# Kane at work, live: built from Kane's own events (its NDJSON log), never from its browser. #}
+<div class="tracker">
+  <div class="tracker-head">
+    <span class="rec" aria-hidden="true"></span>
+    <b>{{ title }}</b>
+    <span class="tracker-meta">
+      {% if track.total %}step {{ track.total }} · {% endif %}<span data-elapsed="{{ track.elapsed }}">{{ '%d:%02d' % (track.elapsed // 60, track.elapsed % 60) }}</span>
+    </span>
+  </div>
+  {% if track.hidden %}<p class="tracker-more">… {{ track.hidden }} earlier step{{ 's' if track.hidden > 1 }}</p>{% endif %}
+  {% if track.steps %}
+    <ol class="steps live track-list">
+      {% for s in track.steps %}
+        <li class="{{ s.status }}">
+          <span class="ico" aria-hidden="true">{{ step_icons.get(s.kind, '•') }}</span>
+          <span class="txt">{{ s.remark }}</span>
+          {% if s.status == 'running' %}<span class="now">now</span>{% elif s.status == 'failed' %}<span class="mark" aria-label="failed">✗</span>{% else %}<span class="mark" aria-label="done">✓</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p class="muted tracker-wait">Kane is opening the browser…</p>
+  {% endif %}
+</div>

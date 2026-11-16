@@ -22,6 +22,16 @@ if (revealable.length && "IntersectionObserver" in window) {
   document.documentElement.classList.add("reveal-ready");
 }
 
+// The live tracker's clock counts up every second, between page refreshes too. The server sends
+// how long Kane has been at work; each refreshed tracker restarts from that, so clocks never drift.
+setInterval(() => {
+  document.querySelectorAll("[data-elapsed]").forEach((el) => {
+    if (!el.dataset.t0) el.dataset.t0 = Date.now() - Number(el.dataset.elapsed) * 1000;
+    const s = Math.max(0, Math.floor((Date.now() - Number(el.dataset.t0)) / 1000));
+    el.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  });
+}, 1000);
+
 // Copy buttons (event delegation, because the live part is replaced while polling).
 document.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-copy]");

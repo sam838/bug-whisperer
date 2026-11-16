@@ -405,6 +405,31 @@ details.card summary { cursor: pointer; font-weight: 700; }
   font: 700 12px/1.5 var(--sans); letter-spacing: .04em;
 }
 .rec { width: 8px; height: 8px; border-radius: 50%; background: #ff4d4d; animation: pulse 1.2s ease-in-out infinite; }
+/* The live tracker: Kane at work, from Kane's own events. */
+.tracker { border: 1px solid var(--line); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--card) 85%, transparent); overflow: hidden; }
+.tracker-head {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line);
+  font-size: 14px; background: var(--accent-soft); color: var(--accent);
+}
+.tracker-meta { margin-left: auto; font: 600 12.5px/1 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tracker-more, .tracker-wait { margin: 0; padding: 8px 14px 0; font-size: 12.5px; color: var(--muted); }
+.tracker-wait { padding-bottom: 12px; }
+.track-list { list-style: none; padding: 6px 0; font-family: var(--sans); font-size: 14px; }
+.track-list li {
+  display: grid; grid-template-columns: 24px 1fr auto; align-items: start; gap: 8px;
+  padding: 6px 14px; border-left: 3px solid transparent;
+}
+.track-list .ico { text-align: center; line-height: 1.4; }
+.track-list .txt { line-height: 1.4; }
+.track-list .mark { font-weight: 800; color: var(--ok); line-height: 1.4; }
+.track-list li.failed .mark { color: var(--bug); }
+.track-list li.running { background: var(--accent-soft); border-left-color: var(--accent); color: var(--ink); }
+.track-list li.running::after { content: none; }
+.track-list .now {
+  font: 700 11px/1 var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--accent);
+  padding: 4px 7px; border-radius: 999px; border: 1px solid currentColor; animation: pulse 1.4s ease-in-out infinite;
+}
+
 .steps-who { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: .02em; }
 @media (max-width: 600px) { .replay-line { font-size: 16.5px; } .replay-stamp { font-size: 20px; } }
 
@@ -463,7 +488,7 @@ details.card summary { cursor: pointer; font-weight: 700; }
   .verdict .stamp, .row, .steps li.new, .replay-stamp, .replay-line.fresh .text { animation: fade-only 200ms ease both; }
   .replay-img { filter: none; }
   .replay-progress span { transition: none; }
-  .pulse { animation: none; }
+  .pulse, .track-list .now { animation: none; }
   .featured, .row, .btn, .chip { transition: none; }
   .hero .eyebrow, .hero h1 .line, .hero .lede, .featured, .featured::before, .featured-step,
   .featured-step .bad, .featured-step .good, .featured .stamp { animation-name: fade-only; animation-duration: 200ms; }

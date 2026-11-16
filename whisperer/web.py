@@ -16,6 +16,7 @@ import queue
 import re
 import threading
 import time
+from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -23,7 +24,7 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import demo
+from . import demo, kane
 from .detective import ROOT, RUNS, App, Investigation, investigate
 from .voice import speak
 from .fixer import fix, load_investigation
@@ -135,24 +136,72 @@ def get_inv(inv_id: str) -> Investigation:
     return load_investigation(RUNS / inv_id)
 
 
-def live_steps(inv: Investigation) -> list[dict]:
-    """Kane's steps so far, from the newest NDJSON log in the report's folder."""
+# The live tracker: what kind of action each Kane step was, and an icon for it.
+STEP_KINDS = {"navigate": "go", "type": "type", "fill": "type", "click": "click", "select": "pick",
+              "assert": "check", "analyze": "look", "press": "key", "key": "key", "scroll": "scroll",
+              "wait": "wait"}
+STEP_ICONS = {"go": "🧭", "type": "⌨️", "click": "👆", "pick": "☰", "check": "✔", "look": "🔎",
+              "key": "⌨️", "scroll": "↕", "wait": "⏳", "think": "🕵️", "do": "•"}
+templates.env.globals["step_icons"] = STEP_ICONS
+
+
+def _step_kind(remark: str) -> str:
+    prefix = remark.split(":", 1)[0].strip().lower() if ":" in remark else ""
+    return STEP_KINDS.get(prefix, "do")
+
+
+def _epoch(ts: str | None) -> float | None:
+    try:
+        return datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp() if ts else None
+    except ValueError:
+        return None
+
+
+def live_track(inv: Investigation) -> dict:
+    """Kane at work, from its live NDJSON log: the steps so far (newest last), how many there
+    have been, and how long Kane has been at it. Built only from Kane's own events, so it never
+    touches Kane's browser."""
     logs = sorted(inv.folder.glob("*.ndjson"), key=lambda p: p.stat().st_mtime)
     if not logs:
-        return []
+        return {"steps": [], "total": 0, "hidden": 0, "elapsed": 0}
+    started, busy = None, False
     steps: dict[int, dict] = {}
     for line in logs[-1].read_text(encoding="utf-8", errors="replace").splitlines():
         try:
             event = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if (isinstance(event, dict) and "step" in event and "type" not in event and event.get("remark")
-                and not INTERNAL_REMARK.match(event["remark"])):
+        if not isinstance(event, dict):
+            continue
+        started = started or _epoch(event.get("ts"))
+        if event.get("type") in kane.COMPLETION_EVENTS:
+            busy = False
+        elif "step" in event and "type" not in event:
+            # Kane announces a step as it starts ("Step 4", running) and describes it when done.
+            busy = event.get("status") == "running"
+        if "step" in event and "type" not in event and event.get("remark") and not INTERNAL_REMARK.match(event["remark"]):
             line = speak(event["remark"])
             if line is None and event.get("status") != "running":
                 continue  # Kane's bookkeeping: not something the detective says out loud
             key = len(steps) if event.get("status") != "running" else -1
-            steps[key] = {"status": event.get("status"), "remark": line or _plain(event["remark"])}
+            steps[key] = {"status": event.get("status"), "remark": line or _plain(event["remark"]),
+                          "kind": _step_kind(event["remark"])}
+    ordered = _collapse(steps)
+    total = len(ordered)
+    if busy and not (ordered and ordered[-1]["status"] == "running"):
+        ordered.append({"status": "running", "remark": "Working out the next move…", "kind": "think"})
+    elapsed = int(time.time() - started) if started else 0
+    return {"steps": ordered[-14:], "total": total, "hidden": max(0, len(ordered) - 14),
+            "elapsed": max(0, elapsed)}
+
+
+def live_steps(inv: Investigation) -> list[dict]:
+    """Kane's steps so far (see live_track)."""
+    return live_track(inv)["steps"]
+
+
+def _collapse(steps: dict[int, dict]) -> list[dict]:
+    """Steps in order, repeats folded, and the step Kane is on right now last."""
     running = steps.pop(-1, None)
     ordered = []
     for k in sorted(steps):  # 'I pressed Tab.' five times in a row → 'I pressed Tab. (×5)'
@@ -164,7 +213,7 @@ def live_steps(inv: Investigation) -> list[dict]:
             ordered.append(dict(step))
     if running and (not ordered or ordered[-1]["remark"] != running["remark"]):
         ordered.append(running)
-    return ordered[-14:]
+    return ordered
 
 
 MAX_FRAMES = 12
@@ -243,13 +292,15 @@ def view(inv: Investigation) -> dict:
     fixing = bool(inv.fix) and inv.fix.get("status") != "done"
     investigating = inv.status not in ("done",)
     last_try = inv.fix["attempts"][-1]["kane"] if inv.fix.get("attempts") else None
+    track = live_track(inv) if (investigating or fixing) else {"steps": [], "total": 0, "hidden": 0, "elapsed": 0}
     return {
         "inv": inv,
         "case_no": case_numbers().get(inv.id),
         "app_cfg": app_cfg,
         "active": investigating or fixing,
         "queued": inv.id in waiting and (inv.status == "queued" or inv.fix.get("status") == "queued"),
-        "steps": live_steps(inv) if (investigating or fixing) else [],
+        "track": track,
+        "steps": track["steps"],
         "can_fix": inv.verdict == "reproduced" and app_cfg is not None and bool(app_cfg.code_dir)
                    and (not inv.fix or (inv.fix.get("status") == "done"
                                         and inv.fix.get("verdict") in ("needs_human", "inconclusive", "error"))),

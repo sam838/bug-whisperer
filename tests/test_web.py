@@ -115,3 +115,37 @@ def test_files_only_serves_images_inside_the_report(client, tmp_path):
     assert client.get(f"/files/{inv.id}/notes.txt").status_code == 404
     assert client.get(f"/files/{inv.id}/investigation.json").status_code == 404
     assert client.get(f"/files/{inv.id}/../../etc/passwd").status_code == 404
+
+
+def test_live_tracker_follows_kanes_own_events(client, tmp_path):
+    """While Kane works, the page tracks it from its NDJSON events: kind, status, step count, clock."""
+    inv = save(tmp_path, status="reproducing")
+    events = [
+        {"type": "stream_start", "ts": "2026-11-16T08:00:00.000Z"},
+        {"step": 1, "status": "done", "remark": "navigate: Navigate to http://127.0.0.1:8001/login"},
+        {"step": 2, "status": "done", "remark": 'type: Type "{{secrets.user.account1_password}}" into "Password"'},
+        {"step": 3, "status": "running", "remark": 'click: Click "Book appointment"'},
+    ]
+    (inv.folder / "reproduce-1.ndjson").write_text("\n".join(json.dumps(e) for e in events), encoding="utf-8")
+    track = web.live_track(inv)
+    assert [s["kind"] for s in track["steps"]] == ["go", "type", "click"]
+    assert track["total"] == 3 and track["steps"][-1]["status"] == "running" and track["elapsed"] > 0
+    page = client.get(f"/r/{inv.id}/live").text
+    assert "Kane at the scene" in page and "I clicked Book appointment." in page and ">now<" in page
+    assert "the test password" in page and "sunrise" not in page
+
+
+def test_tracker_shows_kane_working_on_the_next_step(tmp_path):
+    """Kane announces a step as it starts ('Step 3', running) and names it when it's done."""
+    inv = save(tmp_path, status="reproducing")
+    events = [{"type": "stream_start", "ts": "2026-11-16T08:00:00.000Z"},
+              {"step": 1, "status": "done", "remark": "navigate: Navigate to http://127.0.0.1:8001/login"},
+              {"step": 2, "status": "running", "remark": "Step 2"}]
+    log = inv.folder / "reproduce-1.ndjson"
+    log.write_text("\n".join(json.dumps(e) for e in events), encoding="utf-8")
+    track = web.live_track(inv)
+    assert track["total"] == 1 and track["steps"][-1] == {
+        "status": "running", "remark": "Working out the next move…", "kind": "think"}
+    log.write_text(log.read_text(encoding="utf-8") + "\n" + json.dumps({"type": "run_end", "status": "passed"}),
+                   encoding="utf-8")
+    assert web.live_track(inv)["steps"][-1]["status"] == "done"  # finished: nothing left in progress

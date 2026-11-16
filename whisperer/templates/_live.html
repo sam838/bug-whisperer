@@ -134,18 +134,15 @@
           <img class="live-shot" src="{{ live_shot }}" data-live-src="/files/{{ inv.id }}/live.jpg" alt="Kane's browser, live">
           <span class="live-badge"><span class="rec" aria-hidden="true"></span>LIVE · Kane's browser</span>
         </div>
-        {% if steps %}
-          <p class="steps-who">🕵️ Kane, live from the scene:</p>
-          <ol class="steps live">{% for s in steps %}<li class="{{ s.status }}">{{ s.remark }}</li>{% endfor %}</ol>
-        {% endif %}
+        {% with title="🕵️ Kane at the scene" %}{% include "_tracker.html" %}{% endwith %}
+      {% elif inv.status == 'reproducing' or (inv.status in ('planning', 're-planning') and steps) %}
+        {# live, even on a second try (the first try's screenshot would be out of date) #}
+        {% with title="🕵️ Kane at the scene" %}{% include "_tracker.html" %}{% endwith %}
       {% elif before %}
         <a href="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" target="_blank"><img class="shot kane" src="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" alt="What Kane saw"></a>
         <p class="caption">{{ before.summary }}</p>
       {% elif steps %}
-        <p class="steps-who">🕵️ Kane, live from the scene:</p>
-        <ol class="steps live">
-          {% for s in steps %}<li class="{{ s.status }}">{{ s.remark }}</li>{% endfor %}
-        </ol>
+        {% with title="🕵️ Kane at the scene" %}{% include "_tracker.html" %}{% endwith %}
       {% else %}
         <p class="muted">Kane hasn't reached the scene yet.</p>
       {% endif %}
@@ -156,7 +153,7 @@
   </div>
 
   {# ------------------------------------------------ live steps during the repair check ------------------------------------------------ #}
-  {% if inv.fix and active and (steps or live_shot) %}
+  {% if inv.fix and active and (steps or live_shot or fixs.startswith('Kane')) %}
     <section class="card">
       <h2>🕵️ Kane, back at the scene</h2>
       {% if live_shot %}
@@ -165,7 +162,7 @@
           <span class="live-badge"><span class="rec" aria-hidden="true"></span>LIVE · Kane's browser</span>
         </div>
       {% endif %}
-      <ol class="steps live">{% for s in steps %}<li class="{{ s.status }}">{{ s.remark }}</li>{% endfor %}</ol>
+      {% with title="Repeating the exact same steps" %}{% include "_tracker.html" %}{% endwith %}
     </section>
   {% endif %}
 
