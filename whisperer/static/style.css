@@ -789,3 +789,10 @@ details.card summary { cursor: pointer; font-weight: 700; }
   background: rgba(21, 24, 42, .82); color: #f3eee5; font: 700 12.5px/1.2 var(--mono); letter-spacing: .04em;
   border: 2px solid #f3eee5; text-transform: capitalize;
 }
+
+/* ── Not found ─────────────────────────────────────────────────────────────────────────────── */
+.lost { max-width: 760px; margin: 24px auto 0; }
+.lost-code { display: block; font: 800 15px/1 var(--mono); letter-spacing: .3em; color: var(--accent); }
+.lost .page-title { margin: 8px 0 18px; }
+.lost-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+a.btn { text-decoration: none; }

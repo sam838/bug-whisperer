@@ -24,6 +24,8 @@ from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.exception_handlers import http_exception_handler
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import demo, intake, kane
 from .detective import ROOT, RUNS, App, Investigation, investigate
@@ -556,6 +558,15 @@ def live_gate(request: Request):
         return templates.TemplateResponse(request, "unlock.html", {
             "page": "report", "limit_reached": True, "limit": demo.daily_limit()}, status_code=429)
     return None
+
+
+@app.exception_handler(StarletteHTTPException)
+async def friendly_errors(request: Request, exc: StarletteHTTPException):
+    """A browser that asks for a page that isn't there gets Kane's not-found page."""
+    if exc.status_code == 404 and "text/html" in request.headers.get("accept", ""):
+        return templates.TemplateResponse(request, "not_found.html", {"page": None, "what": exc.detail},
+                                          status_code=404)
+    return await http_exception_handler(request, exc)
 
 
 @app.middleware("http")

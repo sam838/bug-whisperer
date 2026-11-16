@@ -231,3 +231,10 @@ def test_a_closed_case_offers_its_3d_reconstruction_built_from_its_evidence(clie
     assert "data-recon" in page and "Play the reconstruction" in page
     data = page.split('class="recon-data">', 1)[1].split("</script>", 1)[0]
     assert [p["id"] for p in json.loads(data)["pins"]] == ["statement", "reading", "scene", "verdict"]
+
+
+def test_people_get_kanes_not_found_page_and_scripts_get_json(client):
+    page = client.get("/r/20261116-145849-dbes", headers={"accept": "text/html"})
+    assert page.status_code == 404 and "No case file at this address" in page.text
+    api = client.get("/r/20261116-145849-dbes")
+    assert api.status_code == 404 and api.json() == {"detail": "No such report"}

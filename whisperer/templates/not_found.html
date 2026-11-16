@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% from "_kane.html" import sprite, say %}
+{% block title %}Not found · Bug Whisperer{% endblock %}
+{% block content %}
+<section class="lost">
+  <span class="lost-code">404</span>
+  <h1 class="page-title">No case file at this address</h1>
+  <div class="scene scene-case">
+    <div class="scene-actor">{{ sprite("reading") }}</div>
+    {{ say("I went through every drawer. There's no case file at this address. Check the link for a typo, or open the case files and find it there.", key="lost") }}
+  </div>
+  {% if request.state.hosted %}
+    <p class="muted">On this live demo, cases opened by visitors are cleared when the site is updated; the recorded cases always stay.</p>
+  {% endif %}
+  <p class="lost-actions"><a class="btn primary" href="/inbox">📁 Case files</a> <a class="btn" href="/">🕵️ Open a case</a></p>
+</section>
+{% endblock %}
