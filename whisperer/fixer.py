@@ -14,7 +14,7 @@ import time
 from pathlib import Path
 
 
-from . import apprunner, claude, kane, regression
+from . import apprunner, camera, claude, kane, regression
 from . import evidence as kane_evidence
 from .detective import ROOT, App, Investigation
 
@@ -98,8 +98,10 @@ def fix(app: App, inv: Investigation, on_update=None) -> dict:
         # A unique name per re-check: Kane renames on a clash, which once left a failed run
         # posing as the regression test.
         name = f"bug-{inv.id}-r{run_no}a{attempt}"
-        result = kane.run(objective, variables=app.variables(), max_steps=30, timeout=300,
-                          name=name, log_path=inv.folder / f"verify-{run_no}-{attempt}.ndjson")
+        with camera.KaneCamera(inv.folder) as cam:  # Kane back at the scene, filmed live
+            result = kane.run(objective, variables=app.variables(), max_steps=30, timeout=300,
+                              name=name, cdp_endpoint=cam.endpoint,
+                              log_path=inv.folder / f"verify-{run_no}-{attempt}.ndjson")
         name = regression.saved_name(name)
         evidence = _verify_brief(result)
         evidence.update(kane_evidence.extract_shots(result.session_dir,

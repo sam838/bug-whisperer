@@ -15,6 +15,7 @@ import json
 import queue
 import re
 import threading
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -252,8 +253,20 @@ def view(inv: Investigation) -> dict:
         "reply": reply_for_user(inv),
         "ticket_md": ticket_markdown(inv),
         "replay": replay(inv) if not (investigating or fixing) else None,
+        "live_shot": _live_shot(inv) if (investigating or fixing) else None,
         "speak": speak,
     }
+
+
+def _live_shot(inv: Investigation) -> str | None:
+    """Kane's browser right now: the camera's latest frame, if it's fresh."""
+    frame = inv.folder / "live.jpg"
+    try:
+        if time.time() - frame.stat().st_mtime < 15:
+            return f"/files/{inv.id}/live.jpg?t={int(frame.stat().st_mtime * 1000)}"
+    except OSError:
+        pass
+    return None
 
 
 def _key_shot(kane: dict | None) -> dict | None:

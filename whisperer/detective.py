@@ -16,7 +16,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from urllib.parse import urljoin
 
-from . import claude, evidence, kane
+from . import camera, claude, evidence, kane
 
 ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "runs"
@@ -204,8 +204,10 @@ def investigate(app: App, report: str, screenshot: str | None = None,
         apprunner.reset(app)
         if not apprunner.is_up(app):
             apprunner.start(app)
-        result = kane.run(inv.plan["objective"], variables=app.variables(), max_steps=30,
-                          timeout=300, log_path=inv.folder / f"reproduce-{attempt}.ndjson")
+        with camera.KaneCamera(inv.folder) as cam:  # Kane's browser, filmed live for the case page
+            result = kane.run(inv.plan["objective"], variables=app.variables(), max_steps=30,
+                              timeout=300, cdp_endpoint=cam.endpoint,
+                              log_path=inv.folder / f"reproduce-{attempt}.ndjson")
         inv.kane = _brief(result)
         inv.kane["attempt"] = attempt
         inv.kane.update(evidence.extract_shots(result.session_dir,
@@ -244,8 +246,9 @@ def investigate(app: App, report: str, screenshot: str | None = None,
 def check_claim(app: App, inv: Investigation, objective: str, step) -> str:
     """Kane double-checks a claim the verdict relies on. Returns the final verdict."""
     step("double-checking")
-    result = kane.run(objective, variables=app.variables(), max_steps=15, timeout=180,
-                      log_path=inv.folder / "claim-check.ndjson")
+    with camera.KaneCamera(inv.folder) as cam:
+        result = kane.run(objective, variables=app.variables(), max_steps=15, timeout=180,
+                          cdp_endpoint=cam.endpoint, log_path=inv.folder / "claim-check.ndjson")
     inv.claim = {"objective": objective, **_brief(result)}
     if result.verdict == "passed":
         inv.claim["outcome"] = "confirmed"

@@ -33,5 +33,9 @@ def test_bookkeeping_is_not_spoken(remark):
     assert speak(remark) is None
 
 
+def test_icon_font_characters_are_dropped():
+    assert speak('click: Click " Search"') == "I clicked Search."
+
+
 def test_real_passwords_never_appear():
     assert "sunrise123" not in (speak('type: Type "{{secrets.user.account1_password}}" into "Password"') or "")

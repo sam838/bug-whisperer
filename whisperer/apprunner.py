@@ -17,6 +17,7 @@ import signal
 import subprocess
 import sys
 import time
+from pathlib import Path
 from urllib.parse import urlparse
 
 import httpx
@@ -52,11 +53,44 @@ def wait_until_up(app: App, timeout: int = 60) -> bool:
 
 
 def _pids_on_port(port: int) -> set[int]:
-    if os.name == "nt":
-        out = subprocess.run(["netstat", "-ano", "-p", "TCP"], capture_output=True, text=True).stdout
-        return {int(m.group(1)) for m in re.finditer(rf"[:.]{port}\s+\S+\s+LISTENING\s+(\d+)", out)}
-    out = subprocess.run(["lsof", "-ti", f"tcp:{port}", "-sTCP:LISTEN"], capture_output=True, text=True).stdout
-    return {int(p) for p in out.split()}
+    """Processes listening on a port. Never raises: an unknown answer is an empty set."""
+    try:
+        if os.name == "nt":
+            out = subprocess.run(["netstat", "-ano", "-p", "TCP"], capture_output=True, text=True).stdout
+            return {int(m.group(1)) for m in re.finditer(rf"[:.]{port}\s+\S+\s+LISTENING\s+(\d+)", out)}
+        if Path("/proc/net/tcp").exists():
+            return _linux_pids_on_port(port)
+        out = subprocess.run(["lsof", "-ti", f"tcp:{port}", "-sTCP:LISTEN"], capture_output=True, text=True).stdout
+        return {int(p) for p in out.split()}
+    except (OSError, ValueError):
+        return set()
+
+
+def _linux_pids_on_port(port: int) -> set[int]:
+    """Read /proc directly (slim containers have no lsof): listening socket inodes → owning pids."""
+    inodes = set()
+    for table in ("/proc/net/tcp", "/proc/net/tcp6"):
+        try:
+            lines = Path(table).read_text().splitlines()[1:]
+        except OSError:
+            continue
+        for line in lines:
+            parts = line.split()
+            if len(parts) > 9 and parts[3] == "0A" and int(parts[1].rsplit(":", 1)[1], 16) == port:
+                inodes.add(parts[9])  # state 0A = LISTEN
+    pids = set()
+    for proc in Path("/proc").iterdir():
+        if not proc.name.isdigit():
+            continue
+        try:
+            for fd in (proc / "fd").iterdir():
+                link = os.readlink(fd)
+                if link.startswith("socket:[") and link[8:-1] in inodes:
+                    pids.add(int(proc.name))
+                    break
+        except OSError:
+            continue
+    return pids
 
 
 def stop(app: App) -> None:

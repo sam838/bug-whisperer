@@ -99,6 +99,19 @@ function initReplay(el) {
 }
 document.querySelectorAll("[data-replay]").forEach(initReplay);
 
+// Kane's browser, live: reload the camera's latest frame about once a second. The new frame is
+// loaded off-screen first and swapped in only when ready, so the picture never flashes blank.
+setInterval(() => {
+  document.querySelectorAll(".live-shot[data-live-src]").forEach((img) => {
+    if (img.dataset.loading) return;
+    img.dataset.loading = "1";
+    const next = new Image();
+    next.onload = () => { img.src = next.src; delete img.dataset.loading; };
+    next.onerror = () => { delete img.dataset.loading; };
+    next.src = `${img.dataset.liveSrc}?t=${Date.now()}`;
+  });
+}, 900);
+
 // While Kane or Claude is working, refresh the live part of a case page.
 // Only what is NEW animates: steps that weren't there before, and a stamp whose words changed.
 // Without this, everything would re-animate every 2 seconds.

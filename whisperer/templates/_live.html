@@ -126,7 +126,16 @@
     <section class="card">
       {# Kane's own failure label is shown, unless Kane's double-check later settled the question. #}
       <h2>At the scene {% if inv.kane.get('failure_title') and not inv.claim %}<span class="tag bug">{{ inv.kane.get('failure_title') }}</span>{% endif %}</h2>
-      {% if before %}
+      {% if live_shot and not inv.fix %}
+        <div class="live-view">
+          <img class="live-shot" src="{{ live_shot }}" data-live-src="/files/{{ inv.id }}/live.jpg" alt="Kane's browser, live">
+          <span class="live-badge"><span class="rec" aria-hidden="true"></span>LIVE · Kane's browser</span>
+        </div>
+        {% if steps %}
+          <p class="steps-who">🕵️ Kane, live from the scene:</p>
+          <ol class="steps live">{% for s in steps %}<li class="{{ s.status }}">{{ s.remark }}</li>{% endfor %}</ol>
+        {% endif %}
+      {% elif before %}
         <a href="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" target="_blank"><img class="shot kane" src="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" alt="What Kane saw"></a>
         <p class="caption">{{ before.summary }}</p>
       {% elif steps %}
@@ -144,9 +153,15 @@
   </div>
 
   {# ------------------------------------------------ live steps during the repair check ------------------------------------------------ #}
-  {% if inv.fix and active and steps %}
+  {% if inv.fix and active and (steps or live_shot) %}
     <section class="card">
       <h2>🕵️ Kane, back at the scene</h2>
+      {% if live_shot %}
+        <div class="live-view">
+          <img class="live-shot" src="{{ live_shot }}" data-live-src="/files/{{ inv.id }}/live.jpg" alt="Kane's browser, live">
+          <span class="live-badge"><span class="rec" aria-hidden="true"></span>LIVE · Kane's browser</span>
+        </div>
+      {% endif %}
       <ol class="steps live">{% for s in steps %}<li class="{{ s.status }}">{{ s.remark }}</li>{% endfor %}</ol>
     </section>
   {% endif %}

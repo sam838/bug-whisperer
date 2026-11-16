@@ -21,10 +21,14 @@ _SECRETS = [
 _SKIP = re.compile(r"^(queued plan|ANALYZE\(|Step \d+$|Waiting for the next step|wait \d+ ?ms)", re.I)
 
 
+_ICONS = re.compile(r"[-\U000f0000-\U000fffff​-‏️]")  # icon-font glyphs
+
+
 def _clean(text: str) -> str:
     for pattern, replacement in _SECRETS:
         text = pattern.sub(replacement, text)
-    return text.strip().rstrip(".")
+    text = _ICONS.sub("", text)  # buttons labelled with icon fonts show up as boxes otherwise
+    return re.sub(r"\s{2,}", " ", text).strip().rstrip(".")
 
 
 def _quoted(text: str) -> list[str]:
