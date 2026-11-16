@@ -244,3 +244,21 @@ def test_verified_page_shows_the_recorded_proof(client):
     page = client.get("/verified")
     assert page.status_code == 200 and "Checked by Kane, not by us" in page.text
     assert "E1-fixed-bug-stays-fixed" in page.text and "Stop hook" in page.text
+
+
+def test_a_finished_case_exports_a_report(client, tmp_path):
+    inv = save(tmp_path, status="done", verdict="reproduced", plan={"understanding": "A past date was saved.", "objective": "x"},
+               judgement={"explanation": "The app saved it.", "ticket": {"title": "Past dates accepted",
+                          "steps": ["Book"], "expected": "Refused", "actual": "Saved"}},
+               kane={"steps": ['click: Click "Book appointment"'], "shots_dir": "s", "shots": [{"file": "1.jpg", "status": "failed", "summary": "Saved"}]})
+    assert "Case report (PDF)" in client.get(f"/r/{inv.id}/live").text
+    page = client.get(f"/r/{inv.id}/report").text
+    assert "Past dates accepted" in page and "I clicked Book appointment." in page and "Save as PDF" in page
+    md = client.get(f"/r/{inv.id}/report.md")
+    assert md.headers["content-disposition"].startswith("attachment")
+    assert "**CONFIRMED**" in md.text and "**Confirmed.** The app saved it." in md.text and "1. I clicked Book appointment." in md.text
+
+
+def test_no_export_while_kane_is_still_working(client, tmp_path):
+    inv = save(tmp_path, status="reproducing")
+    assert "Case report (PDF)" not in client.get(f"/r/{inv.id}/live").text

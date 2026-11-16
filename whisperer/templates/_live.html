@@ -238,6 +238,17 @@
     </details>
   {% endif %}
 
+  {# ------------------------------------------------ export ------------------------------------------------ #}
+  {% if not active and inv.verdict %}
+    <div class="exportbar">
+      <div><b>📁 Take the case with you.</b> Everything Kane proved, in one report: the statement, his steps and photos, the verdict{{ ', the repair and its proof' if inv.fix }}.</div>
+      <div class="exportbar-actions">
+        <a class="btn primary" href="/r/{{ inv.id }}/report" target="_blank">📄 Case report (PDF)</a>
+        <a class="btn" href="/r/{{ inv.id }}/report.md">⬇️ Markdown</a>
+      </div>
+    </div>
+  {% endif %}
+
   {# ------------------------------------------------ outputs ------------------------------------------------ #}
   {% if reply or ticket_md %}
     <div class="grid2">
