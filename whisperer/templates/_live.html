@@ -84,6 +84,33 @@
     </form>
   {% endif %}
 
+  {# ------------------------------------------------ watch Kane solve it ------------------------------------------------ #}
+  {% if replay %}
+    <section class="card replay" data-replay>
+      <div class="replay-head">
+        <h2>🎞️ Watch Kane solve this case</h2>
+        <span class="muted">{{ replay.count }} moments · about {{ replay.seconds }} s · Kane's real screens</span>
+      </div>
+      <div class="replay-stage">
+        <img class="replay-img on" alt="Kane's screen">
+        <img class="replay-img" alt="" aria-hidden="true">
+        <span class="replay-chapter"></span>
+        <div class="replay-end" hidden>
+          <span class="stamp replay-stamp"></span>
+          <p class="replay-end-line"></p>
+        </div>
+        <button type="button" class="replay-play"><span>▶</span> Watch Kane</button>
+      </div>
+      <p class="replay-line" aria-live="polite"><span class="who">🕵️ Kane:</span> <span class="text"></span></p>
+      <div class="replay-bar">
+        <button type="button" class="btn replay-prev" aria-label="Previous moment">‹</button>
+        <div class="replay-progress"><span></span></div>
+        <button type="button" class="btn replay-next" aria-label="Next moment">›</button>
+      </div>
+      <script type="application/json" class="replay-data">{{ replay|tojson }}</script>
+    </section>
+  {% endif %}
+
   {# ------------------------------------------------ the two views ------------------------------------------------ #}
   <div class="grid2">
     <section class="card">
@@ -103,6 +130,7 @@
         <a href="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" target="_blank"><img class="shot kane" src="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" alt="What Kane saw"></a>
         <p class="caption">{{ before.summary }}</p>
       {% elif steps %}
+        <p class="steps-who">🕵️ Kane, live from the scene:</p>
         <ol class="steps live">
           {% for s in steps %}<li class="{{ s.status }}">{{ s.remark }}</li>{% endfor %}
         </ol>
@@ -210,7 +238,7 @@
         <div class="film">
           {% for s in inv.kane.get('shots') %}
             <a href="/files/{{ inv.id }}/{{ inv.kane.get('shots_dir') }}/{{ s.file }}" target="_blank" class="{{ s.status }}">
-              <img src="/files/{{ inv.id }}/{{ inv.kane.get('shots_dir') }}/{{ s.file }}" alt="" loading="lazy"><span>{{ s.summary.split(': ', 1)[-1][:60] }}</span></a>
+              <img src="/files/{{ inv.id }}/{{ inv.kane.get('shots_dir') }}/{{ s.file }}" alt="" loading="lazy"><span>{{ (speak(s.summary) or s.summary.split(': ', 1)[-1])[:70] }}</span></a>
           {% endfor %}
         </div>
       {% endif %}

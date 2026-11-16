@@ -24,6 +24,7 @@ from fastapi.templating import Jinja2Templates
 
 from . import demo
 from .detective import ROOT, RUNS, App, Investigation, investigate
+from .voice import speak
 from .fixer import fix, load_investigation
 
 HERE = Path(__file__).resolve().parent
@@ -146,13 +147,79 @@ def live_steps(inv: Investigation) -> list[dict]:
             continue
         if (isinstance(event, dict) and "step" in event and "type" not in event and event.get("remark")
                 and not INTERNAL_REMARK.match(event["remark"])):
+            line = speak(event["remark"])
+            if line is None and event.get("status") != "running":
+                continue  # Kane's bookkeeping: not something the detective says out loud
             key = len(steps) if event.get("status") != "running" else -1
-            steps[key] = {"status": event.get("status"), "remark": _plain(event["remark"])}
+            steps[key] = {"status": event.get("status"), "remark": line or _plain(event["remark"])}
     running = steps.pop(-1, None)
     ordered = [steps[k] for k in sorted(steps)]
     if running and (not ordered or ordered[-1]["remark"] != running["remark"]):
         ordered.append(running)
     return ordered[-14:]
+
+
+MAX_FRAMES = 12
+FRAME_SECONDS = 1.2
+
+
+def _full_check(line: str, objective: str) -> str:
+    """Kane shortens long step names in its logs ('…is al'). The full sentence is in the
+    objective's 'Verify that …', so use it when the logged check is the start of it."""
+    match = re.search(r"Verify that (.+?)\.?\s*$", objective or "", re.S)
+    if not match or not line.startswith("I checked: "):
+        return line
+    full = match.group(1).strip()
+    logged = line[len("I checked: "):].rstrip(".").strip()
+    if len(logged) >= 15 and full.lower().startswith(logged.lower()[:60]):
+        return f"I checked: {full[0].upper()}{full[1:]}."
+    return line
+
+
+def replay(inv: Investigation) -> dict | None:
+    """'Watch Kane solve this case': Kane's real screenshots, each with Kane's own line."""
+    chapters = []
+    objective = (inv.plan or {}).get("objective", "")
+
+    def frames(kane: dict | None) -> list[dict]:
+        out = []
+        for shot in (kane or {}).get("shots", []):
+            line = speak(shot.get("summary"))
+            if not line:
+                continue
+            line = _full_check(line, objective)
+            failed = shot.get("status") == "failed"
+            if failed and line.startswith("I checked:"):
+                line = line[:-1] + ". It wasn't true."
+            if out and out[-1]["line"] == line:
+                continue
+            out.append({"src": f"/files/{inv.id}/{kane['shots_dir']}/{shot['file']}",
+                        "line": line, "failed": failed})
+        # Long runs: keep how Kane got in, and the part where the case was decided.
+        return out if len(out) <= MAX_FRAMES else out[:4] + out[-(MAX_FRAMES - 4):]
+
+    scene = frames(inv.kane)
+    if scene:
+        chapters.append({"title": "At the scene", "frames": scene})
+    attempts = (inv.fix or {}).get("attempts") or []
+    if attempts:
+        after = frames(attempts[-1].get("kane"))
+        if after:
+            chapters.append({"title": "Back at the scene, after the repair", "frames": after})
+    if not chapters:
+        return None
+
+    fixv = (inv.fix or {}).get("verdict")
+    if fixv == "fixed":
+        end = {"stamp": "Case closed", "tone": "ok", "line": "I saw the fix with my own eyes."}
+    elif inv.verdict == "reproduced":
+        end = {"stamp": "Confirmed", "tone": "bug", "line": "The bug is real. Here's my evidence."}
+    elif inv.verdict == "not_reproduced":
+        end = {"stamp": "Open", "tone": "neutral", "line": "I couldn't make it happen. I need more from the user."}
+    else:
+        end = {"stamp": "Unsolved", "tone": "warn", "line": "I couldn't finish, so I claim nothing."}
+    count = sum(len(c["frames"]) for c in chapters)
+    return {"chapters": chapters, "end": end, "count": count, "seconds": round(count * FRAME_SECONDS)}
 
 
 def _plain(remark: str) -> str:
@@ -184,6 +251,8 @@ def view(inv: Investigation) -> dict:
         "user_shot": Path(inv.screenshot).name if inv.screenshot else None,
         "reply": reply_for_user(inv),
         "ticket_md": ticket_markdown(inv),
+        "replay": replay(inv) if not (investigating or fixing) else None,
+        "speak": speak,
     }
 
 

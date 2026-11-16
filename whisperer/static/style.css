@@ -311,6 +311,67 @@ details.card summary { cursor: pointer; font-weight: 700; }
 .film a.failed img { border-color: var(--bug); }
 .film a.failed { color: var(--bug); font-weight: 700; }
 
+/* ── Watch Kane solve this case ──────────────────────────────────────────── */
+.replay { padding: 20px 22px; outline: none; }
+.replay:focus-visible { box-shadow: var(--shadow), 0 0 0 3px var(--accent-soft); }
+.replay-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 16px; margin-bottom: 12px; }
+.replay-head h2 { margin: 0; }
+.replay-head .muted { font-size: 13px; }
+.replay-stage {
+  position: relative; aspect-ratio: 16 / 9; border-radius: var(--radius-sm); overflow: hidden;
+  background: var(--ink); border: 1px solid var(--line); cursor: pointer;
+}
+.replay-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-view-box: inset(0% 14% 18% 14%);
+  opacity: 0; filter: blur(2px); transition: opacity 220ms ease, filter 220ms ease;
+}
+.replay-img.on { opacity: 1; filter: none; }
+.replay-chapter {
+  position: absolute; top: 12px; left: 12px; padding: 4px 11px; border-radius: 999px;
+  background: rgba(23, 24, 29, .8); color: #fff; font: 700 12px/1.6 var(--sans); letter-spacing: .02em;
+}
+.replay-play {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  display: flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 999px; border: 0;
+  background: var(--accent); color: var(--accent-ink); font: 700 17px/1 var(--sans); cursor: pointer;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .6); transition: transform 160ms var(--ease-out);
+}
+.replay-play span { font-size: 14px; }
+.replay-play:active { transform: translate(-50%, -50%) scale(0.97); }
+.replay-play[hidden] { display: none; }
+.replay.ended .replay-play { top: auto; bottom: 14%; transform: translateX(-50%); z-index: 2; }
+.replay.ended .replay-play:active { transform: translateX(-50%) scale(0.97); }
+.replay-end {
+  position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 14px;
+  padding-bottom: 12%;
+  background: color-mix(in srgb, var(--card) 86%, transparent); backdrop-filter: blur(3px); text-align: center; padding: 20px;
+}
+.replay-end[hidden] { display: none; }
+.replay-stamp { font-size: 26px; padding: 4px 18px; border-width: 4px; animation: stamp-land 300ms var(--ease-out) both; }
+.replay-stamp.tone-ok { color: var(--ok); }
+.replay-stamp.tone-bug { color: var(--bug); }
+.replay-stamp.tone-warn { color: var(--warn); }
+.replay-stamp.tone-neutral { color: var(--ink-2); }
+.replay-end-line { margin: 0; font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--ink); max-width: 520px; }
+.replay-end .replay-play { position: static; transform: none; }
+.replay-line {
+  margin: 14px 0 10px; min-height: 2.9em; font-family: var(--serif); font-size: 19px; line-height: 1.45; color: var(--ink);
+}
+.replay-line .who { font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin-right: 4px; }
+.replay-line.failed .text { color: var(--bug); font-weight: 700; }
+.replay-line.fresh .text { animation: line-in 220ms var(--ease-out) both; }
+@keyframes line-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.replay-bar { display: flex; align-items: center; gap: 10px; }
+.replay-bar .btn { width: 40px; height: 36px; padding: 0; font-size: 20px; line-height: 1; }
+.replay-progress { flex: 1; height: 6px; border-radius: 999px; background: var(--neutral-soft); overflow: hidden; }
+.replay-progress span {
+  display: block; height: 100%; background: var(--accent); border-radius: inherit;
+  transform: scaleX(0); transform-origin: left; transition: transform 300ms var(--ease-out);
+}
+.steps-who { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: .02em; }
+@media (max-width: 600px) { .replay-line { font-size: 16.5px; } .replay-stamp { font-size: 20px; } }
+
 /* ── Case files list ─────────────────────────────────────────────────────── */
 .list { display: grid; gap: 10px; }
 .row {
@@ -363,7 +424,9 @@ details.card summary { cursor: pointer; font-weight: 700; }
 
 /* ── Reduced motion: keep fades, drop movement ───────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .verdict .stamp, .row, .steps li.new { animation: fade-only 200ms ease both; }
+  .verdict .stamp, .row, .steps li.new, .replay-stamp, .replay-line.fresh .text { animation: fade-only 200ms ease both; }
+  .replay-img { filter: none; }
+  .replay-progress span { transition: none; }
   .pulse { animation: none; }
   .featured, .row, .btn, .chip { transition: none; }
   @keyframes fade-only { from { opacity: 0; } to { opacity: 1; } }

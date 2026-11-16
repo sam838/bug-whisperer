@@ -60,6 +60,19 @@ def test_fixed_report_shows_reply_and_no_fix_button(client, tmp_path):
     assert "Case closed" in page and "Reply to the user" in page and "Repair it" not in page
 
 
+def test_finished_case_offers_a_replay_in_kanes_voice(client, tmp_path):
+    inv = save(tmp_path, status="done", verdict="reproduced", kane={
+        "shots_dir": "shots-reproduce-1", "shots": [
+            {"file": "001.jpg", "status": "passed", "summary": 'click: Click "Book appointment"'},
+            {"file": "002.jpg", "status": "passed", "summary": "wait: queued plan (2 steps)"},
+            {"file": "003.jpg", "status": "failed", "summary": "assert: The app shows an error"}]})
+    page = client.get(f"/r/{inv.id}").text
+    assert "Watch Kane solve this case" in page
+    assert "I clicked Book appointment." in page
+    # inside the player's JSON, Jinja escapes the apostrophe as '
+    assert "It wasn\\u0027t true." in page and "queued plan" not in page
+
+
 def test_connect_app_keeps_passwords_out_of_the_app_file(client, tmp_path, monkeypatch):
     apps = tmp_path / "apps"
     apps.mkdir()
