@@ -23,11 +23,13 @@ CHECKED = [
 
 GUIDE = """What to fill (Kane already knows how to type into each kind of box, including the browser's
 date and time pickers, so name the values plainly):
-- Fill every field the form needs, in page order, one short sentence each, even fields the report
-  doesn't mention (a booking usually needs a date AND a time). Kane can't see the browser's
-  "please fill in this field" bubble, so a field left out makes Kane click a submit button that
-  seems to do nothing.
-- Before the submit click add: "Check that every field is filled."
+- Fill EVERY field on the form, optional ones too, in page order, one short sentence each, even
+  fields the report doesn't mention (leave one empty only when the report is about leaving it
+  empty). Kane can't see the browser's "please fill in this field" bubble, so a field left out can
+  make Kane click a submit button that seems to do nothing.
+- Don't add extra checks like "Check that every field is filled": Kane treats every "check" or
+  "verify" as a checkpoint, and a failed one ends the run before the real test. The only check is
+  the final "Verify that ...".
 - Dates in words, with the year: "Set the Date field to 11 November 2027." Never "today" or
   "tomorrow". Unless the report is about a specific date, choose one at least a year ahead whose
   day and month are the same number (11 November, 3 March), so it reads the same in mm/dd and

@@ -47,7 +47,13 @@ def test_the_dash_format_really_breaks_a_date_box(browser):
 def test_planner_sees_what_to_fill():
     prompt = detective.PLAN_PROMPT.format(name="Shop", base_url="https://x", about="", accounts="",
                                           report="r", screenshot="", fields=fields.GUIDE, feedback="")
-    assert "Fill every field the form needs" in prompt and "Check that every field is filled" in prompt
+    assert "Fill EVERY field on the form, optional ones too" in prompt
+
+
+def test_no_mid_run_checkpoints_are_asked_for():
+    """A 'check' in the middle becomes a Kane checkpoint; one that fails ends the run early."""
+    assert "Don't add extra checks" in fields.GUIDE
+    assert 'add "Check that every field is filled' not in detective.RETRY_FEEDBACK
 
 
 def test_claude_names_values_and_leaves_the_typing_to_kane():

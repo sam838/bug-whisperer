@@ -140,9 +140,9 @@ What went wrong, in Kane's own words: {kane_summary}
 {judge_note}
 Write a shorter, more direct objective that avoids that problem. If Kane kept clicking a submit
 button that seemed to do nothing, a required field was left empty or a date or time was mistyped:
-spell out every field as its own sentence, give dates and times as the exact keys to type (a date
-box takes digits like 11112027, a time box 1430), and add "Check that every field is filled."
-before the click.
+spell out every field on the form as its own sentence, optional ones too, and give dates and times
+as the exact keys to type (a date box takes digits like 11112027, a time box 1430). If an extra
+check in the middle failed, drop it: only the final "Verify that ..." should check anything.
 """
 
 JUDGE_PROMPT = """A user reported a bug. A browser agent (Kane CLI) tried to reproduce it, and its
