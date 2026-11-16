@@ -357,6 +357,8 @@ if (live) {
         live.querySelectorAll("[data-board]").forEach(initBoard);
         live.querySelectorAll("[data-trail]").forEach(initTrail);
         if (window.initRecon) live.querySelectorAll("[data-recon]").forEach(window.initRecon);
+        if (window.initKane3d) window.initKane3d(live);
+        document.dispatchEvent(new Event("kane:update"));  // Kane in 3D acts out any new steps
         typeOut(live);
         const stampNow = stampText();
         if (stampNow && stampNow !== stampBefore && /confirmed|case closed/i.test(stampNow)) {

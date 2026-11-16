@@ -759,3 +759,16 @@ details.card summary { cursor: pointer; font-weight: 700; }
   .recon-say .rpg-box { grid-template-columns: 1fr; }
   .recon-say .rpg-portrait { display: none; }
 }
+
+/* ── Detective Kane in 3D, acting out each real step on a live case ─────────────────────────── */
+.scene-live { display: grid; gap: 12px; }
+.kane3d {
+  position: relative; aspect-ratio: 16 / 7; border-radius: 14px; overflow: hidden;
+  background: radial-gradient(ellipse at 40% 45%, #2a2f42, #0f1118 72%);
+  border: 3px solid #f3eee5; box-shadow: 0 0 0 3px #15182a, 0 18px 36px -18px rgba(0, 0, 0, .7);
+}
+.kane3d-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.kane3d-fallback { position: absolute; inset: 0; display: grid; place-items: center; }
+.kane3d-fallback .kane-sprite { width: 120px; }
+.kane3d.ready .kane3d-fallback { display: none; }
+@media (max-width: 760px) { .kane3d { aspect-ratio: 4 / 3; } }

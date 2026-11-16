@@ -9,9 +9,9 @@
   </div>
   {% if track.hidden %}<p class="tracker-more">… {{ track.hidden }} earlier step{{ 's' if track.hidden > 1 }}</p>{% endif %}
   {% if track.steps %}
-    <ol class="steps live track-list">
+    <ol class="steps live track-list" data-total="{{ track.total }}">
       {% for s in track.steps %}
-        <li class="{{ s.status }}">
+        <li class="{{ s.status }}" data-kind="{{ s.kind }}">
           <span class="ico" aria-hidden="true">{{ step_icons.get(s.kind, '•') }}</span>
           <span class="txt">{{ s.remark }}</span>
           {% if s.status == 'running' %}<span class="now">now</span>{% elif s.status == 'failed' %}<span class="mark" aria-label="failed">✗</span>{% else %}<span class="mark" aria-label="done">✓</span>{% endif %}
