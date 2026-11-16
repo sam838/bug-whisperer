@@ -72,9 +72,10 @@ def test_kane_is_given_the_context_file(monkeypatch):
     assert argv[argv.index("--local-context") + 1] == str(kane.CONTEXT)
 
 
-@pytest.mark.parametrize("value, off", [("1", True), ("true", True), ("0", False), ("", False), ("false", False)])
-def test_camera_switch_can_be_overridden_by_the_host(monkeypatch, value, off):
-    """The Dockerfile turns the camera off; a host setting of 0 must turn it back on."""
+@pytest.mark.parametrize("value, off", [("", True), ("0", True), ("yes", True), ("1", False)])
+def test_camera_is_off_unless_turned_on_on_purpose(monkeypatch, value, off):
+    """The camera broke Kane's submit clicks on the server, so only WHISPERER_CAMERA=1 turns it on."""
     from whisperer import camera
-    monkeypatch.setenv("WHISPERER_NO_CAMERA", value)
+    monkeypatch.delenv("WHISPERER_NO_CAMERA", raising=False)
+    monkeypatch.setenv("WHISPERER_CAMERA", value)
     assert camera.camera_off() is off

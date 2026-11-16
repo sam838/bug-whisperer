@@ -12,12 +12,7 @@ open the DevTools port on Windows (chrome.exe hands off to another process and e
 The camera never decides anything: if it can't start, Kane runs headless on its own as before,
 just without the live picture.
 
-It is OFF on our Linux server by default (WHISPERER_NO_CAMERA=1 in the Dockerfile). There, attached
-to the camera's Chrome (started directly with memory-saving flags), Kane's click on a form's submit
-button never reached the app: the clinic's log showed no POST, run after run. With the camera off,
-the same case confirmed first time and closed. To try the camera again without a code change, set
-WHISPERER_NO_CAMERA=0 and WHISPERER_CAMERA_LAUNCH=playwright on the host: Chrome then starts the way
-demo.studio's did, through Playwright, without the renderer limit.
+It is OFF everywhere unless WHISPERER_CAMERA=1 is set on purpose (see camera_off).
 """
 
 from __future__ import annotations
@@ -34,9 +29,12 @@ INTERVAL = float(os.environ.get("WHISPERER_CAMERA_INTERVAL", "0.8"))
 
 
 def camera_off() -> bool:
-    """WHISPERER_NO_CAMERA=1 turns the camera off; 0 or empty turns it back on (so a host's settings
-    page can override the Dockerfile's default without a code change)."""
-    return os.environ.get("WHISPERER_NO_CAMERA", "").strip().lower() not in ("", "0", "false", "no")
+    """The camera is OFF unless WHISPERER_CAMERA=1 is set on purpose. On our Linux server, attached
+    to a filmed Chrome, Kane's click on a form's submit button never reached the app, whichever way
+    Chrome was started (directly, or through Playwright as demo.studio did). That turned a real bug
+    into a wrong verdict, so the live picture is not worth it: the case page follows Kane through
+    its live tracker and his 3D office instead."""
+    return os.environ.get("WHISPERER_CAMERA", "").strip() != "1"
 
 
 def launch_with_playwright() -> bool:

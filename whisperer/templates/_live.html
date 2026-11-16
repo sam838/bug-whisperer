@@ -25,7 +25,7 @@
     <section class="scene scene-live" data-mode="{{ scene.mode }}">
       {# Detective Kane in 3D, acting out each real step as it happens (kane3d.js). The stage is
          kept across page refreshes; the 2D detective shows if 3D isn't available. #}
-      <div class="kane3d" data-kane3d data-keep="kane-3d" data-live-src="/files/{{ inv.id }}/live.jpg">
+      <div class="kane3d" data-kane3d data-keep="kane-3d">
         <canvas class="kane3d-canvas" role="img" aria-label="Detective Kane at work, in 3D"></canvas>
         <div class="kane3d-fallback">{{ sprite(scene.mode) }}</div>
       </div>
@@ -147,7 +147,7 @@
       <h2>At the scene {% if inv.kane.get('failure_title') and not inv.claim %}<span class="tag bug">{{ inv.kane.get('failure_title') }}</span>{% endif %}</h2>
       {% if live_shot and not inv.fix %}
         <div class="live-view" data-keep="live-scene">
-          <img class="live-shot" src="{{ live_shot }}" data-live-src="/files/{{ inv.id }}/live.jpg" alt="Kane's browser, live">
+          <img class="live-shot" src="{{ live_shot }}" alt="Kane's browser, live">
           <span class="live-badge"><span class="rec" aria-hidden="true"></span>LIVE · Kane's browser</span>
         </div>
         {% with title="🕵️ Kane at the scene" %}{% include "_tracker.html" %}{% endwith %}
@@ -174,7 +174,7 @@
       <h2>🕵️ Kane, back at the scene</h2>
       {% if live_shot %}
         <div class="live-view" data-keep="live-recheck">
-          <img class="live-shot" src="{{ live_shot }}" data-live-src="/files/{{ inv.id }}/live.jpg" alt="Kane's browser, live">
+          <img class="live-shot" src="{{ live_shot }}" alt="Kane's browser, live">
           <span class="live-badge"><span class="rec" aria-hidden="true"></span>LIVE · Kane's browser</span>
         </div>
       {% endif %}

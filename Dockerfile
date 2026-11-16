@@ -18,12 +18,7 @@ RUN npm install -g @testmuai/kane-cli@0.10.4 @anthropic-ai/claude-code
 # In a container Chrome runs as root, which needs --no-sandbox. Kane CLI picks Chrome up from here.
 RUN printf '#!/bin/sh\nexec /usr/bin/google-chrome-stable --no-sandbox --disable-dev-shm-usage "$@"\n' \
       > /usr/local/bin/chrome-for-kane && chmod +x /usr/local/bin/chrome-for-kane
-# The live camera stays off here: on this Linux server, with Kane attached to the camera's Chrome,
-# Kane's click on a form's submit button never reached the app (the clinic's log showed no POST).
-# With Kane in its own Chrome the same case confirmed first time and closed. Cases still show
-# Kane's step-by-step commentary live, and every screen afterwards in the replay.
 ENV KANE_CLI_CHROME_PATH=/usr/local/bin/chrome-for-kane \
-    WHISPERER_NO_CAMERA=1 \
     WHISPERER_HOSTED=1
 
 WORKDIR /app
