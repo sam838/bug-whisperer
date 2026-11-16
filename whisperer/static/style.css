@@ -772,3 +772,7 @@ details.card summary { cursor: pointer; font-weight: 700; }
 .kane3d-fallback .kane-sprite { width: 120px; }
 .kane3d.ready .kane3d-fallback { display: none; }
 @media (max-width: 760px) { .kane3d { aspect-ratio: 4 / 3; } }
+.kane3d::after {  /* a soft vignette: the light falls off toward the edges, like a film still */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 45% 50%, transparent 58%, rgba(0, 0, 0, .5));
+}
