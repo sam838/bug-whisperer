@@ -9,8 +9,12 @@ same way.)
 Chrome is launched through Playwright, because starting chrome.exe directly from Python didn't
 open the DevTools port on Windows (chrome.exe hands off to another process and exits).
 
-The camera never decides anything and never breaks a run: if it can't start, Kane runs headless
-on its own as before, just without the live picture.
+The camera never decides anything: if it can't start, Kane runs headless on its own as before,
+just without the live picture.
+
+It is OFF on our Linux server (WHISPERER_NO_CAMERA=1 in the Dockerfile). There, attached to the
+camera's Chrome, Kane's click on a form's submit button never reached the app: the clinic's log
+showed no POST, run after run. With the camera off, the same case confirmed first time and closed.
 """
 
 from __future__ import annotations
