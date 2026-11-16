@@ -1,4 +1,5 @@
 """Kane NDJSON parsing and verdicts, using a fake kane-cli (no credits, no Chrome)."""
+import pytest
 
 import json
 import sys
@@ -69,3 +70,11 @@ def test_kane_is_given_the_context_file(monkeypatch):
     kane.run("Open the shop")
     argv = seen["argv"]
     assert argv[argv.index("--local-context") + 1] == str(kane.CONTEXT)
+
+
+@pytest.mark.parametrize("value, off", [("1", True), ("true", True), ("0", False), ("", False), ("false", False)])
+def test_camera_switch_can_be_overridden_by_the_host(monkeypatch, value, off):
+    """The Dockerfile turns the camera off; a host setting of 0 must turn it back on."""
+    from whisperer import camera
+    monkeypatch.setenv("WHISPERER_NO_CAMERA", value)
+    assert camera.camera_off() is off

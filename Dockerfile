@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive PYTHONUNBUFFERED=1
 
 # Google Chrome (Kane drives it), Node.js (Kane CLI and Claude Code), git (the repair loop diffs code)
 RUN apt-get update \
- && apt-get install -y --no-install-recommends curl gnupg ca-certificates git lsof procps fonts-liberation fonts-noto-color-emoji \
+ && apt-get install -y --no-install-recommends curl gnupg ca-certificates git lsof procps libatomic1 fonts-liberation fonts-noto-color-emoji \
  && curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg \
  && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
       > /etc/apt/sources.list.d/google-chrome.list \

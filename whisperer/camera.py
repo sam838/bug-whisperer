@@ -12,9 +12,12 @@ open the DevTools port on Windows (chrome.exe hands off to another process and e
 The camera never decides anything: if it can't start, Kane runs headless on its own as before,
 just without the live picture.
 
-It is OFF on our Linux server (WHISPERER_NO_CAMERA=1 in the Dockerfile). There, attached to the
-camera's Chrome, Kane's click on a form's submit button never reached the app: the clinic's log
-showed no POST, run after run. With the camera off, the same case confirmed first time and closed.
+It is OFF on our Linux server by default (WHISPERER_NO_CAMERA=1 in the Dockerfile). There, attached
+to the camera's Chrome (started directly with memory-saving flags), Kane's click on a form's submit
+button never reached the app: the clinic's log showed no POST, run after run. With the camera off,
+the same case confirmed first time and closed. To try the camera again without a code change, set
+WHISPERER_NO_CAMERA=0 and WHISPERER_CAMERA_LAUNCH=playwright on the host: Chrome then starts the way
+demo.studio's did, through Playwright, without the renderer limit.
 """
 
 from __future__ import annotations
@@ -27,7 +30,20 @@ import time
 from pathlib import Path
 
 PORT = int(os.environ.get("WHISPERER_CAMERA_PORT", "9333"))
-INTERVAL = 0.8
+INTERVAL = float(os.environ.get("WHISPERER_CAMERA_INTERVAL", "0.8"))
+
+
+def camera_off() -> bool:
+    """WHISPERER_NO_CAMERA=1 turns the camera off; 0 or empty turns it back on (so a host's settings
+    page can override the Dockerfile's default without a code change)."""
+    return os.environ.get("WHISPERER_NO_CAMERA", "").strip().lower() not in ("", "0", "false", "no")
+
+
+def launch_with_playwright() -> bool:
+    """Windows always launches Chrome through Playwright (chrome.exe hands off and exits). On Linux,
+    WHISPERER_CAMERA_LAUNCH=playwright does the same, as demo.studio did, instead of starting Chrome
+    directly with memory-saving flags."""
+    return os.name == "nt" or os.environ.get("WHISPERER_CAMERA_LAUNCH") == "playwright"
 # Chrome settings that keep memory down on a small server (one renderer, no extras).
 LEAN_FLAGS = ["--window-size=1440,900", "--disable-dev-shm-usage", "--disable-gpu",
               "--disable-extensions", "--disable-background-networking", "--disable-sync",
@@ -60,11 +76,10 @@ class KaneCamera:
 
     def __enter__(self) -> "KaneCamera":
         (self.folder / "live.jpg").unlink(missing_ok=True)  # never show the previous run's frame
-        if os.environ.get("WHISPERER_NO_CAMERA") or not chrome_binary():
+        if camera_off() or not chrome_binary():
             return self
         self._profile = tempfile.mkdtemp(prefix="kane-chrome-")
-        if os.name == "nt":
-            # Windows: chrome.exe hands off and exits, so launch through Playwright.
+        if launch_with_playwright():
             self._thread = threading.Thread(target=self._run, daemon=True)
             self._thread.start()
             self._ready.wait(timeout=60)  # endpoint is set only if Chrome really came up
@@ -123,8 +138,11 @@ class KaneCamera:
             with sync_playwright() as pw:
                 context = pw.chromium.launch_persistent_context(
                     self._profile, executable_path=chrome_binary(), headless=True,
+                    # no window size (Playwright sets the viewport) and no renderer limit: a normal
+                    # Chrome, the setup demo.studio used
                     args=[f"--remote-debugging-port={PORT}", "--remote-allow-origins=*",
-                          *[f for f in LEAN_FLAGS if not f.startswith("--window-size")]],
+                          *[f for f in LEAN_FLAGS
+                            if not f.startswith(("--window-size", "--renderer-process-limit"))]],
                     viewport={"width": 1440, "height": 900})
                 self.endpoint = f"http://127.0.0.1:{PORT}"
                 self._ready.set()
