@@ -1,14 +1,15 @@
-"""How to fill each kind of form field, for Claude when it writes Kane's steps.
+"""Forms, split between the two agents: Claude decides WHAT to fill, Kane knows HOW to type it.
 
-Kane types like a person, key by key. That's fine for text boxes, but the browser's own date, time
-and month pickers take keys segment by segment: typing "2027-11-11" into a US date box gives
-50303-02-20, and the browser then silently refuses the form. These rules work on any website.
+- GUIDE (below) is for Claude when it writes Kane's steps: which fields, which values.
+- .testmuai/context.md is for Kane, read on every run: how to type into each kind of box. Kane
+  types key by key, and the browser's date and time pickers take keys segment by segment: typing
+  "2027-11-11" into a US date box gives 50303-02-20, and the browser silently refuses the form.
 
-The CHECKED examples were typed into real Chrome in US, UK and Indonesian locales
-(tests/test_fields.py repeats that), so the guide says only what browsers actually do.
+CHECKED holds the typing examples Kane's context teaches. tests/test_fields.py types each one into
+real Chrome in US, UK and Indonesian locales, so Kane is only taught what browsers really do.
 """
 
-# (input type, keys Kane types; "{Tab}" is a key press, what the box must end up holding)
+# (input type, keys typed; "{Tab}" is a key press, what the box must end up holding)
 CHECKED = [
     ("date", ["11112027"], "2027-11-11"),
     ("date", ["03032025"], "2025-03-03"),
@@ -20,27 +21,18 @@ CHECKED = [
     ("number", ["1500"], "1500"),
 ]
 
-GUIDE = """How to fill each kind of field (Kane types key by key, like a person):
-- Text, email, password, search, text area: "Type <value> into the <label> field."
-- Number: digits only, no thousands separators or currency signs: "Type 1500" ("1,500" becomes 1.5).
-- Phone, card and other formatted boxes: digits only, no spaces or dashes.
-- Date box (the browser's own picker, showing mm/dd/yyyy or dd/mm/yyyy): digits only, no dashes:
-  "Type 11112027 into the Date field." Typing 2027-11-11 gives a broken date. Choose dates whose
-  day and month are the same number (11 Nov, 3 Mar), so the digits are right in either order. For a
-  date from the report where they differ, say to type the digits in the order the box shows.
-- Time box: four digits, 24-hour clock: "Type 1430 into the Time field." (Typing 0230PM gives 02:30.)
-- Date and time in one box: "Type 11112027, press Tab, then type 1430 into the <label> field."
-- Month box: "Type 11, press Tab, then type 2027 into the <label> field."
-- Week box: week number then year: "Type 452027 into the <label> field."
-- Dropdown list: "Select '<exact option text>' in the <label> dropdown."
-- Search-as-you-type box: "Type '<first letters>' into the <label> field, then click '<full option>'
-  in the list that appears."
-- Pop-up calendar that won't take typing: "Click the <label> field, move to <month year> with the
-  calendar's arrows, and click <day>."
-- Checkbox, radio button, switch: "Tick '<label>'." / "Choose '<option>'." / "Turn on '<label>'."
-- Slider: "Click the <label> slider and press the right arrow key until it shows <value>."
-- File upload: avoid, unless the report is about uploading.
-- Required fields: Kane can't see the browser's "please fill in this field" bubble, so a missed
-  field leaves it clicking a button that seems to do nothing. Fill every field the form needs
-  (date AND time), even ones the report doesn't mention, and before the submit click add:
-  "Check that every field is filled.\""""
+GUIDE = """What to fill (Kane already knows how to type into each kind of box, including the browser's
+date and time pickers, so name the values plainly):
+- Fill every field the form needs, in page order, one short sentence each, even fields the report
+  doesn't mention (a booking usually needs a date AND a time). Kane can't see the browser's
+  "please fill in this field" bubble, so a field left out makes Kane click a submit button that
+  seems to do nothing.
+- Before the submit click add: "Check that every field is filled."
+- Dates in words, with the year: "Set the Date field to 11 November 2027." Never "today" or
+  "tomorrow". Unless the report is about a specific date, choose one at least a year ahead whose
+  day and month are the same number (11 November, 3 March), so it reads the same in mm/dd and
+  dd/mm boxes and still means the same thing when replayed months later.
+- Times on the 24-hour clock: "Set the Time field to 14:30."
+- Numbers as plain digits, no thousands separators: "1500".
+- Dropdowns by their exact option text: "Select '<option>' in the <label> dropdown."
+- Avoid file uploads unless the report is about uploading."""

@@ -123,9 +123,7 @@ Rules for the objective:
   like {{{{account1_email}}}}. Never write real passwords.
 - Then the user's steps, concretely: which page, which fields, which exact values, which button.
 - No "if" or "for example": choose every value yourself. Fewer words means fewer steps for Kane.
-- Forms: one short sentence per field, in page order, written the way the field guide below says.
-- Dates: exact values, never "today" or "tomorrow". Unless the report is about a specific date,
-  pick one at least a year ahead, so the steps mean the same thing when replayed months later.
+- Forms: one short sentence per field, in page order, as the guide below says.
 - Then: "Store what the page shows after that as 'what_happened'."
 - End with ONE check: "Verify that <the correct behaviour>." It must FAIL if the bug is real.
 - Only normal user actions. At most 10 actions, counting each field.
@@ -141,9 +139,10 @@ A previous attempt with this objective did not finish, so its result says nothin
 What went wrong, in Kane's own words: {kane_summary}
 {judge_note}
 Write a shorter, more direct objective that avoids that problem. If Kane kept clicking a submit
-button that seemed to do nothing, a required field was almost certainly left empty: spell out every
-field as its own sentence exactly as the field guide says (dates and times as digits), and add
-"Check that every field is filled." before the click.
+button that seemed to do nothing, a required field was left empty or a date or time was mistyped:
+spell out every field as its own sentence, give dates and times as the exact keys to type (a date
+box takes digits like 11112027, a time box 1430), and add "Check that every field is filled."
+before the click.
 """
 
 JUDGE_PROMPT = """A user reported a bug. A browser agent (Kane CLI) tried to reproduce it, and its

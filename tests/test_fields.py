@@ -44,19 +44,18 @@ def test_the_dash_format_really_breaks_a_date_box(browser):
     assert page.eval_on_selector("#f", "e => e.value") != "2025-03-03"
 
 
-def test_guide_quotes_the_checked_examples():
-    for value in ("11112027", "1430", "1500", "452027"):
-        assert value in fields.GUIDE
-
-
-def test_planner_sees_the_guide():
+def test_planner_sees_what_to_fill():
     prompt = detective.PLAN_PROMPT.format(name="Shop", base_url="https://x", about="", accounts="",
                                           report="r", screenshot="", fields=fields.GUIDE, feedback="")
-    assert "Date box" in prompt and "Check that every field is filled" in prompt
+    assert "Fill every field the form needs" in prompt and "Check that every field is filled" in prompt
+
+
+def test_claude_names_values_and_leaves_the_typing_to_kane():
+    assert "11 November 2027" in fields.GUIDE and "11112027" not in fields.GUIDE
 
 
 def test_kane_context_teaches_the_same_checked_examples():
-    """Kane reads .testmuai/context.md itself; it must agree with what Claude is told."""
+    """Kane reads .testmuai/context.md itself: it must teach the examples checked in real Chrome."""
     from whisperer import kane
     text = kane.CONTEXT.read_text(encoding="utf-8")
     for value in ("11112027", "03032025", "1430", "0900", "452027", "1,500"):
