@@ -776,3 +776,4 @@ details.card summary { cursor: pointer; font-weight: 700; }
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(ellipse at 45% 50%, transparent 58%, rgba(0, 0, 0, .5));
 }
+.room-acts .act { min-width: 0; overflow-wrap: anywhere; }  /* long text wraps inside its room */

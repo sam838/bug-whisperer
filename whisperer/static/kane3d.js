@@ -87,8 +87,21 @@
     const c = document.createElement("canvas"); c.width = 640; c.height = 400;
     const tex = new T.CanvasTexture(c); tex.encoding = T.sRGBEncoding;
     const g = c.getContext("2d");
-    const state = { path: "about:blank", body: null };
+    const state = { path: "about:blank", body: null, live: null };
     function draw() {
+      if (state.live) {
+        // Kane's real browser, from the live camera (1440x900, the screen's own 16:10 shape)
+        g.drawImage(state.live, 0, 0, 640, 400);
+        const b = state.body;
+        if (b && b.kind === "check" && b.result) {  // the verdict, as a badge on the real page
+          g.fillStyle = b.result === "fail" ? "rgba(179,38,30,.92)" : "rgba(15,122,82,.92)";
+          g.fillRect(380, 300, 240, 80);
+          g.fillStyle = "#fff"; g.font = "800 30px Inter, sans-serif";
+          g.fillText(b.result === "fail" ? "✗ Not as expected" : "✓ As expected", 392, 350);
+        }
+        tex.needsUpdate = true;
+        return;
+      }
       g.fillStyle = "#f6f7fb"; g.fillRect(0, 0, 640, 400);
       g.fillStyle = "#dfe3ec"; g.fillRect(0, 0, 640, 46);
       g.fillStyle = "#ffffff"; g.fillRect(70, 10, 540, 26);
@@ -303,14 +316,30 @@
     part(new T.CylinderGeometry(0.018, 0.018, 0.7), std(0x8a8a8a, 0.3, { metalness: 0.8 }), -0.72, 1.3, -0.25);
     const shade = part(new T.ConeGeometry(0.2, 0.22, 24, 1, true), std(0x2f6b4f, 0.4, { metalness: 0.4, side: T.DoubleSide }), -0.62, 1.66, -0.18);
     shade.rotation.z = -0.5;
-    const chairMat = std(0x3a2418, 0.6);
-    const chair = new T.Group(); chair.position.set(-2.35, 0, 0.0); chair.rotation.y = Math.PI / 4 + 1.2; scene.add(chair);
-    [[0, 0.5, 0, 0.55, 0.07, 0.55], [0, 0.85, -0.25, 0.55, 0.65, 0.06]].forEach(([x, y, z, w, h, d]) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), chairMat); m.position.set(x, y, z); m.castShadow = true; chair.add(m); });
-    [[-0.24, -0.24], [0.24, -0.24], [-0.24, 0.24], [0.24, 0.24]].forEach(([x, z]) => { const m = new T.Mesh(new T.BoxGeometry(0.05, 0.5, 0.05), chairMat); m.position.set(x, 0.25, z); m.castShadow = true; chair.add(m); });
+    // an office chair, pulled out to the side of the desk (out of the camera's view of the screen)
+    const leather = std(0x2a2422, 0.45), steel = std(0x9aa0a8, 0.3, { metalness: 0.75 });
+    const chair = new T.Group(); chair.position.set(-2.05, 0, 0.14); chair.rotation.y = 2.67; scene.add(chair);
+    const cp = (geo, mat, x, y, z, rx = 0, ry = 0) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, 0); m.castShadow = m.receiveShadow = true; chair.add(m); return m; };
+    for (let i = 0; i < 5; i++) {
+      const a = i * Math.PI * 2 / 5;
+      cp(new T.BoxGeometry(0.05, 0.035, 0.3), steel, Math.sin(a) * 0.15, 0.07, Math.cos(a) * 0.15, 0, a);
+      cp(new T.SphereGeometry(0.032, 10, 8), std(0x1a1a1a, 0.5), Math.sin(a) * 0.29, 0.032, Math.cos(a) * 0.29);
+    }
+    cp(new T.CylinderGeometry(0.03, 0.035, 0.36, 12), steel, 0, 0.26, 0);
+    cp(new T.BoxGeometry(0.5, 0.06, 0.48), leather, 0, 0.47, 0);
+    cp(new T.BoxGeometry(0.46, 0.06, 0.44), std(0x3a302c, 0.6), 0, 0.52, 0.01);
+    cp(new T.BoxGeometry(0.06, 0.32, 0.05), steel, 0, 0.62, -0.24, -0.1);
+    cp(new T.BoxGeometry(0.48, 0.5, 0.07), leather, 0, 0.92, -0.27, -0.12);
+    cp(new T.BoxGeometry(0.42, 0.44, 0.04), std(0x3a302c, 0.6), 0, 0.92, -0.225, -0.12);
+    [-0.27, 0.27].forEach((x) => { cp(new T.BoxGeometry(0.05, 0.04, 0.3), leather, x, 0.68, -0.02); cp(new T.BoxGeometry(0.03, 0.17, 0.03), steel, x, 0.6, -0.02); });
 
     // the door to the app's next page, with its sign
-    add(new T.Mesh(new T.BoxGeometry(1.2, 2.2, 0.1), std(0x2b1d12, 0.7)), 1.45, 1.1, -2.98);
-    const hinge = new T.Group(); hinge.position.set(0.9, 0, -2.9); scene.add(hinge);
+    const frameWood = std(0x2b1d12, 0.7);
+    add(new T.Mesh(new T.BoxGeometry(1.24, 0.1, 0.12), frameWood), 1.45, 2.13, -2.95);
+    [0.86, 2.04].forEach((x) => add(new T.Mesh(new T.BoxGeometry(0.1, 2.18, 0.12), frameWood), x, 1.09, -2.95));
+    add(new T.Mesh(new T.PlaneGeometry(1.08, 2.08), new T.MeshBasicMaterial({ color: 0xfff0c8, toneMapped: false })), 1.45, 1.04, -2.995, { cast: false, receive: false });
+    const doorLight = new T.PointLight(0xffd9a0, 0, 5, 1.6); doorLight.position.set(1.45, 1.3, -2.55); scene.add(doorLight);
+    const hinge = new T.Group(); hinge.position.set(0.91, 0, -2.93); scene.add(hinge);
     const door = new T.Mesh(new T.BoxGeometry(1.05, 2.08, 0.06), std(0x6e4a2c, 0.65)); door.position.set(0.53, 1.04, 0); door.castShadow = true; hinge.add(door);
     const pane = new T.Mesh(new T.PlaneGeometry(0.62, 0.5), std(0xd9cfa8, 0.2, { transparent: true, opacity: 0.85, emissive: 0x3a3320 }));
     pane.position.set(0.53, 1.55, 0.035); hinge.add(pane);
@@ -322,7 +351,8 @@
     const DESK = new T.Vector3(-0.38, 0, -0.12), DOOR = new T.Vector3(1.45, 0, -2.25);
     const FACE = Math.atan2(-1.73 - DESK.x, -1.03 - DESK.z);  // toward the screen
     const YOU = -0.55;                                          // three-quarters toward the camera
-    return { renderer, scene, camera, focus, screen, sign, hinge, alarm, win, clock: { hourPivot, minPivot }, DESK, DOOR, FACE, YOU, yaw: YOU };
+    const INSIDE = new T.Vector3(1.45, 0, -2.85);  // in the doorway, about to go through
+    return { renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, FACE, YOU, yaw: YOU };
   }
 
   // ── Detective Kane: the CC0 robot, recoloured, with a fedora and a magnifying glass ───────
@@ -416,7 +446,7 @@
   }
 
   // ── actions: each a short timeline driven by one real step ────────────────────────────────
-  const DUR = { go: 3.6, type: 2.0, click: 1.4, check: 2.4, wait: 1.0 };
+  const DUR = { go: 5.0, type: 2.0, click: 1.4, check: 2.4, wait: 1.0 };
 
   function start(rig, kane, step) {
     const a = parseStep(step);
@@ -435,22 +465,27 @@
     const p = Math.min(1, a.t / a.dur);
     const body = kane.model;
     if (a.action === "go") {
-      // walk to the door (0-.38), it opens and the sign changes (.38-.62), walk back (.62-1)
-      const there = rig.DOOR, home = rig.DESK;
-      if (p < 0.38) {
-        kane.loop("Walking"); body.position.lerpVectors(home, there, p / 0.38);
-        body.rotation.y = rig.yaw = Math.atan2(there.x - home.x, there.z - home.z);
-        if (rig.screen.state.body?.kind !== "loading") { rig.screen.state.body = { kind: "loading" }; rig.screen.draw(); }
-      } else if (p < 0.62) {
-        kane.loop("Idle"); body.rotation.y = rig.yaw = Math.PI;
-        const k = (p - 0.38) / 0.24; rig.hinge.rotation.y = -Math.sin(k * Math.PI) * 1.25;
-        if (!a.signed && k > 0.4) { a.signed = true; rig.sign.set(a.label); rig.screen.state.path = a.label; rig.screen.state.body = null; rig.screen.draw(); }
-      } else {
-        rig.hinge.rotation.y = 0; kane.loop("Walking");
-        body.position.lerpVectors(there, home, (p - 0.62) / 0.38);
-        body.rotation.y = rig.yaw = Math.atan2(home.x - there.x, home.z - there.z);
-        if (p >= 1) { body.position.copy(home); rig.yaw = rig.YOU; kane.loop("Idle"); }
-      }
+      // Going to a page: he walks to the door, it opens outward onto the lit doorway, he steps
+      // through and is gone, the door closes and the sign changes to the page he went to, then
+      // the door opens and he comes back out and returns to the desk.
+      const home = rig.DESK, door = rig.DOOR, inside = rig.INSIDE;
+      const span = (from, to) => Math.min(1, Math.max(0, (p - from) / (to - from)));
+      const walk = (from, to, k, yaw) => { kane.loop("Walking"); body.position.lerpVectors(from, to, k); body.rotation.y = rig.yaw = yaw; };
+      let open = 0;
+      if (p < 0.24) walk(home, door, span(0, 0.24), Math.atan2(door.x - home.x, door.z - home.z));
+      else if (p < 0.32) { kane.loop("Idle"); body.rotation.y = rig.yaw = Math.PI; open = span(0.24, 0.32); }
+      else if (p < 0.42) { walk(door, inside, span(0.32, 0.42), Math.PI); open = 1; }
+      else if (p < 0.5) { body.visible = false; open = 1 - span(0.42, 0.5); }
+      else if (p < 0.58) {
+        if (!a.signed) { a.signed = true; rig.sign.set(a.label); rig.screen.state.path = a.label; rig.screen.state.body = null; rig.screen.draw(); }
+        open = span(0.5, 0.58); body.visible = p > 0.55; body.position.copy(inside); body.rotation.y = rig.yaw = 0;
+      } else if (p < 0.68) { body.visible = true; walk(inside, door, span(0.58, 0.68), 0); open = 1; }
+      else if (p < 0.74) { kane.loop("Idle"); open = 1 - span(0.68, 0.74); }
+      else walk(door, home, span(0.74, 1), Math.atan2(home.x - door.x, home.z - door.z));
+      if (p < 0.42 && rig.screen.state.body?.kind !== "loading" && !rig.screen.state.live) { rig.screen.state.body = { kind: "loading" }; rig.screen.draw(); }
+      rig.hinge.rotation.y = open * 1.35;  // outward, away from the room
+      rig.doorLight.intensity = open * 1.8;
+      if (p >= 1) { body.visible = true; body.position.copy(home); rig.yaw = rig.YOU; kane.loop("Idle"); }
     } else if (a.action === "type") {
       kane.loop("Idle");
       const shown = a.value.slice(0, Math.ceil(a.value.length * Math.min(1, p / 0.8)));
@@ -508,6 +543,22 @@
       if (now.total > seen) { now.steps.slice(-(now.total - seen)).forEach((s) => queue.push(s)); seen = now.total; }
     };
     document.addEventListener("kane:update", update);
+
+    // Kane's real browser on the 3D screen, whenever the live camera is filming it
+    const liveSrc = stage.dataset.liveSrc;
+    let misses = 0;
+    const pollLive = () => {
+      if (!canvas.isConnected || !liveSrc) return;
+      const img = new Image();
+      img.onload = () => { misses = 0; rig.screen.state.live = img; rig.screen.draw(); setTimeout(pollLive, 1000); };
+      img.onerror = () => {
+        misses += 1;
+        if (rig.screen.state.live) { rig.screen.state.live = null; rig.screen.draw(); }
+        setTimeout(pollLive, misses > 3 ? 5000 : 1500);  // no camera: check now and then, quietly
+      };
+      img.src = `${liveSrc}?t=${Date.now()}`;
+    };
+    pollLive();
 
     const frame = (now) => {
       if (!canvas.isConnected) { document.removeEventListener("kane:update", update); rig.renderer.dispose(); return; }

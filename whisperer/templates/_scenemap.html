@@ -15,7 +15,7 @@
             <code class="room-path">{{ r.path }}</code>
             {% if r.actions %}
               <ul class="room-acts">
-                {% for a in r.actions[:4] %}<li class="{{ a.status }}"><span aria-hidden="true">{{ step_icons.get(a.kind, '•') }}</span>{{ a.text }}</li>{% endfor %}
+                {% for a in r.actions[:4] %}<li class="{{ a.status }}"><span aria-hidden="true">{{ step_icons.get(a.kind, '•') }}</span><span class="act">{{ a.text }}</span></li>{% endfor %}
                 {% if r.actions|length > 4 %}<li class="more">+{{ r.actions|length - 4 }} more</li>{% endif %}
               </ul>
             {% endif %}

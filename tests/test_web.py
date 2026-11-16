@@ -209,7 +209,7 @@ def test_scene_map_rooms_are_the_pages_kane_really_visited():
     rooms = web.scene_trail(kane, "Verify that the app shows an error saying the date is in the past.")
     assert [r["name"] for r in rooms] == ["Login", "Appointments · New", "Patients · #10"]
     assert rooms[1]["path"] == "/appointments/new?patient_id=3"
-    assert [a["text"] for a in rooms[0]["actions"]] == ["I went to http://127.0.0.1:8001/login.", "I clicked Log in button."]
+    assert [a["text"] for a in rooms[0]["actions"]] == ["I went to /login.", "I clicked Log in button."]
     assert [r["clue"] for r in rooms] == [False, False, True]
     assert rooms[2]["actions"][0]["text"] == "I checked: The app shows an error saying the date is in the past."
 

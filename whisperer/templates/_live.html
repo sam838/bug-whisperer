@@ -25,7 +25,7 @@
     <section class="scene scene-live" data-mode="{{ scene.mode }}">
       {# Detective Kane in 3D, acting out each real step as it happens (kane3d.js). The stage is
          kept across page refreshes; the 2D detective shows if 3D isn't available. #}
-      <div class="kane3d" data-kane3d data-keep="kane-3d">
+      <div class="kane3d" data-kane3d data-keep="kane-3d" data-live-src="/files/{{ inv.id }}/live.jpg">
         <canvas class="kane3d-canvas" role="img" aria-label="Detective Kane at work, in 3D"></canvas>
         <div class="kane3d-fallback">{{ sprite(scene.mode) }}</div>
       </div>

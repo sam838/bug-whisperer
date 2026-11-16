@@ -401,6 +401,8 @@ def scene_trail(kane: dict | None, objective: str) -> list[dict]:
         line = speak(remark)
         if line:
             line = _full_check(line, objective)
+            # 'I went to http://host/appointments/new.' -> 'I went to /appointments/new.' (short, fits a room)
+            line = re.sub(r"https?://[^/\s]+(/[^\s]*)?", lambda m: m.group(1) or "/", line)
             if not room["actions"] or room["actions"][-1]["text"] != line:
                 room["actions"].append({"kind": _step_kind(remark), "text": line, "status": shot.get("status")})
         if shot.get("status") == "failed":
