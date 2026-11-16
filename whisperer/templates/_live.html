@@ -1,4 +1,4 @@
-{% from "_kane.html" import sprite, say %}
+{% from "_kane.html" import sprite, say, head %}
 {% set fixv = inv.fix.get('verdict') if inv.fix else None %}
 {% set fixs = inv.fix.get('status', '') if inv.fix else '' %}
 <div class="live-root" data-active="{{ 'true' if active else 'false' }}">
@@ -94,6 +94,7 @@
     </form>
   {% endif %}
 
+  {% if board and not active %}{% include "_reconstruction.html" %}{% endif %}
   {% if board and not active %}{% include "_evidence.html" %}{% endif %}
   {% if trail and not active %}{% include "_scenemap.html" %}{% endif %}
 

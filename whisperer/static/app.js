@@ -356,6 +356,7 @@ if (live) {
         live.querySelectorAll("[data-replay]").forEach(initReplay);  // appears when the case ends
         live.querySelectorAll("[data-board]").forEach(initBoard);
         live.querySelectorAll("[data-trail]").forEach(initTrail);
+        if (window.initRecon) live.querySelectorAll("[data-recon]").forEach(window.initRecon);
         typeOut(live);
         const stampNow = stampText();
         if (stampNow && stampNow !== stampBefore && /confirmed|case closed/i.test(stampNow)) {

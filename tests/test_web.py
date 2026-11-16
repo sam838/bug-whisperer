@@ -221,3 +221,13 @@ def test_a_new_case_opens_with_a_chapter_card(client, tmp_path):
     inv.status = "done"
     inv.save()
     assert "data-chapter" not in client.get(f"/r/{inv.id}").text  # only when a case is really opened
+
+
+def test_a_closed_case_offers_its_3d_reconstruction_built_from_its_evidence(client, tmp_path):
+    inv = save(tmp_path, status="done", verdict="reproduced", plan={"understanding": "A past date was saved."},
+               judgement={"explanation": "The app saved it."},
+               kane={"shots_dir": "s1", "shots": [{"file": "001.jpg", "status": "failed", "summary": "Saved"}]})
+    page = client.get(f"/r/{inv.id}").text
+    assert "data-recon" in page and "Play the reconstruction" in page
+    data = page.split('class="recon-data">', 1)[1].split("</script>", 1)[0]
+    assert [p["id"] for p in json.loads(data)["pins"]] == ["statement", "reading", "scene", "verdict"]

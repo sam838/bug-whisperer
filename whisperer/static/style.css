@@ -733,3 +733,29 @@ details.card summary { cursor: pointer; font-weight: 700; }
   display: inline-grid; place-items: center; width: 20px; height: 20px; margin-right: 7px; border-radius: 50%;
   background: var(--ink); color: var(--paper); font: 700 11px/1 var(--sans); vertical-align: 2px;
 }
+
+/* ── The case, reconstructed in 3D (plays by itself) ───────────────────────────────────────── */
+.recon-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 16px; }
+.recon-head h2 { margin: 0; }
+.recon-head .muted { font-size: 13.5px; }
+.recon-stage {
+  position: relative; margin-top: 12px; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 40%, #2a2f42, #0f1118 70%);
+}
+.recon-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.recon-play {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  font: 700 17px/1 var(--sans); color: #15182a; background: #ffd166; border: 3px solid #f3eee5; border-radius: 999px;
+  padding: 16px 26px; box-shadow: 0 0 0 4px #15182a, 0 16px 30px -12px rgba(0, 0, 0, .7); cursor: pointer;
+  transition: transform 160ms var(--ease-out);
+}
+.recon-play:active { transform: translate(-50%, -50%) scale(.97); }
+.recon-play[disabled] { cursor: progress; opacity: .85; }
+.recon-say { position: absolute; left: 14px; right: 14px; bottom: 14px; }
+.recon-say .rpg-box { box-shadow: 0 0 0 3px #15182a, 0 10px 24px -10px rgba(0, 0, 0, .8); }
+.recon-say .rpg-text { font-size: 15px; }
+@media (max-width: 760px) {
+  .recon-stage { aspect-ratio: 4 / 5; }
+  .recon-say .rpg-box { grid-template-columns: 1fr; }
+  .recon-say .rpg-portrait { display: none; }
+}
