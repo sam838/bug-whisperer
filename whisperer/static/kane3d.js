@@ -593,6 +593,8 @@
     requestAnimationFrame(frame);
   }
 
+  // the same Detective Kane for the 3D reconstruction of finished cases (recon.js)
+  window.kaneRobot = { loadEngine, loadKane };
   window.initKane3d = (root) => (root || document).querySelectorAll("[data-kane3d]").forEach(init);
   window.initKane3d();
 })();

@@ -182,14 +182,14 @@ function buildOffice(T, canvas, board) {
 // ── the tour: wide shot, then each piece of evidence in turn, then wide again ────────────────
 function shotsFor(world) {
   const { BY, BZ } = world.board;
-  const wide = { pos: [0.4, 2.6, 4.6], look: [0, 2.1, BZ], line: "This is the case as it happened. Every piece on my board is real evidence." };
+  const wide = { pos: [0.7, 2.25, 5.2], look: [0.4, 1.7, BZ], line: "This is the case as it happened. Every piece on my board is real evidence." };
   const stops = world.pins.map((pin) => {
     const s = world.spots[pin.id];
     // aim a little low, so the evidence sits above Kane's dialogue box
     return { pos: [s.x * 0.8, s.y - 0.3, BZ + 1.75], look: [s.x, s.y - 0.28, BZ], line: kaneLine(pin), pin };
   });
   const last = world.pins[world.pins.length - 1];
-  const end = { pos: [0.6, 2.4, 3.6], look: [0, BY, BZ],
+  const end = { pos: [0.8, 2.2, 4.4], look: [0.5, 1.75, BZ],
     line: last && last.id === "closed" && last.stamp === "Case closed" ? "Case closed." : "That's the case so far." };
   return [wide, ...stops, end];
 }
@@ -225,6 +225,7 @@ function initRecon(section) {
     button.innerHTML = "<span>…</span> Setting up Kane's office";
     try {
       await loadThree();
+      if (window.kaneRobot) await window.kaneRobot.loadEngine().catch(() => {});
       if (document.fonts) await Promise.all(["600 44px Caveat", "500 25px 'JetBrains Mono'", "800 58px Inter"].map((f) => document.fonts.load(f).catch(() => {})));
     } catch (err) {
       button.disabled = false;
@@ -232,6 +233,16 @@ function initRecon(section) {
       return;
     }
     world ||= buildOffice(window.THREE, canvas, board);
+    if (!world.robot && window.kaneRobot && window.THREE.GLTFLoader) {
+      // the same Detective Kane as in his live office: swap the drawn stand-in for the robot
+      try {
+        const T = window.THREE;
+        world.robot = await window.kaneRobot.loadKane(T, { scene: world.scene, DESK: new T.Vector3(2.7, 0, -0.9), YOU: -0.6 });
+        world.scene.remove(world.kane);
+        world.kane = world.robot.model;
+      } catch (e) { /* keep the drawn detective */ }
+    }
+    if (world.robot) world.robot.play("Wave");  // he greets you as the tour starts
     fit();
     playing = true;
     section.classList.add("playing");
@@ -246,7 +257,10 @@ function initRecon(section) {
     // each shot holds until Kane has finished his line, plus a moment to read it
     const hold = (i) => Math.max(2600, shots[i].line.length * 16 + 1500);
     speakLine(shots[0].line);
+    let previous = performance.now(), cheered = false;
     const frame = (now) => {
+      const dt = Math.min(0.1, (now - previous) / 1000); previous = now;
+      if (world.robot) world.robot.mixer.update(dt);
       if (!playing) return;
       const elapsed = now - phaseStart;
       if (index < shots.length - 1 && elapsed > hold(index) + MOVE) {
@@ -254,6 +268,7 @@ function initRecon(section) {
         from.copy(cam.position); to.set(...shots[index].pos);
         lookFrom.copy(look); lookTo.set(...shots[index].look);
         speakLine(shots[index].line);
+        if (world.robot && !cheered && shots[index].line === "Case closed.") { cheered = true; world.robot.play("ThumbsUp"); }
       }
       if (index > 0 && MOVE) {
         const t = ease(Math.min(1, (now - phaseStart) / MOVE));
@@ -263,7 +278,7 @@ function initRecon(section) {
         cam.position.set(...shots[index].pos); look.set(...shots[index].look);
       }
       cam.lookAt(look);
-      if (!reconReduce) world.kane.rotation.y = -0.9 + Math.sin(now / 900) * 0.08;  // Kane looks around
+      if (!reconReduce) world.kane.rotation.y = (world.robot ? -0.6 : -0.9) + Math.sin(now / 900) * 0.08;  // Kane looks around
       world.renderer.render(world.scene, cam);
       if (index === shots.length - 1 && now - phaseStart > MOVE + hold(index)) {
         playing = false;
