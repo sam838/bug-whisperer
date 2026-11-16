@@ -99,13 +99,14 @@ def _reason(reopened: list[dict], attempt: int) -> str:
 
 
 def _fingerprint(code_dir: str) -> str:
-    """Changes to the app's code since the last commit, plus the commit itself."""
+    """The app's code as it is now: its folder in the last commit (not the whole commit, so work on
+    other parts of the repo doesn't trigger a revisit), plus uncommitted changes in that folder."""
     def git(*args):
         return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True,
                               encoding="utf-8", errors="replace").stdout
     untracked = git("ls-files", "--others", "--exclude-standard", "--", code_dir).split()
     digest = hashlib.sha1()
-    digest.update(git("rev-parse", "HEAD").encode())
+    digest.update(git("rev-parse", f"HEAD:{Path(code_dir).as_posix()}").encode())
     digest.update(git("diff", "HEAD", "--", code_dir).encode())
     for name in sorted(untracked):
         path = ROOT / name
