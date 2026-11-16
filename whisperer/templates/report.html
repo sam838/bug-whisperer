@@ -1,14 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="hero">
-  <h1>Users don't write good bug reports.<br><span>Kane doesn't need them to.</span></h1>
-  <p class="lede">Every bug report is a case. Paste what the user wrote, add their screenshot if they sent one,
-    and send <b>Detective Kane</b> to the scene. Kane retraces their steps in a real browser and brings back
-    evidence. If the code is connected, Claude repairs it, and Kane won't close the case until it sees the fix
-    with its own eyes.</p>
+  <p class="eyebrow">🕵️ Bug reports, investigated</p>
+  <h1>Users don't write good bug reports.<br><em>Kane doesn't need them to.</em></h1>
+  <p class="lede">Your tests cover what you expected. Your users find what you didn't. Paste what they wrote,
+    and <b>Detective Kane</b> retraces their steps in a real browser, brings back evidence, and won't close the
+    case until it sees the fix with its own eyes.</p>
 </section>
 
-<form class="card form" action="/report" method="post" enctype="multipart/form-data">
+{% if featured %}
+  {% set f = featured %}
+  <a class="featured card" href="/r/{{ f.inv.id }}">
+    <div class="featured-head">
+      <span class="featured-label">Case #{{ f.case_no }} · {{ f.inv.app }}</span>
+      <span class="stamp stamp-ok">Case closed</span>
+    </div>
+    <div class="featured-grid">
+      <figure class="featured-step">
+        <figcaption><span class="num">1</span> The witness statement</figcaption>
+        <blockquote class="complaint">{{ f.inv.report[:170] }}{{ '…' if f.inv.report|length > 170 }}</blockquote>
+      </figure>
+      <figure class="featured-step">
+        <figcaption><span class="num">2</span> Kane at the scene <span class="bad">❌</span></figcaption>
+        <img class="shot kane" src="/files/{{ f.inv.id }}/{{ f.before.dir }}/{{ f.before.file }}" alt="Kane's screenshot of the bug" loading="lazy">
+      </figure>
+      <figure class="featured-step">
+        <figcaption><span class="num">3</span> After Claude's repair <span class="good">✅</span></figcaption>
+        <img class="shot kane" src="/files/{{ f.inv.id }}/{{ f.after.dir }}/{{ f.after.file }}" alt="Kane's screenshot after the fix" loading="lazy">
+      </figure>
+    </div>
+    <span class="featured-cta">Open the full case file →</span>
+  </a>
+{% endif %}
+
+<form class="card form intake" action="/report" method="post" enctype="multipart/form-data">
+  <div class="intake-head">
+    <h2>Open a new case</h2>
+    <span class="muted">Kane takes about 2 minutes at the scene</span>
+  </div>
+
   <label class="field">
     <span>Which app?</span>
     <select name="app_file" required>
@@ -20,14 +50,14 @@
 
   <label class="field">
     <span>The witness statement <em>(what the user wrote, messy is fine)</em></span>
-    <textarea name="report" rows="5" required maxlength="4000"
+    <textarea name="report" rows="4" required maxlength="4000"
       placeholder="cant book!!! the button does nothing. pls fix 😡"></textarea>
   </label>
 
   <div class="examples">
     <span>Try a real one:</span>
     {% for e in examples %}
-      <button type="button" class="chip" data-example="{{ e }}">{{ e[:46] }}…</button>
+      <button type="button" class="chip" data-example="{{ e }}">{{ e[:44] }}…</button>
     {% endfor %}
   </div>
 
@@ -37,14 +67,13 @@
   </label>
 
   <button class="btn primary big" type="submit">🕵️ Send Kane to investigate</button>
-  <p class="hint">Kane works one case at a time, in a real Chrome browser. A visit to the scene takes about 2 minutes.</p>
 </form>
 
 <section class="how">
-  <div><b>1 · The case</b><p>Claude reads the complaint and the screenshot, and works out what the user did.</p></div>
-  <div><b>2 · The scene</b><p>Kane retraces the user's steps in a real browser and captures every screen.</p></div>
-  <div><b>3 · The evidence</b><p>Kane checks what the user claimed. A memory or a guess doesn't count.</p></div>
-  <div><b>4 · The repair</b><p>If the code is connected, Claude fixes it, using only Kane's evidence.</p></div>
-  <div><b>5 · Case closed</b><p>Kane repeats the exact steps. Only a pass closes the case, and it stays on file.</p></div>
+  <div><span class="num">1</span><b>The case</b><p>Claude reads the complaint and the screenshot, and works out what the user did.</p></div>
+  <div><span class="num">2</span><b>The scene</b><p>Kane retraces the steps in a real browser and captures every screen.</p></div>
+  <div><span class="num">3</span><b>The evidence</b><p>Kane checks what the user claimed. A memory or a guess doesn't count.</p></div>
+  <div><span class="num">4</span><b>The repair</b><p>If the code is connected, Claude fixes it, using only Kane's evidence.</p></div>
+  <div><span class="num">5</span><b>Case closed</b><p>Kane repeats the exact steps. Only a pass closes the case, and it stays on file.</p></div>
 </section>
 {% endblock %}

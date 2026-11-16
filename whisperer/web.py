@@ -273,10 +273,23 @@ def unlock(passcode: str = Form("")):
     return response
 
 
+def featured_case() -> dict | None:
+    """The newest case Kane closed, with its before/after screens: proof on the front page."""
+    for folder in sorted(RUNS.glob("*/investigation.json"), reverse=True):
+        try:
+            inv = load_investigation(folder.parent)
+        except (json.JSONDecodeError, TypeError):
+            continue
+        v = view(inv)
+        if inv.fix.get("verdict") == "fixed" and v["before"] and v["after"]:
+            return v
+    return None
+
+
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse(request, "report.html", {
-        "apps": list_apps(), "examples": EXAMPLES, "page": "report"})
+        "apps": list_apps(), "examples": EXAMPLES, "page": "report", "featured": featured_case()})
 
 
 @app.post("/report")

@@ -5,11 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Bug Whisperer{% endblock %}</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕵️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">🐛</span> Bug Whisperer</a>
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true">🐛</span>
+      <span class="brand-name">Bug Whisperer</span>
+    </a>
     <nav>
       <a href="/" class="{{ 'on' if page == 'report' }}">Open a case</a>
       <a href="/inbox" class="{{ 'on' if page == 'inbox' }}">Case files</a>
@@ -18,8 +24,9 @@
   </header>
   {% if request.state.hosted %}
     <div class="demo-bar">
-      🎬 <b>Live demo.</b> The clinic sample app starts every case as the AI first built it, <b>bugs included</b>,
-      so you can watch Kane find them and Claude repair them. Every case runs Kane CLI for real.
+      <span class="demo-dot" aria-hidden="true"></span>
+      <b>Live demo.</b> The clinic sample app starts every case as the AI first built it, bugs included.
+      Every case runs Kane CLI for real.
       {% if not request.state.unlocked %}<a href="/unlock">Judges: unlock live cases →</a>{% endif %}
     </div>
   {% endif %}
@@ -27,9 +34,9 @@
     {% block content %}{% endblock %}
   </main>
   <footer class="foot">
-    Every bug report is a case. Claude reads it and does the repairs.
-    <strong>🕵️ Kane CLI is the detective:</strong> it goes to the scene in a real browser, collects the evidence,
-    and only closes the case when it sees the fix with its own eyes.
+    <span>Every bug report is a case.</span>
+    <span>Claude reads it and does the repairs.</span>
+    <span><b>🕵️ Kane CLI is the detective:</b> it goes to the scene in a real browser and only closes the case when it sees the fix with its own eyes.</span>
   </footer>
   <script src="/static/app.js"></script>
 </body>

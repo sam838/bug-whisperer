@@ -126,14 +126,22 @@
   {# ------------------------------------------------ before / after ------------------------------------------------ #}
   {% if after %}
     <section class="card">
-      <h2>The scene, before and after the repair <span class="muted">· same steps, same detective</span></h2>
-      <div class="ba">
-        <figure><figcaption class="bad">❌ Before</figcaption>
-          {% if before %}<img class="shot kane" src="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" alt="Before">{% endif %}
-          <p class="caption">{{ inv.kane.get('reason') }}</p></figure>
-        <figure><figcaption class="good">{{ '✅' if fixv == 'fixed' else '❌' }} After</figcaption>
-          <img class="shot kane" src="/files/{{ inv.id }}/{{ after.dir }}/{{ after.file }}" alt="After">
-          <p class="caption">{{ inv.fix.attempts[-1].kane.get('reason') }}</p></figure>
+      <h2>The scene, before and after the repair <span class="muted">· same steps, same detective · drag to compare</span></h2>
+      {% if before %}
+        <div class="compare" data-compare>
+          <img class="compare-img kane" src="/files/{{ inv.id }}/{{ before.dir }}/{{ before.file }}" alt="Before the repair">
+          <img class="compare-img compare-after kane" src="/files/{{ inv.id }}/{{ after.dir }}/{{ after.file }}" alt="After the repair">
+          <span class="compare-handle" aria-hidden="true"></span>
+          <span class="compare-label left">❌ Before</span>
+          <span class="compare-label right">{{ '✅' if fixv == 'fixed' else '❌' }} After</span>
+          <input class="compare-range" type="range" min="0" max="100" value="50" aria-label="Drag to compare the scene before and after the repair">
+        </div>
+      {% else %}
+        <img class="shot kane" src="/files/{{ inv.id }}/{{ after.dir }}/{{ after.file }}" alt="After">
+      {% endif %}
+      <div class="ba-captions">
+        <p class="caption"><b class="bad">Before:</b> {{ inv.kane.get('reason') }}</p>
+        <p class="caption"><b class="good">After:</b> {{ inv.fix.attempts[-1].kane.get('reason') }}</p>
       </div>
     </section>
   {% endif %}
