@@ -14,6 +14,7 @@
 (function () {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const GLTF_LOADER = "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js";
+  const ROOM_ENV = "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js";
   const MODEL = "/static/models/RobotExpressive.glb";
   const PATH_RE = /https?:\/\/[^\s]+/;
 
@@ -27,6 +28,7 @@
   async function loadEngine() {
     await loadThree();  // from recon.js
     if (!window.THREE.GLTFLoader) await loadScript(GLTF_LOADER);
+    if (!window.THREE.RoomEnvironment) await loadScript(ROOM_ENV).catch(() => {});  // reflections are a nicety
   }
 
   // ── reading the real steps from the live tracker ──────────────────────────────────────────
@@ -164,6 +166,14 @@
     return s;
   }
 
+  function radialTex(T, inner, outer) {
+    return canvasTex(T, 128, 128, (g) => {
+      const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+      r.addColorStop(0, inner); r.addColorStop(1, outer);
+      g.fillStyle = r; g.fillRect(0, 0, 128, 128);
+    });
+  }
+
   // the night outside the window: a city skyline with lit windows, and rain drawn every frame
   function makeWindow(T) {
     const city = canvasTex(T, 512, 384, (g, w, h) => {
@@ -179,7 +189,7 @@
       }
     });
     const rainCanvas = document.createElement("canvas"); rainCanvas.width = 256; rainCanvas.height = 192;
-    const rain = new T.CanvasTexture(rainCanvas);
+    const rain = new T.CanvasTexture(rainCanvas); rain.encoding = T.sRGBEncoding;
     const drops = Array.from({ length: 70 }, () => [Math.random() * 256, Math.random() * 192, 6 + Math.random() * 10]);
     const rg = rainCanvas.getContext("2d");
     return {
@@ -201,11 +211,16 @@
     const renderer = new T.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.outputEncoding = T.sRGBEncoding;
-    renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+    renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95;
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
     const scene = new T.Scene();
-    scene.background = new T.Color(0x0d1018);
-    scene.fog = new T.Fog(0x0d1018, 7, 14);
+    scene.background = new T.Color(0x0a0d15);
+    scene.fog = new T.Fog(0x0a0d15, 6.5, 13);
+    if (T.RoomEnvironment) {  // soft image-based lighting: varnish, brass and glass catch a little light
+      const pmrem = new T.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromScene(new T.RoomEnvironment(), 0.04).texture;
+      pmrem.dispose();
+    }
     const camera = new T.PerspectiveCamera(36, 16 / 7, 0.1, 40);
     camera.position.set(0.9, 1.95, 3.7);
     const focus = new T.Vector3(-0.65, 1.12, -0.95);
@@ -216,10 +231,11 @@
     };
 
     // light: a dim blue night, a warm desk lamp with shadows, moonlight through the window
-    scene.add(new T.HemisphereLight(0x5a6c99, 0x1a120c, 0.55));
-    const lampLight = new T.SpotLight(0xffc98a, 3.2, 9, 0.95, 0.65, 1.4);
+    scene.add(new T.HemisphereLight(0x51618c, 0x1a120c, 0.34));
+    const lampLight = new T.SpotLight(0xffc98a, 3.8, 9, 0.95, 0.7, 1.3);
     lampLight.position.set(-1.25, 2.0, -0.35); lampLight.target.position.set(-0.6, 0.6, -0.4);
-    lampLight.castShadow = true; lampLight.shadow.mapSize.set(1024, 1024); lampLight.shadow.bias = -0.0008;
+    lampLight.castShadow = true; lampLight.shadow.mapSize.set(1024, 1024); lampLight.shadow.bias = -0.0006;
+    lampLight.shadow.normalBias = 0.02; lampLight.shadow.camera.near = 0.2; lampLight.shadow.camera.far = 9;
     scene.add(lampLight, lampLight.target);
     const moon = new T.DirectionalLight(0x8fb0ff, 0.45); moon.position.set(-1.8, 3, -6); scene.add(moon);
     const rim = new T.PointLight(0x7f9cff, 0.6, 6); rim.position.set(1.2, 2.4, -1.8); scene.add(rim);
@@ -236,10 +252,20 @@
     planks.wrapS = planks.wrapT = T.RepeatWrapping; planks.repeat.set(3, 3);
     const floor = add(new T.Mesh(new T.PlaneGeometry(10, 9), std(0xffffff, 0.85, { map: planks })), 0, 0, 0.5, { cast: false });
     floor.rotation.x = -Math.PI / 2;
-    const wallMat = std(0x1d2436, 0.95);
+    const paper = canvasTex(T, 256, 256, (g, w, h) => {
+      g.fillStyle = "#1f2840"; g.fillRect(0, 0, w, h);
+      for (let x = 0; x < w; x += 32) { g.fillStyle = "rgba(255,255,255,.035)"; g.fillRect(x, 0, 12, h); g.fillStyle = "rgba(0,0,0,.12)"; g.fillRect(x + 12, 0, 2, h); }
+    });
+    paper.wrapS = paper.wrapT = T.RepeatWrapping; paper.repeat.set(5, 2);
+    const wallMat = std(0xffffff, 0.92, { map: paper });
     add(new T.Mesh(new T.BoxGeometry(10, 4, 0.1), wallMat), 0, 2, -3.05, { cast: false });
     add(new T.Mesh(new T.BoxGeometry(0.1, 4, 9), wallMat), -3.55, 2, 0.5, { cast: false });
     add(new T.Mesh(new T.BoxGeometry(10, 0.14, 0.04), std(0x2b2116)), 0, 0.07, -2.99, { cast: false });
+    const panel = std(0x2e2119, 0.55), rail = std(0x4a3424, 0.45);
+    add(new T.Mesh(new T.BoxGeometry(10, 0.95, 0.03), panel), 0, 0.5, -2.985, { cast: false });
+    add(new T.Mesh(new T.BoxGeometry(10, 0.05, 0.06), rail), 0, 0.99, -2.97, { cast: false });
+    add(new T.Mesh(new T.BoxGeometry(0.03, 0.95, 9), panel), -3.485, 0.5, 0.5, { cast: false });
+    add(new T.Mesh(new T.BoxGeometry(0.06, 0.05, 9), rail), -3.47, 0.99, 0.5, { cast: false });
     add(new T.Mesh(new T.BoxGeometry(0.04, 0.14, 9), std(0x2b2116)), -3.49, 0.07, 0.5, { cast: false });
 
     // a rug under the desk
@@ -260,6 +286,18 @@
     [[0, 0.62, 1.62, 0.08], [0, -0.62, 1.62, 0.08], [-0.79, 0, 0.08, 1.3], [0.79, 0, 0.08, 1.3], [0, 0, 0.05, 1.2]].forEach(([x, y, w, h]) =>
       add(new T.Mesh(new T.BoxGeometry(w, h, 0.08), frameMat), -2.1 + x, 2.05 + y, -2.96));
     for (let i = 0; i < 5; i++) add(new T.Mesh(new T.BoxGeometry(1.52, 0.035, 0.03), std(0xb9a37f, 0.6)), -2.1, 2.5 - i * 0.1, -2.93);
+    const stripes = canvasTex(T, 256, 256, (g, w, h) => {
+      g.clearRect(0, 0, w, h);
+      for (let y = 18; y < h - 18; y += 34) {
+        const band = g.createLinearGradient(0, 0, w, 0);
+        band.addColorStop(0, "rgba(150,180,255,0)"); band.addColorStop(0.5, "rgba(150,180,255,.9)"); band.addColorStop(1, "rgba(150,180,255,0)");
+        g.fillStyle = band; g.fillRect(16, y, w - 32, 16);
+      }
+    });
+    const blinds = new T.Mesh(new T.PlaneGeometry(2.2, 2.4), new T.MeshBasicMaterial({ map: stripes, transparent: true, opacity: 0.22, depthWrite: false, blending: T.AdditiveBlending }));
+    blinds.rotation.x = -Math.PI / 2; blinds.rotation.z = 0.35; blinds.position.set(-1.25, 0.009, -1.25); scene.add(blinds);
+    const shaft = new T.Mesh(new T.PlaneGeometry(1.4, 3.2), new T.MeshBasicMaterial({ map: radialTex(T, "rgba(150,180,255,.5)", "rgba(150,180,255,0)"), transparent: true, opacity: 0.18, depthWrite: false, blending: T.AdditiveBlending }));
+    shaft.position.set(-1.75, 1.35, -2.0); shaft.rotation.set(-0.55, 0.3, 0); scene.add(shaft);
 
     // the bookshelf on the left wall
     const shelf = new T.Group(); shelf.position.set(-3.3, 0, 1.1); shelf.rotation.y = Math.PI / 2; scene.add(shelf);
@@ -316,6 +354,10 @@
     part(new T.CylinderGeometry(0.018, 0.018, 0.7), std(0x8a8a8a, 0.3, { metalness: 0.8 }), -0.72, 1.3, -0.25);
     const shade = part(new T.ConeGeometry(0.2, 0.22, 24, 1, true), std(0x2f6b4f, 0.4, { metalness: 0.4, side: T.DoubleSide }), -0.62, 1.66, -0.18);
     shade.rotation.z = -0.5;
+    const bulb = new T.Mesh(new T.SphereGeometry(0.05, 12, 10), new T.MeshBasicMaterial({ color: 0xfff1c8, toneMapped: false }));
+    bulb.position.set(-0.6, 1.6, -0.17); station.add(bulb);
+    const halo = new T.Sprite(new T.SpriteMaterial({ map: radialTex(T, "rgba(255,214,150,.55)", "rgba(255,214,150,0)"), transparent: true, depthWrite: false, blending: T.AdditiveBlending }));
+    halo.scale.set(0.9, 0.9, 1); halo.position.copy(bulb.position); station.add(halo);
     // an office chair in front of the computer: Kane sits here while he works
     const leather = std(0x2a2422, 0.45), steel = std(0x9aa0a8, 0.3, { metalness: 0.75 });
     const chair = new T.Group(); chair.position.set(-1.09, 0, -0.46); chair.rotation.y = Math.PI / 4 + Math.PI; scene.add(chair);
@@ -332,6 +374,31 @@
     cp(new T.BoxGeometry(0.48, 0.5, 0.07), leather, 0, 0.92, -0.27, -0.12);
     cp(new T.BoxGeometry(0.42, 0.44, 0.04), std(0x3a302c, 0.6), 0, 0.92, -0.225, -0.12);
     [-0.27, 0.27].forEach((x) => { cp(new T.BoxGeometry(0.05, 0.04, 0.3), leather, x, 0.68, -0.02); cp(new T.BoxGeometry(0.03, 0.17, 0.03), steel, x, 0.6, -0.02); });
+
+    const blobTex = radialTex(T, "rgba(0,0,0,.55)", "rgba(0,0,0,0)");
+    const blob = (w, d, x, z, ry = 0) => {
+      const m = new T.Mesh(new T.PlaneGeometry(w, d), new T.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false }));
+      m.rotation.x = -Math.PI / 2; m.rotation.z = ry; m.position.set(x, 0.008, z); scene.add(m); return m;
+    };
+    blob(2.4, 1.4, -1.55, -0.85, Math.PI / 4);   // desk
+    blob(0.9, 0.9, -1.09, -0.46);                  // chair
+    blob(0.9, 0.9, 2.75, -2.6);                    // filing cabinet
+    blob(0.8, 1.8, -3.25, 1.1);                    // bookshelf
+    const kaneShadow = blob(0.9, 0.9, 0, 0);
+
+    // dust drifting in the lamplight
+    const dustGeo = new T.BufferGeometry(), dustPos = new Float32Array(90 * 3);
+    for (let i = 0; i < 90; i++) { dustPos[i * 3] = -1.6 + Math.random() * 1.6; dustPos[i * 3 + 1] = 0.6 + Math.random() * 1.4; dustPos[i * 3 + 2] = -1.2 + Math.random() * 1.2; }
+    dustGeo.setAttribute("position", new T.BufferAttribute(dustPos, 3));
+    const dust = new T.Points(dustGeo, new T.PointsMaterial({ size: 0.018, color: 0xffd9a0, transparent: true, opacity: 0.55, depthWrite: false, blending: T.AdditiveBlending }));
+    scene.add(dust);
+    dust.update = (dt) => {
+      for (let i = 0; i < 90; i++) {
+        dustPos[i * 3 + 1] += dt * 0.03 * (1 + (i % 3)); dustPos[i * 3] += Math.sin((dustPos[i * 3 + 1] + i) * 3) * dt * 0.02;
+        if (dustPos[i * 3 + 1] > 2.0) dustPos[i * 3 + 1] = 0.6;
+      }
+      dustGeo.attributes.position.needsUpdate = true;
+    };
 
     // the corkboard on the back wall, where Kane pins the case's evidence as he finds it
     const corkTex = canvasTex(T, 512, 320, (g, w, h) => {
@@ -389,7 +456,7 @@
     // seated, the robot's hips sit 0.29 up and 0.24 behind its feet: lift and shift it onto the cushion
     const SEAT = new T.Vector3(CHAIR.x - 0.24 * Math.sin(SEAT_YAW) * -1, 0.26, CHAIR.z - 0.24 * Math.cos(SEAT_YAW) * -1);
     const AISLE = new T.Vector3(-0.4, 0, -0.2), PIN_SPOT = new T.Vector3(BOARD.x, 0, -2.3);
-    return { renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, board, clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, CHAIR, SEAT, SEAT_YAW, AISLE, PIN_SPOT, FACE, YOU, yaw: YOU };
+    return { renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, board, dust, kaneShadow, clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, CHAIR, SEAT, SEAT_YAW, AISLE, PIN_SPOT, FACE, YOU, yaw: YOU };
   }
 
   // ── Detective Kane: the CC0 robot, recoloured, with a fedora and a magnifying glass ───────
@@ -609,6 +676,9 @@
     stage.classList.add("ready");
     stage.dataset.ready = "1";
     const T = window.THREE;
+    rig.scene.traverse((o) => {
+      for (const m of [].concat(o.material || [])) if (m.isMeshStandardMaterial) m.envMapIntensity = m.metalness > 0.5 ? 0.6 : 0.1;
+    });
 
     // "Kane's screen": the same picture as the 3D monitor, readable even with Kane sitting in front of it
     const hud = document.createElement("div");
@@ -706,6 +776,9 @@
         rig.screen.state.body = { kind: "note", label: "Claude is writing my orders…" }; rig.screen.draw();
       }
       if (now - rainAt > 60) { rig.win.update(Math.min(0.2, (now - rainAt) / 1000)); rainAt = now; }
+      rig.dust.update(dt);
+      rig.kaneShadow.visible = kane.model.visible;
+      rig.kaneShadow.position.set(kane.model.position.x, 0.009, kane.model.position.z);
       const d = new Date();
       rig.clock.minPivot.rotation.z = -d.getMinutes() / 60 * Math.PI * 2;
       rig.clock.hourPivot.rotation.z = -((d.getHours() % 12) + d.getMinutes() / 60) / 12 * Math.PI * 2;
