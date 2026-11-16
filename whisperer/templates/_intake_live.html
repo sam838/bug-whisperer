@@ -1,0 +1,34 @@
+{% from "_kane.html" import sprite, say %}
+{% from "_cards.html" import case_card %}
+{% set n = cards|length %}
+<div class="live-root" data-active="{{ 'true' if active else 'false' }}">
+  {# The reading scene: Kane's magnifying glass sweeps over the real text of the uploaded files. #}
+  <section class="scene">
+    <div class="scene-stage">
+      <div class="scene-actor" data-keep="kane-{{ 'reading' if active else 'idle' }}">{{ sprite('reading' if active else 'idle') }}</div>
+      <div class="evidence-paper{{ ' scanning' if active }}">
+        <span class="paper-label">🗂️ Evidence bag: {{ job.files|join(' · ') }}</span>
+        {% if excerpt %}<pre>{{ excerpt }}</pre>{% else %}<p class="muted">Screenshots and documents: Claude looks at them directly.</p>{% endif %}
+        {% if active %}<span class="scan-lens" aria-hidden="true"></span>{% endif %}
+      </div>
+    </div>
+    {% if job.status == 'reading' %}
+      {{ say("Let me go through the tester's results and pick out every real problem. Passed tests and duplicates don't make the board…", key="reading") }}
+    {% elif job.status == 'error' %}
+      {{ say("I couldn't get through these files: " ~ job.error, key="error") }}
+    {% elif n %}
+      {{ say("I found " ~ n ~ " problem" ~ ('s' if n != 1 else '') ~ " worth investigating. " ~ n ~ " new case" ~ ('s are' if n != 1 else ' is') ~ " pinned on the board. I'll take them one at a time, in a real browser.", key="found") }}
+    {% else %}
+      {{ say("Nothing to investigate here: " ~ (job.left_out or "no failed tests or problems in these files."), key="none") }}
+    {% endif %}
+  </section>
+
+  {% if cards %}
+    <div class="cork" data-board data-links='[]'>
+      <svg class="strings" aria-hidden="true"></svg>
+      {% for c in cards %}{{ case_card(c, case_no, loop.index0) }}{% endfor %}
+    </div>
+    {% if job.left_out %}<p class="muted">↪ {{ job.left_out }}</p>{% endif %}
+    <p><a class="btn" href="/inbox">See all case files →</a></p>
+  {% endif %}
+</div>

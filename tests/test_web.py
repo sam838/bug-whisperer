@@ -179,3 +179,20 @@ def test_closed_case_gets_an_evidence_wall_in_investigation_order(client, tmp_pa
 def test_no_evidence_wall_while_kane_is_still_working(client, tmp_path):
     inv = save(tmp_path, status="reproducing")
     assert web.evidence_board(inv, None, None) is None
+
+
+@pytest.mark.parametrize("closed, name, nxt", [(0, "Rookie", "Gumshoe"), (2, "Gumshoe", "Sleuth"),
+                                               (6, "Inspector", "Chief Inspector"), (12, "Chief Inspector", None)])
+def test_detective_rank_is_earned_by_closed_cases_only(closed, name, nxt):
+    rank = web.detective_rank(closed)
+    assert rank["name"] == name and rank["next"] == nxt and 0 <= rank["progress"] <= 100
+
+
+def test_kane_only_says_what_is_really_happening(client, tmp_path):
+    inv = save(tmp_path, status="reproducing")
+    empty = {"steps": [], "total": 0, "hidden": 0, "elapsed": 0}
+    assert web.kane_scene(inv, empty, False)["mode"] == "walking"
+    steps = {**empty, "steps": [{"status": "done", "remark": "I typed 03/03/2025 into Date.", "kind": "type"}]}
+    assert web.kane_scene(inv, steps, False)["line"] == "I typed 03/03/2025 into Date."
+    inv.status = "done"
+    assert web.kane_scene(inv, empty, False) is None

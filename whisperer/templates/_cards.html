@@ -1,0 +1,16 @@
+{# One case pinned on a corkboard: Kane's photo from the scene, the user's words, and its stamp. #}
+{% macro case_card(c, case_no, i=0) -%}
+<a class="pinned pin-case" href="/r/{{ c.inv.id }}" data-pin="{{ c.inv.id }}"
+   style="--tilt: {{ tilt(c.inv.id) }}deg; --i: {{ i }}">
+  <span class="pin" aria-hidden="true"></span>
+  <span class="case-label">Case #{{ case_no.get(c.inv.id) }} · {{ c.inv.app }}</span>
+  {% if c.shot %}<img src="/files/{{ c.inv.id }}/{{ c.shot.dir }}/{{ c.shot.file }}" alt="" loading="lazy">{% endif %}
+  <span class="hand">“{{ c.inv.report[:120] }}{{ '…' if c.inv.report|length > 120 }}”</span>
+  {% if c.title %}<span class="case-line">{{ c.title }}</span>{% endif %}
+  {% if c.inv.note %}<span class="case-line muted">↪ {{ c.inv.note }}</span>{% endif %}
+  <span class="case-foot">
+    <span class="stamp tone-{{ c.stamp[1] }}">{{ c.stamp[0] }}</span>
+    <small>{{ c.inv.created }}</small>
+  </span>
+</a>
+{%- endmacro %}

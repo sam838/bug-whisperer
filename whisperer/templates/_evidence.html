@@ -1,7 +1,14 @@
+{% from "_kane.html" import sprite, say %}
 {# The evidence wall: the case's real evidence, pinned up and joined by red string in the order the
    investigation went. Strings are drawn by app.js between the pins named in data-links. #}
 <section class="board" data-board data-links='{{ board.links|tojson }}' aria-label="Evidence board">
   <h2 class="board-title">🧷 The evidence board</h2>
+  {% if replay and replay.end %}
+    <div class="scene scene-case scene-end">
+      <div class="scene-actor">{{ sprite("idle") }}</div>
+      {{ say(replay.end.line, key="end-" ~ inv.id) }}
+    </div>
+  {% endif %}
   <div class="board-wall">
     <svg class="strings" aria-hidden="true"></svg>
     {% for p in board.pins %}

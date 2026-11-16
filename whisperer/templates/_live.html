@@ -1,3 +1,4 @@
+{% from "_kane.html" import sprite, say %}
 {% set fixv = inv.fix.get('verdict') if inv.fix else None %}
 {% set fixs = inv.fix.get('status', '') if inv.fix else '' %}
 <div class="live-root" data-active="{{ 'true' if active else 'false' }}">
@@ -19,7 +20,13 @@
     {% endfor %}
   </ol>
 
-  {% if active %}
+  {% if active and scene %}
+    {# The RPG scene: Detective Kane at work, saying what is really happening right now. #}
+    <section class="scene scene-case">
+      <div class="scene-actor" data-keep="kane-{{ scene.mode }}">{{ sprite(scene.mode) }}</div>
+      {{ say(scene.line, key=scene.line) }}
+    </section>
+  {% elif active %}
     <div class="banner working">
       <span class="pulse"></span>
       {% if queued %}🕵️ Kane works one case at a time. This one is next in line…

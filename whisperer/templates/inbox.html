@@ -1,29 +1,30 @@
 {% extends "base.html" %}
+{% from "_kane.html" import sprite %}
+{% from "_cards.html" import case_card %}
 {% block title %}Case files · Bug Whisperer{% endblock %}
 {% block content %}
 <h1 class="page-title">Case files</h1>
+
+{# Detective Kane's rank: earned only by cases really closed (Kane saw the fix with its own eyes). #}
+<section class="hud">
+  <div class="hud-actor">{{ sprite("idle") }}</div>
+  <div class="hud-body">
+    <span class="hud-name">Detective Kane</span>
+    <b class="hud-rank">{{ rank.name }}</b>
+    <span class="hud-stats">{{ rank.closed }} case{{ 's' if rank.closed != 1 }} closed · {{ opened }} opened</span>
+    <div class="hud-bar" role="progressbar" aria-valuenow="{{ rank.progress }}" aria-valuemin="0" aria-valuemax="100"
+         aria-label="Progress to the next rank"><span style="--p: {{ rank.progress / 100 }}"></span></div>
+    <small class="muted">{% if rank.next %}{{ rank.to_next }} more closed case{{ 's' if rank.to_next != 1 }} to {{ rank.next }}. Only a fix Kane saw with its own eyes counts.{% else %}Top rank.{% endif %}</small>
+  </div>
+</section>
+
 {% if not cards %}
   <div class="card"><p>No cases yet. <a href="/">Open the first one →</a></p></div>
 {% else %}
   <p class="board-lede">Every bug report gets pinned up here as a case. Red string joins cases from the same scene, in the order they were opened.</p>
-  {# The corkboard: each report pinned up as a case, with Kane's photo from the scene and its stamp. #}
   <div class="cork" data-board data-links='{{ links|tojson }}'>
     <svg class="strings" aria-hidden="true"></svg>
-    {% for c in cards %}
-      <a class="pinned pin-case" href="/r/{{ c.inv.id }}" data-pin="{{ c.inv.id }}"
-         style="--tilt: {{ tilt(c.inv.id) }}deg; --i: {{ loop.index0 }}">
-        <span class="pin" aria-hidden="true"></span>
-        <span class="case-label">Case #{{ case_no.get(c.inv.id) }} · {{ c.inv.app }}</span>
-        {% if c.shot %}<img src="/files/{{ c.inv.id }}/{{ c.shot.dir }}/{{ c.shot.file }}" alt="" loading="lazy">{% endif %}
-        <span class="hand">“{{ c.inv.report[:120] }}{{ '…' if c.inv.report|length > 120 }}”</span>
-        {% if c.title %}<span class="case-line">{{ c.title }}</span>{% endif %}
-        {% if c.inv.note %}<span class="case-line muted">↪ {{ c.inv.note }}</span>{% endif %}
-        <span class="case-foot">
-          <span class="stamp tone-{{ c.stamp[1] }}">{{ c.stamp[0] }}</span>
-          <small>{{ c.inv.created }}</small>
-        </span>
-      </a>
-    {% endfor %}
+    {% for c in cards %}{{ case_card(c, case_no, loop.index0) }}{% endfor %}
   </div>
 {% endif %}
 {% endblock %}

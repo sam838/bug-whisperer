@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}New evidence · Bug Whisperer{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="/">← Open a case</a> · {{ job.app }}</div>
+<h1 class="case-title">New evidence<span>{{ job.files|length }} file{{ 's' if job.files|length != 1 }} from the tester: {{ job.files|join(', ') }}</span></h1>
+<div id="live" data-url="/intake/{{ job.id }}/live">
+  {% include "_intake_live.html" %}
+</div>
+{% endblock %}

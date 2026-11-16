@@ -50,7 +50,7 @@
 
   <label class="field">
     <span>The witness statement <em>(what the user wrote, messy is fine)</em></span>
-    <textarea name="report" rows="4" required maxlength="4000"
+    <textarea name="report" rows="4" maxlength="4000"
       placeholder="cant book!!! the button does nothing. pls fix 😡"></textarea>
   </label>
 
@@ -62,8 +62,10 @@
   </div>
 
   <label class="field">
-    <span>Their screenshot <em>(optional, a phone photo of the screen is fine)</em></span>
-    <input type="file" name="screenshot" accept="image/png,image/jpeg,image/webp,image/gif">
+    <span>Evidence files <em>(optional: a screenshot, or your whole test results; Kane opens one case per problem)</em></span>
+    <input type="file" name="files" multiple
+      accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.xlsx,.csv,.tsv,.docx,.txt,.md,.json,.xml,.html,.htm,.log">
+    <small class="hint">Screenshots, spreadsheets (.xlsx, .csv), documents (.docx, .txt, .pdf) or test reports (JUnit .xml, .json, .html). Up to 8 files.</small>
   </label>
 
   <button class="btn primary big" type="submit">🕵️ Send Kane to investigate</button>

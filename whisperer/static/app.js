@@ -177,6 +177,27 @@ function initBoard(board) {
 
 document.querySelectorAll("[data-board]").forEach(initBoard);
 
+// Kane's dialogue box types its line out, RPG style. A line is typed once: when the page refreshes
+// with the same line, it just stays. Reduced motion shows the whole line at once.
+const typed = new Set();
+function typeOut(root) {
+  root.querySelectorAll("[data-type]").forEach((el) => {
+    const key = el.dataset.type;
+    if (typed.has(key) || reduceMotion) return;
+    typed.add(key);
+    const text = el.textContent;
+    el.textContent = "";
+    let i = 0;
+    const step = () => {
+      if (!el.isConnected) return;  // the page refreshed with a newer line
+      el.textContent = text.slice(0, ++i);
+      if (i < text.length) setTimeout(step, text[i - 1] === "." ? 120 : 18);
+    };
+    step();
+  });
+}
+typeOut(document);
+
 // Kane's browser, live: reload the camera's latest frame about once a second. The new frame is
 // loaded off-screen first and swapped in only when ready, so the picture never flashes blank.
 setInterval(() => {
@@ -224,6 +245,7 @@ if (live) {
         });
         live.querySelectorAll("[data-replay]").forEach(initReplay);  // appears when the case ends
         live.querySelectorAll("[data-board]").forEach(initBoard);
+        typeOut(live);
       }
     } catch {
       /* try again next tick */

@@ -24,7 +24,7 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import demo, kane
+from . import demo, intake, kane
 from .detective import ROOT, RUNS, App, Investigation, investigate
 from .voice import speak
 from .fixer import fix, load_investigation
@@ -300,6 +300,8 @@ def view(inv: Investigation) -> dict:
         "active": investigating or fixing,
         "queued": inv.id in waiting and (inv.status == "queued" or inv.fix.get("status") == "queued"),
         "track": track,
+        "scene": kane_scene(inv, track, inv.id in waiting and (inv.status == "queued" or inv.fix.get("status") == "queued"))
+                 if (investigating or fixing) else None,
         "steps": track["steps"],
         "can_fix": inv.verdict == "reproduced" and app_cfg is not None and bool(app_cfg.code_dir)
                    and (not inv.fix or (inv.fix.get("status") == "done"
@@ -325,6 +327,47 @@ def _live_shot(inv: Investigation) -> str | None:
             return f"/files/{inv.id}/live.jpg?t={int(frame.stat().st_mtime * 1000)}"
     except OSError:
         pass
+    return None
+
+
+RANKS = [(0, "Rookie"), (1, "Gumshoe"), (3, "Sleuth"), (6, "Inspector"), (10, "Chief Inspector")]
+
+
+def detective_rank(closed: int) -> dict:
+    """Detective Kane's rank, earned only by cases really closed (Kane saw the fix itself)."""
+    name, start, nxt = RANKS[0][1], 0, None
+    for i, (needed, title) in enumerate(RANKS):
+        if closed >= needed:
+            name, start = title, needed
+            nxt = RANKS[i + 1] if i + 1 < len(RANKS) else None
+    progress = 100 if not nxt else int(100 * (closed - start) / (nxt[0] - start))
+    return {"name": name, "closed": closed, "next": nxt[1] if nxt else None,
+            "to_next": (nxt[0] - closed) if nxt else 0, "progress": progress}
+
+
+def kane_scene(inv: Investigation, track: dict, queued: bool) -> dict | None:
+    """What Detective Kane is doing and saying right now, for the RPG scene. Every line is a real
+    state of the case or one of Kane's real steps. None when the case is finished."""
+    fixs = (inv.fix or {}).get("status", "")
+    latest = next((s["remark"] for s in reversed(track["steps"]) if s["status"] != "running"), None)
+    if queued:
+        return {"mode": "idle", "line": "Another case on my desk. I work one at a time, and this one is next."}
+    if inv.status in ("planning", "queued"):
+        return {"mode": "reading", "line": "Claude is reading the witness statement and writing my orders…"}
+    if inv.status == "re-planning":
+        return {"mode": "reading", "line": "I lost the trail last time. Claude is rewriting my orders from my own notes…"}
+    if inv.status == "reproducing":
+        return {"mode": "walking", "line": latest or "Heading to the scene. A real browser, the user's own steps."}
+    if inv.status == "judging":
+        return {"mode": "reading", "line": "I found something. Claude is checking it matches the witness statement…"}
+    if inv.status == "double-checking":
+        return {"mode": "walking", "line": "Before I call it, I'm checking the witness's claim with my own eyes."}
+    if fixs.startswith("fixing") or fixs == "queued":
+        return {"mode": "reading", "line": "Claude is repairing the code, using only my evidence. I'll check it myself after."}
+    if fixs.startswith("waiting"):
+        return {"mode": "idle", "line": "The app is restarting with the repair…"}
+    if fixs.startswith("Kane"):
+        return {"mode": "walking", "line": latest or "Back to the scene. Same steps, no taking Claude's word for it."}
     return None
 
 
@@ -518,25 +561,58 @@ def home(request: Request):
         "apps": list_apps(), "examples": EXAMPLES, "page": "report", "featured": featured_case()})
 
 
+async def _read_uploads(files: list[UploadFile]) -> list[tuple[str, bytes]]:
+    """The uploaded files that are allowed, as (safe name, bytes)."""
+    out, seen = [], set()
+    for f in [f for f in files if f and f.filename][: intake.MAX_FILES]:
+        name = re.sub(r"[^A-Za-z0-9._-]+", "-", Path(f.filename).name).strip("-.") or "file"
+        if Path(name).suffix.lower() not in intake.ALLOWED:
+            raise HTTPException(400, f"{f.filename}: Bug Whisperer reads spreadsheets (.xlsx, .csv), documents "
+                                     "(.docx, .txt, .md, .pdf), test reports (.xml, .json, .html) and screenshots")
+        data = await f.read()
+        if len(data) > MAX_UPLOAD:
+            raise HTTPException(400, f"{f.filename} is over 5 MB")
+        while name in seen:
+            name = "copy-" + name
+        seen.add(name)
+        out.append((name, data))
+    return out
+
+
 @app.post("/report")
-async def submit(request: Request, app_file: str = Form(...), report: str = Form(...),
-                 screenshot: UploadFile | None = File(None)):
+async def submit(request: Request, app_file: str = Form(...), report: str = Form(""),
+                 screenshot: UploadFile | None = File(None), files: list[UploadFile] = File(default=[])):
     gate = live_gate(request)
     if gate is not None:
         return gate
     valid = {a["file"] for a in list_apps()}
-    if app_file not in valid or not report.strip():
-        raise HTTPException(400, "Choose an app and describe the problem")
+    uploads = await _read_uploads([*files, screenshot] if screenshot else files)
+    if app_file not in valid or not (report.strip() or uploads):
+        raise HTTPException(400, "Choose an app, and describe the problem or upload your test results")
     cfg = App.load(ROOT / app_file)
+    # Test results (or several screenshots) are read by Claude and split into cases, one per problem.
+    single_shot = len(uploads) == 1 and Path(uploads[0][0]).suffix.lower() in intake.IMAGE_SUFFIXES
+    if uploads and not (single_shot and report.strip()):
+        job = intake.Intake(app=cfg.name, app_file=app_file, note=report.strip()[:4000])
+        for name, data in uploads:
+            (job.folder / name).write_bytes(data)
+            job.files.append(name)
+        job.save()
+        threading.Thread(target=intake.run, args=(job, enqueue), daemon=True).start()
+        return RedirectResponse(f"/intake/{job.id}", status_code=303)
+    screenshot = None
+    if uploads:  # one screenshot with a typed report: an ordinary single case
+        name, data = uploads[0]
+        screenshot = (Path(name).suffix.lower(), data)
+    return _single_case(cfg, app_file, report, screenshot)
+
+
+def _single_case(cfg: App, app_file: str, report: str, shot: tuple[str, bytes] | None):
     inv = Investigation(report=report.strip()[:4000], app=cfg.name, app_file=app_file)
     inv.status = "queued"
-    if screenshot and screenshot.filename:
-        if screenshot.content_type not in IMAGE_TYPES:
-            raise HTTPException(400, "The screenshot must be a PNG, JPG, WEBP or GIF image")
-        data = await screenshot.read()
-        if len(data) > MAX_UPLOAD:
-            raise HTTPException(400, "The screenshot must be under 5 MB")
-        path = inv.folder / ("user-screenshot" + IMAGE_TYPES[screenshot.content_type])
+    if shot:
+        suffix, data = shot
+        path = inv.folder / ("user-screenshot" + (".jpg" if suffix == ".jpeg" else suffix))
         path.write_bytes(data)
         inv.screenshot = str(path)
     inv.save()
@@ -544,6 +620,39 @@ async def submit(request: Request, app_file: str = Form(...), report: str = Form
         demo.count_job()
     enqueue("investigate", inv.id)
     return RedirectResponse(f"/r/{inv.id}", status_code=303)
+
+
+def _intake_view(intake_id: str) -> dict:
+    try:
+        job = intake.Intake.load(intake_id)
+    except (FileNotFoundError, json.JSONDecodeError):
+        raise HTTPException(404)
+    excerpt = ""
+    for name in job.files:  # the real text the detective is reading, for the reading scene
+        text = intake.file_text(job.folder / name)
+        if text:
+            excerpt = text[:900]
+            break
+    cases = []
+    for inv_id in job.cases:
+        try:
+            cases.append(load_investigation(RUNS / inv_id))
+        except (FileNotFoundError, json.JSONDecodeError, TypeError):
+            continue
+    cards = [{"inv": c, "stamp": case_stamp(c), "shot": _key_shot(c.kane),
+              "title": (c.judgement.get("ticket") or {}).get("title") if c.judgement else None} for c in cases]
+    return {"job": job, "excerpt": excerpt or job.note, "cards": cards, "case_no": case_numbers(),
+            "active": job.status == "reading"}
+
+
+@app.get("/intake/{intake_id}", response_class=HTMLResponse)
+def intake_page(request: Request, intake_id: str):
+    return templates.TemplateResponse(request, "intake.html", {**_intake_view(intake_id), "page": "report"})
+
+
+@app.get("/intake/{intake_id}/live", response_class=HTMLResponse)
+def intake_live(request: Request, intake_id: str):
+    return templates.TemplateResponse(request, "_intake_live.html", _intake_view(intake_id))
 
 
 @app.get("/r/{inv_id}", response_class=HTMLResponse)
@@ -647,8 +756,10 @@ def inbox(request: Request):
     cards = [{"inv": inv, "stamp": case_stamp(inv), "shot": _key_shot(inv.kane),
               "title": (inv.judgement.get("ticket") or {}).get("title") if inv.judgement else None}
              for inv in items]
+    closed = sum(1 for inv in items if inv.fix and inv.fix.get("verdict") == "fixed")
     return templates.TemplateResponse(request, "inbox.html", {
-        "items": items, "cards": cards, "links": links, "page": "inbox", "case_no": case_numbers()})
+        "items": items, "cards": cards, "links": links, "page": "inbox", "case_no": case_numbers(),
+        "rank": detective_rank(closed), "opened": len(items)})
 
 
 @app.get("/files/{inv_id}/{name:path}")
