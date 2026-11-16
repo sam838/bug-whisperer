@@ -149,6 +149,11 @@ JUDGE_PROMPT = """A user reported a bug. A browser agent (Kane CLI) tried to rep
 final check failed. Decide whether the failure shows the user's bug, or whether the agent just got
 lost (wrong page, could not find a field, login failed, and so on).
 
+Read Kane's own summary first. If it says an action didn't happen or had no effect (the form was
+never submitted, the page didn't change after a click, a step was skipped), the run shows nothing
+about the bug, even though the final check failed: reproduced false, agent_lost true. A failed
+check only counts as the bug when Kane really did the user's steps and then saw the wrong result.
+
 User's report:
 <report>
 {report}

@@ -24,3 +24,9 @@ def test_claim_check(inv, monkeypatch, kane_verdict, outcome, verdict):
     assert detective.check_claim(APP, inv, "Search canon. Verify a Canon product is listed.",
                                  lambda status: None) == verdict
     assert inv.claim["outcome"] == outcome
+
+
+def test_judge_is_told_a_step_that_never_happened_proves_nothing():
+    """On the server, Kane 'clicked' Book but the form never submitted; that once got a Confirmed."""
+    assert "the form was" in detective.JUDGE_PROMPT and "never submitted" in detective.JUDGE_PROMPT
+    assert "Read Kane's own summary first" in detective.JUDGE_PROMPT
