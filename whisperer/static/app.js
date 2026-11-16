@@ -7,6 +7,21 @@ document.querySelectorAll("[data-example]").forEach((chip) => {
   });
 });
 
+// Home page: sections below the fold rise once as they scroll into view.
+// Nothing is hidden until this runs, so the page still reads fine without JavaScript.
+const revealable = document.querySelectorAll("[data-reveal], .how");
+if (revealable.length && "IntersectionObserver" in window) {
+  const watcher = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("seen");
+      watcher.unobserve(entry.target);
+    });
+  }, { rootMargin: "0px 0px -60px 0px" });
+  revealable.forEach((node) => watcher.observe(node));
+  document.documentElement.classList.add("reveal-ready");
+}
+
 // Copy buttons (event delegation, because the live part is replaced while polling).
 document.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-copy]");

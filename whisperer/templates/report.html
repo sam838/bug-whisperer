@@ -2,7 +2,7 @@
 {% block content %}
 <section class="hero">
   <p class="eyebrow">🕵️ Bug reports, investigated</p>
-  <h1>Users don't write good bug reports.<br><em>Kane doesn't need them to.</em></h1>
+  <h1><span class="line">Users don't write good bug reports.</span> <em class="line">Kane doesn't need them to.</em></h1>
   <p class="lede">Your tests cover what you expected. Your users find what you didn't. Paste what they wrote,
     and <b>Detective Kane</b> retraces their steps in a real browser, brings back evidence, and won't close the
     case until it sees the fix with its own eyes.</p>
@@ -33,7 +33,7 @@
   </a>
 {% endif %}
 
-<form class="card form intake" action="/report" method="post" enctype="multipart/form-data">
+<form class="card form intake" data-reveal action="/report" method="post" enctype="multipart/form-data">
   <div class="intake-head">
     <h2>Open a new case</h2>
     <span class="muted">Kane takes about 2 minutes at the scene</span>

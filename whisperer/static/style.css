@@ -183,6 +183,34 @@ textarea { resize: vertical; min-height: 110px; }
 .how b { display: block; margin: 8px 0 4px; font-family: var(--serif); font-size: 17px; }
 .how p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
 
+/* ── Home: the opening. Seen once per visit, so it can tell the story:
+   the headline rises, then the featured case plays in order (statement → bug → fix → stamp). ──
+   fill-mode "backwards" (not "both") so hover transforms still work once the entrance ends. */
+.hero h1 .line { display: block; }
+.hero .eyebrow, .hero h1 .line, .hero .lede { animation: rise 520ms var(--ease-out) backwards; }
+.hero h1 .line:nth-child(1) { animation-delay: 70ms; }
+.hero h1 .line:nth-child(2) { animation-delay: 160ms; }
+.hero .lede { animation-delay: 250ms; }
+.featured { animation: rise 520ms var(--ease-out) 340ms backwards; }
+.featured::before { transform-origin: left; animation: draw 600ms var(--ease-out) 600ms backwards; }
+.featured-step { animation: rise 420ms var(--ease-out) backwards; }
+.featured-step:nth-child(1) { animation-delay: 520ms; }
+.featured-step:nth-child(2) { animation-delay: 760ms; }
+.featured-step:nth-child(3) { animation-delay: 1000ms; }
+.featured-step .bad { display: inline-block; animation: pop 240ms var(--ease-out) 1000ms backwards; }
+.featured-step .good { display: inline-block; animation: pop 240ms var(--ease-out) 1240ms backwards; }
+.featured .stamp { animation: slam 320ms var(--ease-out) 1420ms backwards; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+@keyframes draw { from { transform: scaleX(0.05); } }
+@keyframes pop { from { opacity: 0; transform: scale(0.6); } }
+@keyframes slam { from { opacity: 0; transform: rotate(-12deg) scale(1.6); } }
+
+/* Below the fold: rise when scrolled into view. Hidden only once app.js says it's watching. */
+.reveal-ready [data-reveal]:not(.seen), .reveal-ready .how:not(.seen) > div { opacity: 0; transform: translateY(14px); }
+[data-reveal], .how > div { transition: opacity 480ms var(--ease-out), transform 480ms var(--ease-out); }
+.how > div:nth-child(2) { transition-delay: 60ms; } .how > div:nth-child(3) { transition-delay: 120ms; }
+.how > div:nth-child(4) { transition-delay: 180ms; } .how > div:nth-child(5) { transition-delay: 240ms; }
+
 /* ── Case page ───────────────────────────────────────────────────────────── */
 .crumbs { color: var(--muted); font-size: 14px; }
 .crumbs a { text-decoration: none; font-weight: 600; }
@@ -437,5 +465,9 @@ details.card summary { cursor: pointer; font-weight: 700; }
   .replay-progress span { transition: none; }
   .pulse { animation: none; }
   .featured, .row, .btn, .chip { transition: none; }
+  .hero .eyebrow, .hero h1 .line, .hero .lede, .featured, .featured::before, .featured-step,
+  .featured-step .bad, .featured-step .good, .featured .stamp { animation-name: fade-only; animation-duration: 200ms; }
+  .reveal-ready [data-reveal]:not(.seen), .reveal-ready .how:not(.seen) > div { transform: none; }
+  [data-reveal], .how > div { transition: opacity 200ms ease; transition-delay: 0ms; }
   @keyframes fade-only { from { opacity: 0; } to { opacity: 1; } }
 }
