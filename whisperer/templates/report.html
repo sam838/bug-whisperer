@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_kane.html" import sprite, say %}
 {% block content %}
 <section class="hero">
   <p class="eyebrow">🕵️ Bug reports, investigated</p>
@@ -37,6 +38,12 @@
   <div class="intake-head">
     <h2>Open a new case</h2>
     <span class="muted">Kane takes about 2 minutes at the scene</span>
+  </div>
+
+  {# Detective Kane's desk: the game starts here, with the case you bring him. #}
+  <div class="scene scene-case scene-desk">
+    <div class="scene-actor">{{ sprite("idle") }}</div>
+    {{ say("Bring me a case. Paste what the user wrote, messy is fine. Or drop in your whole test results, and I'll open one case for every problem I find.", key="desk") }}
   </div>
 
   <label class="field">

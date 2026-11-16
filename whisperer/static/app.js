@@ -180,20 +180,32 @@ document.querySelectorAll("[data-board]").forEach(initBoard);
 // Kane's dialogue box types its line out, RPG style. A line is typed once: when the page refreshes
 // with the same line, it just stays. Reduced motion shows the whole line at once.
 const typed = new Set();
+function typeLine(el) {
+  const text = el.textContent;
+  el.textContent = "";
+  let i = 0;
+  const step = () => {
+    if (!el.isConnected) return;  // the page refreshed with a newer line
+    el.textContent = text.slice(0, ++i);
+    if (i < text.length) setTimeout(step, text[i - 1] === "." ? 120 : 18);
+  };
+  step();
+}
+// A box further down the page starts typing when it scrolls into view, not before.
+const onScreen = "IntersectionObserver" in window && new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    onScreen.unobserve(entry.target);
+    typeLine(entry.target);
+  });
+}, { threshold: 0.6 });
 function typeOut(root) {
   root.querySelectorAll("[data-type]").forEach((el) => {
     const key = el.dataset.type;
     if (typed.has(key) || reduceMotion) return;
     typed.add(key);
-    const text = el.textContent;
-    el.textContent = "";
-    let i = 0;
-    const step = () => {
-      if (!el.isConnected) return;  // the page refreshed with a newer line
-      el.textContent = text.slice(0, ++i);
-      if (i < text.length) setTimeout(step, text[i - 1] === "." ? 120 : 18);
-    };
-    step();
+    if (onScreen) onScreen.observe(el);
+    else typeLine(el);
   });
 }
 typeOut(document);
