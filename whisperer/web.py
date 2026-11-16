@@ -154,7 +154,14 @@ def live_steps(inv: Investigation) -> list[dict]:
             key = len(steps) if event.get("status") != "running" else -1
             steps[key] = {"status": event.get("status"), "remark": line or _plain(event["remark"])}
     running = steps.pop(-1, None)
-    ordered = [steps[k] for k in sorted(steps)]
+    ordered = []
+    for k in sorted(steps):  # 'I pressed Tab.' five times in a row → 'I pressed Tab. (×5)'
+        step = steps[k]
+        if ordered and ordered[-1]["remark"].split(" (×")[0] == step["remark"] and ordered[-1]["status"] == step["status"]:
+            base, _, count = ordered[-1]["remark"].partition(" (×")
+            ordered[-1]["remark"] = f"{base} (×{int(count.rstrip(')') or 1) + 1})"
+        else:
+            ordered.append(dict(step))
     if running and (not ordered or ordered[-1]["remark"] != running["remark"]):
         ordered.append(running)
     return ordered[-14:]

@@ -127,7 +127,7 @@
       {# Kane's own failure label is shown, unless Kane's double-check later settled the question. #}
       <h2>At the scene {% if inv.kane.get('failure_title') and not inv.claim %}<span class="tag bug">{{ inv.kane.get('failure_title') }}</span>{% endif %}</h2>
       {% if live_shot and not inv.fix %}
-        <div class="live-view">
+        <div class="live-view" data-keep="live-scene">
           <img class="live-shot" src="{{ live_shot }}" data-live-src="/files/{{ inv.id }}/live.jpg" alt="Kane's browser, live">
           <span class="live-badge"><span class="rec" aria-hidden="true"></span>LIVE · Kane's browser</span>
         </div>
@@ -157,7 +157,7 @@
     <section class="card">
       <h2>🕵️ Kane, back at the scene</h2>
       {% if live_shot %}
-        <div class="live-view">
+        <div class="live-view" data-keep="live-recheck">
           <img class="live-shot" src="{{ live_shot }}" data-live-src="/files/{{ inv.id }}/live.jpg" alt="Kane's browser, live">
           <span class="live-badge"><span class="rec" aria-hidden="true"></span>LIVE · Kane's browser</span>
         </div>
@@ -212,7 +212,7 @@
   {% endif %}
 
   {% if inv.fix_history %}
-    <details class="card">
+    <details class="card" data-key="fix-history">
       <summary>Earlier repair attempts ({{ inv.fix_history|length }}), kept on file</summary>
       {% for h in inv.fix_history %}
         <p><b>{{ 'Passed Kane' if h.get('verdict') == 'fixed' else "Didn't get past Kane" }}</b> after {{ h.get('attempts', [])|length }} attempt(s).
@@ -244,7 +244,7 @@
 
   {# ------------------------------------------------ the full case file ------------------------------------------------ #}
   {% if inv.plan.get('objective') %}
-    <details class="card">
+    <details class="card" data-key="case-file">
       <summary>📁 The full case file: Kane's instructions and every screen it saw</summary>
       <h3>Kane's instructions</h3>
       <p class="objective">{{ inv.plan.get('objective') }}</p>

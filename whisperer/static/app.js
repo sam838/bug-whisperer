@@ -126,7 +126,19 @@ if (live) {
       if (response.ok) {
         const stepsBefore = live.querySelectorAll(".steps.live li").length;
         const stampBefore = stampText();
+        // Keep what the viewer is looking at: the live picture stays the same element (so it
+        // never blanks out and reloads), and open sections stay open.
+        const kept = {};
+        live.querySelectorAll("[data-keep]").forEach((n) => (kept[n.dataset.keep] = n));
+        const open = new Set([...live.querySelectorAll("details[data-key]")]
+          .filter((d) => d.open).map((d) => d.dataset.key));
         live.innerHTML = await response.text();
+        live.querySelectorAll("[data-keep]").forEach((n) => {
+          if (kept[n.dataset.keep]) n.replaceWith(kept[n.dataset.keep]);
+        });
+        live.querySelectorAll("details[data-key]").forEach((d) => {
+          if (open.has(d.dataset.key)) d.open = true;
+        });
         const root = live.querySelector(".live-root");
         if (root && stampText() === stampBefore) root.classList.add("polled");
         live.querySelectorAll(".steps.live li").forEach((li, i) => {

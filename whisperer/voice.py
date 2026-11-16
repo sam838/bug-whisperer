@@ -43,12 +43,17 @@ def speak(remark: str | None) -> str | None:
     kind, rest = (match["kind"], match["rest"]) if match else ("", remark.strip())
     if _SKIP.match(rest):
         return None
+    rest = _SELECTOR.sub("", rest)  # Kane's element locators ('; role=button; text=...')
     q = _quoted(rest)
     lower = rest.lower()
 
     if kind == "navigate":
         url = re.search(r"https?://\S+", rest)
-        return f"I went to {url.group(0).rstrip('.')}." if url else f"I went to {_clean(rest)}."
+        if url:
+            return f"I went to {url.group(0).rstrip('.')}."
+        return f"I went to {_clean(re.sub(r'^(go|going|navigate|navigating)\s+to\s+', '', rest, flags=re.I))}."
+    if kind in ("press", "key", "keyboard") or re.match(r"^press\s", rest, re.I):
+        return f"I pressed {_clean(re.sub(r'^(press(ing)?)\s+', '', rest, flags=re.I))}."
     if kind in ("type", "fill"):
         if len(q) >= 2:
             return f"I typed {q[0]} into {q[1]}."
@@ -70,6 +75,17 @@ def speak(remark: str | None) -> str | None:
         if "load" in lower or "result" in lower or "confirm" in lower or "verify" in lower:
             return "I waited to see what the page did."
         return None
-    if kind == "scroll":
+    if kind == "scroll" or lower.startswith("scroll"):
         return "I scrolled the page."
-    return _clean(re.sub(r"^[a-z_]+:\s*", "", rest)) + "."
+    text = _clean(re.sub(r"^[a-z_]+:\s*", "", rest))
+    first, _, others = text.partition(" ")
+    verb = _PAST.get(first.lower())
+    if verb:  # 'move keyboard focus to …' → 'I moved keyboard focus to …'
+        return f"I {verb} {others}." if others else f"I {verb}."
+    return (text[:1].upper() + text[1:] + ".") if text else None
+
+
+_SELECTOR = re.compile(r";\s*(role|text|name|label|placeholder|testid|css|xpath)\s*=.*$", re.I | re.S)
+_PAST = {"move": "moved", "focus": "focused", "hover": "hovered over", "open": "opened",
+         "close": "closed", "check": "checked", "uncheck": "unchecked", "submit": "submitted",
+         "upload": "uploaded", "drag": "dragged", "clear": "cleared", "go": "went", "find": "found"}

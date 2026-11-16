@@ -33,6 +33,19 @@ def test_bookkeeping_is_not_spoken(remark):
     assert speak(remark) is None
 
 
+@pytest.mark.parametrize("remark, line", [
+    ("navigate: Go to the new appointment booking page", "I went to the new appointment booking page."),
+    ('click: Clicking button to save the appointment; role=button; text="Book appoi',
+     "I clicked button to save the appointment."),
+    ("press: Press Tab", "I pressed Tab."),
+    ("Press Space", "I pressed Space."),
+    ("focus: move keyboard focus from the Time input toward the save button",
+     "I moved keyboard focus from the Time input toward the save button."),
+])
+def test_odd_server_remarks_read_naturally(remark, line):
+    assert speak(remark) == line
+
+
 def test_icon_font_characters_are_dropped():
     assert speak('click: Click " Search"') == "I clicked Search."
 
