@@ -24,6 +24,11 @@ from pathlib import Path
 
 PORT = int(os.environ.get("WHISPERER_CAMERA_PORT", "9333"))
 INTERVAL = 0.8
+# Chrome settings that keep memory down on a small server (one renderer, no extras).
+LEAN_FLAGS = ["--window-size=1440,900", "--disable-dev-shm-usage", "--disable-gpu",
+              "--disable-extensions", "--disable-background-networking", "--disable-sync",
+              "--renderer-process-limit=2", "--no-first-run", "--no-default-browser-check",
+              "--mute-audio"]
 
 
 def chrome_binary() -> str | None:
@@ -47,23 +52,61 @@ class KaneCamera:
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self._profile: str | None = None
+        self._chrome = None  # the Chrome process, when started directly (Linux)
 
     def __enter__(self) -> "KaneCamera":
         (self.folder / "live.jpg").unlink(missing_ok=True)  # never show the previous run's frame
         if os.environ.get("WHISPERER_NO_CAMERA") or not chrome_binary():
             return self
         self._profile = tempfile.mkdtemp(prefix="kane-chrome-")
-        self._thread = threading.Thread(target=self._run, daemon=True)
-        self._thread.start()
-        self._ready.wait(timeout=60)  # endpoint is set only if Chrome really came up
+        if os.name == "nt":
+            # Windows: chrome.exe hands off and exits, so launch through Playwright.
+            self._thread = threading.Thread(target=self._run, daemon=True)
+            self._thread.start()
+            self._ready.wait(timeout=60)  # endpoint is set only if Chrome really came up
+        else:
+            # Linux (our server): start Chrome directly. No Playwright driver process, which
+            # matters on a small server where Chrome, Kane CLI and Claude Code share the memory.
+            self._start_direct()
         return self
 
     def __exit__(self, *exc) -> None:
         self._stop.set()
         if self._thread:
             self._thread.join(timeout=20)
+        if self._chrome and self._chrome.poll() is None:
+            self._chrome.terminate()
+            try:
+                self._chrome.wait(timeout=10)
+            except Exception:
+                self._chrome.kill()
         if self._profile:
             shutil.rmtree(self._profile, ignore_errors=True)
+
+    def _start_direct(self) -> None:
+        import subprocess
+
+        import httpx
+        try:
+            self._chrome = subprocess.Popen(
+                [chrome_binary(), "--headless=new", *LEAN_FLAGS,
+                 f"--remote-debugging-port={PORT}", "--remote-allow-origins=*",
+                 f"--user-data-dir={self._profile}", "about:blank"],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError:
+            return
+        deadline = time.time() + 30
+        while time.time() < deadline and self._chrome.poll() is None:
+            try:
+                if httpx.get(f"http://127.0.0.1:{PORT}/json/version", timeout=1).status_code == 200:
+                    self.endpoint = f"http://127.0.0.1:{PORT}"
+                    self._thread = threading.Thread(target=self._film, args=(None,), daemon=True)
+                    self._thread.start()
+                    return
+            except httpx.HTTPError:
+                time.sleep(0.3)
+        if self._chrome.poll() is None:
+            self._chrome.kill()
 
     def _run(self) -> None:
         """Owns Playwright for its whole life: Playwright objects must stay on one thread."""
@@ -77,7 +120,7 @@ class KaneCamera:
                 context = pw.chromium.launch_persistent_context(
                     self._profile, executable_path=chrome_binary(), headless=True,
                     args=[f"--remote-debugging-port={PORT}", "--remote-allow-origins=*",
-                          "--disable-dev-shm-usage"],
+                          *[f for f in LEAN_FLAGS if not f.startswith("--window-size")]],
                     viewport={"width": 1440, "height": 900})
                 self.endpoint = f"http://127.0.0.1:{PORT}"
                 self._ready.set()
