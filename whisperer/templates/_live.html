@@ -87,6 +87,8 @@
     </form>
   {% endif %}
 
+  {% if board and not active %}{% include "_evidence.html" %}{% endif %}
+
   {# ------------------------------------------------ watch Kane solve it ------------------------------------------------ #}
   {% if replay %}
     <section class="card replay" data-replay>

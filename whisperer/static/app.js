@@ -124,6 +124,59 @@ function initReplay(el) {
 }
 document.querySelectorAll("[data-replay]").forEach(initReplay);
 
+// Red string on the boards: a gently sagging line from pin to pin, for each pair in data-links
+// (cases from the same scene, or the steps of one investigation). It draws in once, after the
+// pins have landed; on resize it is simply redrawn.
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function drawStrings(board, animate) {
+  const svg = board.querySelector(".strings");
+  if (!svg || getComputedStyle(svg).display === "none") return;
+  const wall = svg.parentElement;
+  const origin = wall.getBoundingClientRect();
+  const centre = (id) => {
+    const pin = wall.querySelector(`[data-pin="${CSS.escape(id)}"] .pin`);
+    if (!pin) return null;
+    const r = pin.getBoundingClientRect();
+    return [r.left + r.width / 2 - origin.left - wall.clientLeft, r.top + r.height / 2 - origin.top - wall.clientTop];
+  };
+  svg.replaceChildren();
+  svg.classList.remove("drawing");
+  JSON.parse(board.dataset.links || "[]").forEach(([from, to], i) => {
+    const a = centre(from), b = centre(to);
+    if (!a || !b) return;
+    const sag = Math.min(70, Math.hypot(b[0] - a[0], b[1] - a[1]) * 0.15);
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", `M${a[0]},${a[1]} Q${(a[0] + b[0]) / 2},${(a[1] + b[1]) / 2 + sag} ${b[0]},${b[1]}`);
+    svg.append(path);
+    if (animate) {
+      const length = path.getTotalLength();
+      path.style.strokeDasharray = length;
+      path.style.strokeDashoffset = length;
+      path.style.transitionDelay = `${i * 110}ms`;
+    }
+  });
+  if (animate) {
+    svg.getBoundingClientRect();  // start from the hidden state, then let the strings draw in
+    svg.classList.add("drawing");
+    svg.querySelectorAll("path").forEach((p) => (p.style.strokeDashoffset = "0"));
+  }
+}
+
+function initBoard(board) {
+  const pins = board.querySelectorAll(".pinned").length;
+  const landed = reduceMotion ? 0 : pins * 70 + 380;  // matches the pin-drop stagger in style.css
+  let ready = false, frame = 0;
+  setTimeout(() => { drawStrings(board, !reduceMotion); ready = true; }, landed);
+  new ResizeObserver(() => {
+    if (!ready) return;  // the first drawing happens once the pins have landed
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => drawStrings(board, false));
+  }).observe(board);
+}
+
+document.querySelectorAll("[data-board]").forEach(initBoard);
+
 // Kane's browser, live: reload the camera's latest frame about once a second. The new frame is
 // loaded off-screen first and swapped in only when ready, so the picture never flashes blank.
 setInterval(() => {
@@ -170,6 +223,7 @@ if (live) {
           if (i >= stepsBefore) li.classList.add("new");
         });
         live.querySelectorAll("[data-replay]").forEach(initReplay);  // appears when the case ends
+        live.querySelectorAll("[data-board]").forEach(initBoard);
       }
     } catch {
       /* try again next tick */

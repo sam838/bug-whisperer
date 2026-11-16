@@ -1,0 +1,27 @@
+{# The evidence wall: the case's real evidence, pinned up and joined by red string in the order the
+   investigation went. Strings are drawn by app.js between the pins named in data-links. #}
+<section class="board" data-board data-links='{{ board.links|tojson }}' aria-label="Evidence board">
+  <h2 class="board-title">🧷 The evidence board</h2>
+  <div class="board-wall">
+    <svg class="strings" aria-hidden="true"></svg>
+    {% for p in board.pins %}
+      <figure class="pinned pin-{{ p.kind }} at-{{ p.id }}" data-pin="{{ p.id }}"
+              style="--tilt: {{ tilt(inv.id ~ p.id) }}deg; --i: {{ loop.index0 }}">
+        <span class="pin" aria-hidden="true"></span>
+        {% if p.kind == 'photo' %}
+          <a href="{{ p.img }}" target="_blank"><img src="{{ p.img }}" alt="{{ p.title }}" loading="lazy"></a>
+          <figcaption><b>{{ p.title }}</b>{% if p.body %}<span>{{ p.body }}</span>{% endif %}</figcaption>
+        {% elif p.kind == 'stamp' %}
+          <span class="stamp tone-{{ p.tone }}">{{ p.stamp }}</span>
+          {% if p.body %}<p>{{ p.body }}</p>{% endif %}
+        {% elif p.kind == 'diff' %}
+          <b class="pinned-title">{{ p.title }}</b>
+          <pre>{% for l in p.lines %}<span class="{{ 'add' if l.startswith('+') else 'del' }}">{{ l }}</span>{% endfor %}</pre>
+        {% else %}
+          <b class="pinned-title">{{ p.title }}</b>
+          <p>{{ p.body }}</p>
+        {% endif %}
+      </figure>
+    {% endfor %}
+  </div>
+</section>

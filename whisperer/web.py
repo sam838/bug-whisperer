@@ -307,6 +307,7 @@ def view(inv: Investigation) -> dict:
         "retry": bool(inv.fix) and inv.fix.get("verdict") in ("needs_human", "inconclusive", "error"),
         "before": _key_shot(inv.kane),
         "after": _key_shot(last_try) if last_try else None,
+        "board": evidence_board(inv, _key_shot(inv.kane), _key_shot(last_try) if last_try else None),
         "user_shot": Path(inv.screenshot).name if inv.screenshot else None,
         "reply": reply_for_user(inv),
         "ticket_md": ticket_markdown(inv),
@@ -325,6 +326,91 @@ def _live_shot(inv: Investigation) -> str | None:
     except OSError:
         pass
     return None
+
+
+def case_stamp(inv: Investigation) -> tuple[str, str]:
+    """The stamp on a case, as pinned on the boards: its words and its tone."""
+    fix_verdict = inv.fix.get("verdict") if inv.fix else None
+    if fix_verdict == "fixed":
+        return "Case closed", "ok"
+    if inv.fix and inv.fix.get("status") != "done":
+        return "Repairing", "work"
+    if inv.status != "done":
+        return "Investigating", "work"
+    if fix_verdict == "needs_human":
+        return "Handed to a person", "warn"
+    if fix_verdict in ("inconclusive", "error") or inv.verdict == "inconclusive":
+        return "Unsolved", "warn"
+    if inv.verdict == "reproduced":
+        return "Confirmed", "bug"
+    return "Open", "neutral"
+
+
+def tilt(key: str) -> float:
+    """A small tilt for a pinned note, so a board looks pinned by hand. Same on every visit."""
+    return round((int(hashlib.sha1(key.encode()).hexdigest()[:4], 16) % 9 - 4) * 0.7, 1)
+
+
+templates.env.globals["tilt"] = tilt
+
+
+def _diff_lines(patch: str, limit: int = 6) -> list[str]:
+    lines = [l for l in (patch or "").splitlines()
+             if l[:1] in "+-" and not l.startswith(("+++", "---"))]
+    return lines[:limit]
+
+
+def _caption(remark: str, inv: Investigation) -> str:
+    """A photo's caption in Kane's own voice, with Kane's shortened check written out in full."""
+    return _full_check(speak(remark) or remark, (inv.plan or {}).get("objective", ""))
+
+
+def evidence_board(inv: Investigation, before: dict | None, after: dict | None) -> dict | None:
+    """The case laid out as a detective's evidence wall: real pieces of evidence, joined by red
+    string in the order the investigation actually went. None until there's a verdict."""
+    if inv.status != "done" or not inv.verdict:
+        return None
+    pins = [{"id": "statement", "kind": "hand", "title": "Witness statement",
+             "body": inv.report[:220] + ("…" if len(inv.report) > 220 else "")}]
+    links = []
+    if (inv.plan or {}).get("understanding"):
+        pins.append({"id": "reading", "kind": "typed", "title": "Claude's reading",
+                     "body": inv.plan["understanding"]})
+        links.append(("statement", "reading"))
+    if before:
+        pins.append({"id": "scene", "kind": "photo", "title": "Kane at the scene",
+                     "img": f"/files/{inv.id}/{before['dir']}/{before['file']}",
+                     "body": _caption(before.get("summary", ""), inv)})
+        links.append((pins[-2]["id"], "scene"))
+    if inv.claim:
+        outcome = {"confirmed": "✓ true", "not_true": "✗ not true"}.get(inv.claim.get("outcome"), "? unknown")
+        pins.append({"id": "claim", "kind": "typed", "title": f"Claim checked: {outcome}",
+                     "body": inv.claim.get("objective", "")[:160]})
+    stamp = {"reproduced": ("Confirmed", "bug"), "not_reproduced": ("Open", "neutral"),
+             "needs_info": ("Open", "neutral")}.get(inv.verdict, ("Unsolved", "warn"))
+    pins.append({"id": "verdict", "kind": "stamp", "stamp": stamp[0], "tone": stamp[1],
+                 "body": (inv.judgement or {}).get("explanation", "")[:180]})
+    links.append(("scene" if before else pins[0]["id"], "verdict"))
+    if inv.claim:
+        links.append(("claim", "verdict"))
+    attempts = (inv.fix or {}).get("attempts") or []
+    if attempts:
+        last = attempts[-1]
+        pins.append({"id": "repair", "kind": "diff", "title": f"Claude's repair · attempt {last.get('attempt', len(attempts))}",
+                     "lines": _diff_lines(last.get("patch", ""))})
+        links.append(("verdict", "repair"))
+        if after:
+            pins.append({"id": "recheck", "kind": "photo", "title": "Kane, back at the scene",
+                         "img": f"/files/{inv.id}/{after['dir']}/{after['file']}",
+                         "body": _caption(after.get("summary", ""), inv)})
+            links.append(("repair", "recheck"))
+    if inv.fix and inv.fix.get("status") == "done":
+        words, tone = case_stamp(inv)
+        test = inv.fix.get("regression_test")
+        pins.append({"id": "closed", "kind": "stamp", "stamp": words, "tone": tone,
+                     "body": f"Kept on file: {test}" if test else ""})
+        links.append(("recheck" if after and attempts else "verdict", "closed"))
+    return {"pins": pins, "links": links}
 
 
 def _key_shot(kane: dict | None) -> dict | None:
@@ -553,8 +639,16 @@ def inbox(request: Request):
             items.append(load_investigation(folder.parent))
         except (json.JSONDecodeError, TypeError):
             continue
+    # Red string joins cases from the same app (the same scene), in the order they were opened.
+    by_app: dict[str, list[str]] = {}
+    for inv in sorted(items, key=lambda i: i.id):
+        by_app.setdefault(inv.app, []).append(inv.id)
+    links = [(a, b) for ids in by_app.values() for a, b in zip(ids, ids[1:])]
+    cards = [{"inv": inv, "stamp": case_stamp(inv), "shot": _key_shot(inv.kane),
+              "title": (inv.judgement.get("ticket") or {}).get("title") if inv.judgement else None}
+             for inv in items]
     return templates.TemplateResponse(request, "inbox.html", {
-        "items": items, "page": "inbox", "case_no": case_numbers()})
+        "items": items, "cards": cards, "links": links, "page": "inbox", "case_no": case_numbers()})
 
 
 @app.get("/files/{inv_id}/{name:path}")

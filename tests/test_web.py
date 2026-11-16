@@ -135,7 +135,7 @@ def test_live_tracker_follows_kanes_own_events(client, tmp_path):
     assert "the test password" in page and "sunrise" not in page
 
 
-def test_tracker_shows_kane_working_on_the_next_step(tmp_path):
+def test_tracker_shows_kane_working_on_the_next_step(client, tmp_path):
     """Kane announces a step as it starts ('Step 3', running) and names it when it's done."""
     inv = save(tmp_path, status="reproducing")
     events = [{"type": "stream_start", "ts": "2026-11-16T08:00:00.000Z"},
@@ -149,3 +149,33 @@ def test_tracker_shows_kane_working_on_the_next_step(tmp_path):
     log.write_text(log.read_text(encoding="utf-8") + "\n" + json.dumps({"type": "run_end", "status": "passed"}),
                    encoding="utf-8")
     assert web.live_track(inv)["steps"][-1]["status"] == "done"  # finished: nothing left in progress
+
+
+def test_case_files_are_pinned_on_a_corkboard(client, tmp_path):
+    a = save(tmp_path, status="done", verdict="reproduced", id="20261116-100000-aaaa")
+    b = save(tmp_path, status="done", verdict="not_reproduced", id="20261116-110000-bbbb")
+    page = client.get("/inbox").text
+    assert page.count('class="pinned pin-case"') == 2 and ">Confirmed<" in page and ">Open<" in page
+    # same app, so one red string from the older case to the newer one
+    assert f'[["{a.id}", "{b.id}"]]' in page.replace("&#34;", '"')
+
+
+def test_closed_case_gets_an_evidence_wall_in_investigation_order(client, tmp_path):
+    inv = save(tmp_path, status="done", verdict="reproduced", plan={"understanding": "A past date was saved."},
+               judgement={"explanation": "The app saved it."},
+               kane={"shots_dir": "s1", "shots": [{"file": "001.jpg", "status": "failed", "summary": "Saved"}]},
+               fix={"status": "done", "verdict": "fixed", "regression_test": "bug-x-fixed",
+                    "attempts": [{"attempt": 1, "fixer_said": "Added a check.", "patch": "--- a\n+++ b\n-old\n+new",
+                                  "kane": {"verdict": "passed", "shots_dir": "s2",
+                                           "shots": [{"file": "009.jpg", "status": "passed", "summary": "Error shown"}]}}]})
+    board = web.evidence_board(inv, web._key_shot(inv.kane), web._key_shot(inv.fix["attempts"][-1]["kane"]))
+    assert [p["id"] for p in board["pins"]] == ["statement", "reading", "scene", "verdict", "repair", "recheck", "closed"]
+    assert board["links"] == [("statement", "reading"), ("reading", "scene"), ("scene", "verdict"),
+                              ("verdict", "repair"), ("repair", "recheck"), ("recheck", "closed")]
+    page = client.get(f"/r/{inv.id}").text
+    assert "The evidence board" in page and "Kept on file: bug-x-fixed" in page and "+new" in page
+
+
+def test_no_evidence_wall_while_kane_is_still_working(client, tmp_path):
+    inv = save(tmp_path, status="reproducing")
+    assert web.evidence_board(inv, None, None) is None

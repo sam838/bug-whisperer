@@ -496,3 +496,96 @@ details.card summary { cursor: pointer; font-weight: 700; }
   [data-reveal], .how > div { transition: opacity 200ms ease; transition-delay: 0ms; }
   @keyframes fade-only { from { opacity: 0; } to { opacity: 1; } }
 }
+
+/* ── The boards: a detective's corkboard of cases, and each case's evidence wall ──────────────
+   Everything pinned is real evidence. Pins drop in once (rare, meaningful: delight allowed), the
+   red string draws after them; hover straightens a note on real pointers; reduced motion fades. */
+:root {
+  --cork: #b8875a; --cork-dot: rgba(70, 40, 15, .16); --cork-hi: rgba(255, 240, 215, .12);
+  --frame: #6e4a2c; --note: #fffcf2; --note-ink: #23201b; --string: #c62828; --hand: "Caveat", "Segoe Print", cursive;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --cork: #6b4f33; --cork-dot: rgba(0, 0, 0, .28); --cork-hi: rgba(255, 220, 180, .06); --frame: #3b2a1b; --note: #f4eedf; --string: #e2483d; }
+}
+.board-lede { color: var(--muted); margin: -6px 0 16px; }
+.cork, .board-wall {
+  position: relative; border-radius: 14px; border: 10px solid var(--frame);
+  background-color: var(--cork);
+  background-image: radial-gradient(var(--cork-dot) 1.2px, transparent 1.6px), radial-gradient(var(--cork-hi) 1px, transparent 1.5px);
+  background-size: 7px 7px, 11px 11px; background-position: 0 0, 3px 5px;
+  box-shadow: inset 0 2px 14px rgba(0, 0, 0, .35), var(--shadow);
+}
+.cork { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 34px 28px; padding: 34px 28px 30px; }
+.strings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: visible; }  /* behind the notes, like real string */
+.strings path { fill: none; stroke: var(--string); stroke-width: 2.2; stroke-linecap: round; filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, .35)); }
+.strings.drawing path { transition: stroke-dashoffset 700ms var(--ease-out); }
+
+.pinned {
+  position: relative; z-index: 1; display: block; margin: 0; background: var(--note); color: var(--note-ink);
+  padding: 22px 16px 14px; border-radius: 3px; text-decoration: none;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 10px 18px -8px rgba(0, 0, 0, .55);
+  transform: rotate(var(--tilt, 0deg)); transition: transform 200ms var(--ease-out);
+  animation: pin-drop 380ms var(--ease-out) backwards; animation-delay: calc(var(--i, 0) * 70ms);
+}
+.pin {
+  position: absolute; top: -7px; left: 50%; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; z-index: 3;
+  background: radial-gradient(circle at 35% 30%, #ff8a80, #c62828 55%, #7f1010);
+  box-shadow: 0 3px 4px rgba(0, 0, 0, .45);
+}
+@keyframes pin-drop { from { opacity: 0; transform: translateY(-14px) rotate(var(--tilt, 0deg)) scale(1.03); } }
+@media (hover: hover) and (pointer: fine) {
+  a.pinned:hover, .pin-photo:hover { transform: rotate(0deg) translateY(-3px); z-index: 4; }
+}
+.pinned .stamp { font-size: 12.5px; }
+.tone-ok { color: var(--ok); } .tone-bug { color: var(--bug); } .tone-warn { color: var(--warn); }
+.tone-neutral { color: #6f6a62; } .tone-work { color: var(--accent); }
+.pinned .tone-ok { color: #0f7a52; } .pinned .tone-bug { color: #b3261e; } .pinned .tone-warn { color: #946200; }
+.pinned .tone-work { color: #b4410f; }
+
+/* a case on the corkboard */
+.pin-case { display: grid; gap: 8px; align-content: start; }
+.case-label { font: 700 11.5px/1.2 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: #6f6a62; }
+.pin-case img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; border: 6px solid #fff; border-bottom-width: 14px; box-shadow: 0 2px 6px rgba(0, 0, 0, .25); }
+.hand { font: 600 21px/1.15 var(--hand); color: #1f3a8a; overflow-wrap: anywhere; }
+.case-line { font-size: 13px; font-weight: 600; line-height: 1.35; }
+.case-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.case-foot small { color: #8a847a; font-size: 11.5px; }
+
+/* the evidence wall inside a case */
+.board { margin: 18px 0; }
+.board-title { margin: 0 0 10px; }
+.board-wall {
+  display: grid; gap: 40px 34px; padding: 36px 30px 30px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas: "statement reading claim" "scene scene verdict" "repair recheck closed";
+}
+.at-statement { grid-area: statement; } .at-reading { grid-area: reading; } .at-claim { grid-area: claim; }
+.at-scene { grid-area: scene; } .at-verdict { grid-area: verdict; }
+.at-repair { grid-area: repair; } .at-recheck { grid-area: recheck; } .at-closed { grid-area: closed; }
+.board-wall .pinned { align-self: start; }
+.pinned-title { display: block; font: 700 11.5px/1.3 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: #6f6a62; margin-bottom: 6px; }
+.pinned p { margin: 0; font-size: 14px; line-height: 1.45; }
+.pin-hand p { font: 600 22px/1.15 var(--hand); color: #1f3a8a; }
+.pin-typed p { font-family: var(--mono); font-size: 12.5px; }
+.pin-photo { background: #fff; padding: 10px 10px 12px; }
+.pin-photo img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; }
+.pin-photo figcaption { margin-top: 8px; font: 600 19px/1.15 var(--hand); color: #23201b; }
+.pin-photo figcaption span { display: block; font: 500 12.5px/1.4 var(--sans); color: #6f6a62; margin-top: 2px; }
+.pin-stamp { display: grid; gap: 10px; justify-items: start; }
+.pin-stamp .stamp { font-size: 18px; padding: 3px 14px; }
+.pin-stamp p { font-size: 13px; color: #3d3f47; }
+.pin-diff pre { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; color: inherit; font: 11.5px/1.45 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.pin-diff .add { color: #0f7a52; display: block; } .pin-diff .del { color: #b3261e; display: block; }
+
+@media (max-width: 760px) {
+  .board-wall { grid-template-columns: 1fr; grid-template-areas: none; gap: 28px; padding: 30px 18px 22px; }
+  .board-wall .pinned { grid-area: auto; }
+  .board-wall .strings { display: none; }  /* one column: the order already tells the story */
+  .cork { gap: 28px; padding: 28px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pinned { animation: fade-only 200ms ease both; animation-delay: 0ms; transition: none; }
+  .strings.drawing path { transition: none; }
+}
+.at-scene { justify-self: start; width: min(100%, 560px); }
+.at-scene img { aspect-ratio: 2 / 1; }

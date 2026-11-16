@@ -2,29 +2,25 @@
 {% block title %}Case files · Bug Whisperer{% endblock %}
 {% block content %}
 <h1 class="page-title">Case files</h1>
-{% if not items %}
+{% if not cards %}
   <div class="card"><p>No cases yet. <a href="/">Open the first one →</a></p></div>
 {% else %}
-  <div class="list">
-    {% for i in items %}
-      {% set fv = i.fix.get('verdict') if i.fix else None %}
-      <a class="row card" href="/r/{{ i.id }}">
-        <span class="case-no">#{{ case_no.get(i.id) }}</span>
-        <span class="badge
-          {% if fv == 'fixed' %}ok{% elif i.verdict == 'reproduced' %}bug{% elif i.status != 'done' or (i.fix and i.fix.get('status') != 'done') %}work{% elif i.verdict in ('inconclusive',) or fv in ('needs_human', 'inconclusive', 'error') %}warn{% else %}neutral{% endif %}">
-          {% if fv == 'fixed' %}✅ Closed: fixed
-          {% elif i.fix and i.fix.get('status') != 'done' %}🛠️ Repairing
-          {% elif i.status != 'done' %}🕵️ Investigating
-          {% elif fv == 'needs_human' %}🙋 Handed to a person
-          {% elif i.verdict == 'reproduced' %}🐛 Confirmed
-          {% elif i.verdict == 'not_reproduced' %}❓ Open: not reproduced
-          {% elif i.verdict == 'needs_info' %}❓ Open: needs a detail
-          {% else %}⚠️ Unsolved{% endif %}
-        </span>
-        <span class="row-text">
-          <b>{{ (i.judgement.get('ticket') or {}).get('title') or i.report[:90] }}</b>
-          <small>“{{ i.report[:110] }}{{ '…' if i.report|length > 110 }}” · {{ i.app }} · {{ i.created }}</small>
-          {% if i.note %}<small class="note">↪ {{ i.note }}</small>{% endif %}
+  <p class="board-lede">Every bug report gets pinned up here as a case. Red string joins cases from the same scene, in the order they were opened.</p>
+  {# The corkboard: each report pinned up as a case, with Kane's photo from the scene and its stamp. #}
+  <div class="cork" data-board data-links='{{ links|tojson }}'>
+    <svg class="strings" aria-hidden="true"></svg>
+    {% for c in cards %}
+      <a class="pinned pin-case" href="/r/{{ c.inv.id }}" data-pin="{{ c.inv.id }}"
+         style="--tilt: {{ tilt(c.inv.id) }}deg; --i: {{ loop.index0 }}">
+        <span class="pin" aria-hidden="true"></span>
+        <span class="case-label">Case #{{ case_no.get(c.inv.id) }} · {{ c.inv.app }}</span>
+        {% if c.shot %}<img src="/files/{{ c.inv.id }}/{{ c.shot.dir }}/{{ c.shot.file }}" alt="" loading="lazy">{% endif %}
+        <span class="hand">“{{ c.inv.report[:120] }}{{ '…' if c.inv.report|length > 120 }}”</span>
+        {% if c.title %}<span class="case-line">{{ c.title }}</span>{% endif %}
+        {% if c.inv.note %}<span class="case-line muted">↪ {{ c.inv.note }}</span>{% endif %}
+        <span class="case-foot">
+          <span class="stamp tone-{{ c.stamp[1] }}">{{ c.stamp[0] }}</span>
+          <small>{{ c.inv.created }}</small>
         </span>
       </a>
     {% endfor %}
