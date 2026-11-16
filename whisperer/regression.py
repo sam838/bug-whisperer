@@ -69,5 +69,6 @@ def sanitize(name: str) -> Path:
 def replay(name: str, variables: dict, *, log_path: Path | None = None) -> kane.KaneResult:
     """Replay a saved test exactly: no adaptive heal, so a changed app fails instead of healing."""
     argv = [kane.kane_binary(), "testmd", "run", str(TESTS / f"{name}_test.md"), "--agent",
-            "--headless", "--no-adaptive-heal", "--variables", json.dumps(variables)]
+            "--headless", "--no-adaptive-heal", "--variables", json.dumps(variables),
+            *kane.context_args()]
     return kane._execute(argv, timeout=420, log_path=log_path, on_event=None)

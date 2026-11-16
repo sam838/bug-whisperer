@@ -53,3 +53,11 @@ def test_planner_sees_the_guide():
     prompt = detective.PLAN_PROMPT.format(name="Shop", base_url="https://x", about="", accounts="",
                                           report="r", screenshot="", fields=fields.GUIDE, feedback="")
     assert "Date box" in prompt and "Check that every field is filled" in prompt
+
+
+def test_kane_context_teaches_the_same_checked_examples():
+    """Kane reads .testmuai/context.md itself; it must agree with what Claude is told."""
+    from whisperer import kane
+    text = kane.CONTEXT.read_text(encoding="utf-8")
+    for value in ("11112027", "03032025", "1430", "0900", "452027", "1,500"):
+        assert value in text

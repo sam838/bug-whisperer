@@ -62,5 +62,8 @@ python -m pytest -q tests          # must pass before you finish
 - One check: `kane-cli run "<plain English>" --agent --headless --max-steps 15 --timeout 180`
 - Exit codes: `0` passed, `1` failed, `2` setup error, `3` timeout or cancelled.
 - In the objective, "store … as 'name'" puts a value in `run_end.final_state`.
+- Kane's standing instructions (how to fill date pickers and other fields) are in
+  `.testmuai/context.md`, passed with `--local-context` on every run and replay. Claude's matching
+  guide is `whisperer/fields.py`; `tests/test_fields.py` keeps both true to real Chrome.
 - Save a run as a test with `--name <flow>`. Replay it with
   `kane-cli testmd run <file> --agent --no-adaptive-heal`.

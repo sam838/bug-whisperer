@@ -48,6 +48,15 @@ class KaneResult:
         return data
 
 
+# What Kane should know on every website (how to fill date pickers and so on). Kane CLI reads it
+# as "local context"; passed explicitly so it doesn't depend on the folder Kane is started from.
+CONTEXT = Path(__file__).resolve().parent.parent / ".testmuai" / "context.md"
+
+
+def context_args() -> list[str]:
+    return ["--local-context", str(CONTEXT)] if CONTEXT.is_file() else []
+
+
 def kane_binary() -> str:
     found = shutil.which("kane-cli")
     if not found:
@@ -73,7 +82,7 @@ def run(
     `name` saves the run as a Kane test (.testmuai/tests/<name>_test.md) that can be replayed.
     """
     argv = [kane_binary(), "run", objective, "--agent", "--max-steps", str(max_steps),
-            "--timeout", str(timeout)]
+            "--timeout", str(timeout), *context_args()]
     if name:
         argv += ["--name", name]
     if url:

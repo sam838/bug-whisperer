@@ -60,3 +60,12 @@ def test_kane_automation_bug_is_not_an_app_failure(tmp_path):
 def test_status_and_exit_code_must_agree(tmp_path):
     r = run_fake([START, {"type": "run_end", "status": "passed"}], 1, tmp_path)
     assert r.verdict == "error"
+
+
+def test_kane_is_given_the_context_file(monkeypatch):
+    seen = {}
+    monkeypatch.setattr(kane, "kane_binary", lambda: "kane-cli")
+    monkeypatch.setattr(kane, "_execute", lambda argv, **kw: seen.setdefault("argv", argv))
+    kane.run("Open the shop")
+    argv = seen["argv"]
+    assert argv[argv.index("--local-context") + 1] == str(kane.CONTEXT)
