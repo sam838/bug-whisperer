@@ -210,6 +210,104 @@ function typeOut(root) {
 }
 typeOut(document);
 
+// The scene map: Kane's token walks the rooms in the order he really visited them, each room
+// lighting up as he reaches it; the clue room (or the fixed room) gives a small pop. It walks
+// once, when the map scrolls into view. Reduced motion shows the finished walk.
+function initTrail(trail) {
+  const rooms = [...trail.querySelectorAll("[data-room]")];
+  const token = trail.querySelector(".trail-token");
+  if (!rooms.length || !token) return;
+  let at = rooms.length - 1;
+  const place = (room) => {
+    const t = trail.getBoundingClientRect(), r = room.getBoundingClientRect();
+    token.style.transform = `translate(${r.right - t.left - 24}px, ${r.top - t.top - 13}px)`;
+  };
+  const finish = () => {
+    trail.classList.remove("walking");
+    trail.classList.add("walked");
+    rooms.forEach((r) => r.classList.add("visited"));
+    place(rooms[at]);
+  };
+  const walk = () => {
+    if (reduceMotion) return finish();
+    trail.classList.add("walking");
+    token.style.transition = "none";
+    place(rooms[0]);
+    token.getBoundingClientRect();
+    token.style.transition = "";
+    let i = 0;
+    const next = () => {
+      at = i;
+      place(rooms[i]);
+      rooms[i].classList.add("visited");
+      if (rooms[i].matches(".clue, .solved")) rooms[i].classList.add("found");
+      i += 1;
+      setTimeout(i < rooms.length ? next : finish, i < rooms.length ? 650 : 450);
+    };
+    next();
+  };
+  if ("IntersectionObserver" in window) {
+    const seen = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      seen.disconnect();
+      walk();
+    }, { threshold: 0.35 });
+    seen.observe(trail);
+  } else walk();
+  new ResizeObserver(() => place(rooms[at])).observe(trail);
+}
+document.querySelectorAll("[data-trail]").forEach(initTrail);
+
+// The chapter card: a new case opens. Shown once per case (remembered in this browser), skipped
+// with reduced motion, and a click dismisses it.
+const chapter = document.querySelector("[data-chapter]");
+if (chapter) {
+  const key = `chapter-${chapter.dataset.chapter}`;
+  let seen = false;
+  try {
+    seen = localStorage.getItem(key) === "1";
+    localStorage.setItem(key, "1");
+  } catch {
+    /* no storage: show it this once */
+  }
+  if (seen || reduceMotion) chapter.remove();
+  else {
+    chapter.hidden = false;
+    const close = () => {
+      chapter.classList.add("out");
+      setTimeout(() => chapter.remove(), 280);
+    };
+    const timer = setTimeout(close, 1900);
+    chapter.addEventListener("click", () => { clearTimeout(timer); close(); });
+  }
+}
+
+// Juice on a real verdict (CONFIRMED or CASE CLOSED): the world freezes for a beat as the stamp
+// lands (hit-stop), one flash in the verdict's colour, and the verdict panel jolts from a
+// decaying trauma value (summed sines, visual only). Nothing happens with reduced motion.
+function impact(panel) {
+  if (reduceMotion || !panel) return;
+  const moving = document.querySelectorAll(".kane-body, .kane-lens");
+  moving.forEach((n) => (n.style.animationPlayState = "paused"));
+  setTimeout(() => moving.forEach((n) => (n.style.animationPlayState = "")), 120);
+  panel.classList.remove("impact");
+  void panel.offsetWidth;
+  panel.classList.add("impact");
+  let trauma = 0.7, last = 0, t = 0;
+  const frame = (now) => {
+    const dt = last ? (now - last) / 1000 : 0;
+    last = now;
+    trauma = Math.max(0, trauma - 1.8 * dt);
+    t += dt * 30;
+    const s = trauma * trauma;
+    panel.style.transform = trauma
+      ? `translate(${(8 * s * Math.sin(t * 1.7)).toFixed(2)}px, ${(5 * s * Math.sin(t * 2.3)).toFixed(2)}px) rotate(${(0.6 * s * Math.sin(t * 1.1)).toFixed(2)}deg)`
+      : "";
+    if (trauma > 0) requestAnimationFrame(frame);
+  };
+  setTimeout(() => requestAnimationFrame(frame), 120);
+}
+
 // Kane's browser, live: reload the camera's latest frame about once a second. The new frame is
 // loaded off-screen first and swapped in only when ready, so the picture never flashes blank.
 setInterval(() => {
@@ -257,7 +355,12 @@ if (live) {
         });
         live.querySelectorAll("[data-replay]").forEach(initReplay);  // appears when the case ends
         live.querySelectorAll("[data-board]").forEach(initBoard);
+        live.querySelectorAll("[data-trail]").forEach(initTrail);
         typeOut(live);
+        const stampNow = stampText();
+        if (stampNow && stampNow !== stampBefore && /confirmed|case closed/i.test(stampNow)) {
+          setTimeout(() => impact(live.querySelector(".verdict")), 260);  // as the stamp lands
+        }
       }
     } catch {
       /* try again next tick */

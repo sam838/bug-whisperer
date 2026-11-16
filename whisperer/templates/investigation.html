@@ -4,6 +4,16 @@
 <div class="crumbs"><a href="/inbox">← Case files</a> · {{ inv.app }} · opened {{ inv.created }}</div>
 <h1 class="case-title">Case #{{ case_no }}{% if (inv.judgement.get('ticket') or {}).get('title') %}<span>{{ inv.judgement.ticket.title }}</span>{% endif %}</h1>
 {% if inv.note %}<div class="claim">↪ {{ inv.note }}</div>{% endif %}
+{# The chapter card: plays once when a case is really opened, with its real number and words. #}
+{% if inv.status in ('queued', 'planning') and not inv.fix %}
+  <div class="chapter" data-chapter="{{ inv.id }}" hidden>
+    <div class="chapter-card">
+      <span class="chapter-no">Case #{{ case_no }}</span>
+      <p class="chapter-quote">“{{ inv.report[:110] }}{{ '…' if inv.report|length > 110 }}”</p>
+      <span class="chapter-sub">Detective Kane takes the case…</span>
+    </div>
+  </div>
+{% endif %}
 <div id="live" data-url="/r/{{ inv.id }}/live" data-active="{{ 'true' if active else 'false' }}">
   {% include "_live.html" %}
 </div>

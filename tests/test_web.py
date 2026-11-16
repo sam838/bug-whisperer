@@ -196,3 +196,28 @@ def test_kane_only_says_what_is_really_happening(client, tmp_path):
     assert web.kane_scene(inv, steps, False)["line"] == "I typed 03/03/2025 into Date."
     inv.status = "done"
     assert web.kane_scene(inv, empty, False) is None
+
+
+def test_scene_map_rooms_are_the_pages_kane_really_visited():
+    kane = {"shots": [
+        {"url": "http://127.0.0.1:8001/login", "status": "passed", "summary": "navigate: Navigate to http://127.0.0.1:8001/login"},
+        {"url": "http://127.0.0.1:8001/login", "status": "passed", "summary": 'wait: queued plan (2 steps): type "Email"'},
+        {"url": "http://127.0.0.1:8001/login", "status": "passed", "summary": "click: Clicking Log in button"},
+        {"url": "http://127.0.0.1:8001/appointments/new?patient_id=3", "status": "passed", "summary": 'type: Type "03032025" into "Date"'},
+        {"url": "http://127.0.0.1:8001/patients/10", "status": "failed", "summary": "assert: The app shows an error"},
+    ]}
+    rooms = web.scene_trail(kane, "Verify that the app shows an error saying the date is in the past.")
+    assert [r["name"] for r in rooms] == ["Login", "Appointments · New", "Patients · #10"]
+    assert rooms[1]["path"] == "/appointments/new?patient_id=3"
+    assert [a["text"] for a in rooms[0]["actions"]] == ["I went to http://127.0.0.1:8001/login.", "I clicked Log in button."]
+    assert [r["clue"] for r in rooms] == [False, False, True]
+    assert rooms[2]["actions"][0]["text"] == "I checked: The app shows an error saying the date is in the past."
+
+
+def test_a_new_case_opens_with_a_chapter_card(client, tmp_path):
+    inv = save(tmp_path, status="queued")
+    page = client.get(f"/r/{inv.id}").text
+    assert 'data-chapter="' in page and "Detective Kane takes the case" in page
+    inv.status = "done"
+    inv.save()
+    assert "data-chapter" not in client.get(f"/r/{inv.id}").text  # only when a case is really opened

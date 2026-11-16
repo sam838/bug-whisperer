@@ -17,6 +17,7 @@ import re
 import threading
 import time
 from datetime import datetime
+from urllib.parse import urlsplit
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -309,6 +310,8 @@ def view(inv: Investigation) -> dict:
         "retry": bool(inv.fix) and inv.fix.get("verdict") in ("needs_human", "inconclusive", "error"),
         "before": _key_shot(inv.kane),
         "after": _key_shot(last_try) if last_try else None,
+        "trail": scene_trail(inv.kane, (inv.plan or {}).get("objective", "")) if not (investigating or fixing) else [],
+        "trail_after": scene_trail(last_try, (inv.plan or {}).get("objective", "")) if last_try and not (investigating or fixing) else [],
         "board": evidence_board(inv, _key_shot(inv.kane), _key_shot(last_try) if last_try else None),
         "user_shot": Path(inv.screenshot).name if inv.screenshot else None,
         "reply": reply_for_user(inv),
@@ -369,6 +372,40 @@ def kane_scene(inv: Investigation, track: dict, queued: bool) -> dict | None:
     if fixs.startswith("Kane"):
         return {"mode": "walking", "line": latest or "Back to the scene. Same steps, no taking Claude's word for it."}
     return None
+
+
+def _room_name(url: str) -> tuple[str, str]:
+    """A page as a room on the scene map: a readable name and its path."""
+    parts = urlsplit(url)
+    path = (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
+    words = [p for p in parts.path.split("/") if p]
+    name = " · ".join(f"#{w}" if w.isdigit() else w.replace("-", " ").replace("_", " ").capitalize()
+                      for w in words) or "Home"
+    return name, path
+
+
+def scene_trail(kane: dict | None, objective: str) -> list[dict]:
+    """The scene map: the app as the dungeon. Each room is a page Kane really visited (from the
+    page address on each of his screenshots), in the order he went, with what he did there. The
+    room where his check failed is the clue room."""
+    rooms: list[dict] = []
+    for shot in (kane or {}).get("shots") or []:
+        url = shot.get("url") or ""
+        if not url:
+            continue
+        if not rooms or rooms[-1]["url"] != url:
+            name, path = _room_name(url)
+            rooms.append({"url": url, "name": name, "path": path, "actions": [], "clue": False})
+        room = rooms[-1]
+        remark = shot.get("summary") or ""
+        line = speak(remark)
+        if line:
+            line = _full_check(line, objective)
+            if not room["actions"] or room["actions"][-1]["text"] != line:
+                room["actions"].append({"kind": _step_kind(remark), "text": line, "status": shot.get("status")})
+        if shot.get("status") == "failed":
+            room["clue"] = True
+    return rooms
 
 
 def case_stamp(inv: Investigation) -> tuple[str, str]:

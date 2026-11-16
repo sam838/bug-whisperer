@@ -1,0 +1,30 @@
+{% from "_kane.html" import head %}
+{# The scene map: the app as the dungeon. Every room is a page Kane really visited, in the order
+   he went; his token walks that route; the room where his check failed is the clue room. #}
+{% set closed = inv.fix and inv.fix.get('verdict') == 'fixed' %}
+<section class="card scenemap" aria-label="Scene map">
+  <h2>🗺️ The scene map <span class="muted">· each room is a page Kane really visited, in the order he went</span></h2>
+  {% for label, rooms, after in [("Kane's first visit", trail, false), ("Back at the scene, after the repair", trail_after, true)] if rooms %}
+    <div class="trail{{ ' after' if after }}" data-trail>
+      <p class="trail-label">{{ label }}</p>
+      <ol class="rooms">
+        {% for r in rooms %}
+          {% set solved = after and loop.last and closed %}
+          <li class="room{{ ' clue' if r.clue }}{{ ' solved' if solved }}" data-room>
+            <span class="room-name"><span class="room-no">{{ loop.index }}</span>{{ r.name }}</span>
+            <code class="room-path">{{ r.path }}</code>
+            {% if r.actions %}
+              <ul class="room-acts">
+                {% for a in r.actions[:4] %}<li class="{{ a.status }}"><span aria-hidden="true">{{ step_icons.get(a.kind, '•') }}</span>{{ a.text }}</li>{% endfor %}
+                {% if r.actions|length > 4 %}<li class="more">+{{ r.actions|length - 4 }} more</li>{% endif %}
+              </ul>
+            {% endif %}
+            {% if r.clue %}<span class="room-badge bug">🔴 Clue: the bug</span>
+            {% elif solved %}<span class="room-badge ok">🟢 Fixed: Kane saw it</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+      <span class="trail-token" aria-hidden="true">{{ head() }}</span>
+    </div>
+  {% endfor %}
+</section>
