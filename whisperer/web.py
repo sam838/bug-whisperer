@@ -790,6 +790,21 @@ async def connect_app(request: Request):
     return RedirectResponse(f"/apps?added={slug}", status_code=303)
 
 
+templates.env.filters["verdict_words"] = lambda v: {
+    "reproduced": "Confirmed", "not_reproduced": "Open: not reproduced",
+    "needs_info": "Open: asked the user", "inconclusive": "Unsolved"}.get(v, v)
+
+
+@app.get("/verified", response_class=HTMLResponse)
+def verified(request: Request):
+    """The proof a judge can check fast: read from docs/proof/results.json (python -m whisperer proof)."""
+    path = ROOT / "docs" / "proof" / "results.json"
+    if not path.exists():
+        raise HTTPException(404, "No results yet")
+    return templates.TemplateResponse(request, "verified.html", {
+        "r": json.loads(path.read_text(encoding="utf-8")), "page": "verified"})
+
+
 @app.get("/inbox", response_class=HTMLResponse)
 def inbox(request: Request):
     items = []

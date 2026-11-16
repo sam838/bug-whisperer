@@ -238,3 +238,9 @@ def test_people_get_kanes_not_found_page_and_scripts_get_json(client):
     assert page.status_code == 404 and "No case file at this address" in page.text
     api = client.get("/r/20261116-145849-dbes")
     assert api.status_code == 404 and api.json() == {"detail": "No such report"}
+
+
+def test_verified_page_shows_the_recorded_proof(client):
+    page = client.get("/verified")
+    assert page.status_code == 200 and "Checked by Kane, not by us" in page.text
+    assert "E1-fixed-bug-stays-fixed" in page.text and "Stop hook" in page.text

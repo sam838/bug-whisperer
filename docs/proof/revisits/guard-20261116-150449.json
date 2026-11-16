@@ -1,0 +1,35 @@
+{
+  "when": "20261116-150449",
+  "results": [
+    {
+      "case_id": "20261113-112727",
+      "title": "Appointments can be booked on past dates with no error",
+      "app": "Clinic Records",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 22.34
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "20261113-124324-d930",
+      "title": "Two patients can be booked into the same appointment slot",
+      "app": "Clinic Records",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 15.89
+      },
+      "verdict": "holds"
+    }
+  ],
+  "reopened": [],
+  "unknown": []
+}

@@ -796,3 +796,18 @@ details.card summary { cursor: pointer; font-weight: 700; }
 .lost .page-title { margin: 8px 0 18px; }
 .lost-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
 a.btn { text-decoration: none; }
+
+/* ── Verified: the proof page ──────────────────────────────────────────────────────────────── */
+.proof { display: grid; gap: 18px; }
+.proof .page-title { margin: 6px 0 4px; }
+.proof-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.proof-stats div { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 14px 16px; display: grid; gap: 4px; }
+.proof-stats b { font: 700 32px/1 var(--serif); color: var(--accent); }
+.proof-stats span { color: var(--muted); font-size: 14px; line-height: 1.4; }
+.table-wrap { overflow-x: auto; }
+.proof-table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.proof-table th { text-align: left; font: 700 12px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.proof-table td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.proof-table small { display: block; color: var(--muted); font-size: 13px; margin-top: 4px; line-height: 1.45; }
+.proof-table .mark { font-size: 20px; text-align: center; }
+.proof-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; }

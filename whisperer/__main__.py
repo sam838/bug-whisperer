@@ -20,11 +20,24 @@ def main(argv=None) -> int:
     gd = sub.add_parser("guard", help="Kane revisits every closed case: is any old bug back?")
     gd.add_argument("--app", help="Only this app's cases, e.g. apps/clinic.json")
     sub.add_parser("hook", help="Claude Code Stop hook (reads the hook JSON on stdin)")
+    ex = sub.add_parser("experiments", help="Run the pre-registered proof experiments (real Kane runs)")
+    ex.add_argument("ids", nargs="*", help="Only these experiment ids")
+    sub.add_parser("proof", help="Gather the real records into docs/proof/results.json and RESULTS.md")
     args = parser.parse_args(argv)
 
     if args.cmd == "hook":
         from .hook import main as hook_main
         return hook_main()
+
+    if args.cmd in ("experiments", "proof"):
+        from .proof import collect, run_experiments
+        if args.cmd == "experiments":
+            run_experiments(args.ids or None)
+        r = collect()
+        t = r["totals"]
+        print(f"[proof] {t['experiments_as_expected']}/{t['experiments_run']} experiments as expected; "
+              f"{t['kane_runs']} Kane runs on record. Written to docs/proof/RESULTS.md")
+        return 0
 
     if args.cmd == "guard":
         from .guard import revisit

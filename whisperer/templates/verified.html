@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Verified · Bug Whisperer{% endblock %}
+{% block content %}
+{% set t = r.totals %}
+<section class="proof">
+  <span class="lost-code">Verified</span>
+  <h1 class="page-title">Checked by Kane, not by us</h1>
+  <p class="lede">Every number here is read from the real records in the repo: Kane CLI's own logs and verdicts.
+    Nothing is typed in by hand. Generated {{ r.generated }} · <a href="{{ r.repo }}/docs/proof/RESULTS.md">the same page as a file</a>.</p>
+
+  <div class="proof-stats">
+    <div><b>{{ t.experiments_as_expected }}/{{ t.experiments_run }}</b><span>pre-registered experiments came out as expected</span></div>
+    <div><b>{{ r.regression_tests|length }}</b><span>bugs fixed, proven by Kane, kept as regression tests</span></div>
+    <div><b>{{ r.revisits.replays }}</b><span>automatic revisits of closed cases by the Claude Code hook</span></div>
+    <div><b>~{{ t.kane_runs }}</b><span>Kane CLI runs on record</span></div>
+  </div>
+
+  <section class="card">
+    <h2>Pre-registered experiments</h2>
+    <p class="muted">Each report and the verdict we expected were <a href="{{ r.repo }}/docs/proof/experiments.json">committed before any of them ran</a>.
+      They test that Bug Whisperer doesn't invent bugs, ignores instructions hidden in a report, and asks instead of guessing.</p>
+    <div class="table-wrap"><table class="proof-table">
+      <thead><tr><th>Experiment</th><th>Expected</th><th>Bug Whisperer said</th><th></th></tr></thead>
+      <tbody>
+        {% for e in r.experiments %}
+          <tr>
+            <td><b>{{ e.id }}</b><small>“{{ e.report[:110] }}{{ '…' if e.report|length > 110 }}”</small><small>{{ e.why }}</small></td>
+            <td>{{ e.expected|map('verdict_words')|join(' or ') }}</td>
+            {% if e.ran %}
+              <td>{{ e.verdict|verdict_words }}{% if e.explanation %}<small>{{ e.explanation[:220] }}</small>{% endif %}<small><a href="{{ r.repo }}/{{ e.folder }}">evidence</a> · {{ e.kane_runs }} Kane run{{ 's' if e.kane_runs != 1 }}</small></td>
+              <td class="mark">{{ '✅' if e.as_expected else '❌' }}</td>
+            {% else %}
+              <td class="muted">not run yet</td><td></td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="card">
+    <h2>Case studies, with every log</h2>
+    <div class="table-wrap"><table class="proof-table">
+      <thead><tr><th>Case</th><th>App</th><th>Verdict</th><th>Fixed?</th></tr></thead>
+      <tbody>
+        {% for c in r.evidence %}
+          <tr><td><a href="{{ r.repo }}/{{ c.folder }}/README.md"><b>{{ c.title }}</b></a></td>
+            <td>{{ c.app or 'Clinic Records' }}</td><td>{{ c.verdict|verdict_words if c.verdict else 'see the write-up' }}</td>
+            <td>{{ '✅ Kane saw the fix' if c.fixed else '–' }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Kept on file</h2>
+      <p class="muted">Each closed case is a saved Kane test, replayed with no self-healing, so a changed app fails instead of being quietly accepted.</p>
+      <ul class="proof-list">{% for x in r.regression_tests %}<li>{{ x.title }} <a href="{{ r.repo }}/{{ x.test }}"><code>{{ x.test.split('/')[-1] }}</code></a></li>{% endfor %}</ul>
+    </section>
+    <section class="card">
+      <h2>The Stop hook</h2>
+      {% set v = r.revisits %}
+      <p>Between {{ v.first }} and {{ v.last }}, Claude Code's Stop hook made Kane replay the closed cases
+        <b>{{ v.replays }}</b> times: {{ v.holds }} still closed, <b>{{ v.reopened }} reopened</b>, {{ v.unknown }} unclear.
+        A reopened case blocks the coding session until it's fixed again
+        (<a href="{{ r.repo }}/docs/evidence/004-hook-reopened-case/README.md">how that went</a>,
+        <a href="{{ r.repo }}/docs/proof/revisits">every report</a>).</p>
+    </section>
+  </div>
+</section>
+{% endblock %}
