@@ -174,36 +174,88 @@
     });
   }
 
-  // the night outside the window: a city skyline with lit windows, and rain drawn every frame
+  // The view from the window: the sky follows the time on the viewer's own computer (dawn, day,
+  // dusk, night) and the weather is picked at random each visit (clear, cloudy, rain, storm, fog).
+  const SKIES = {
+    dawn: ["#3b4a7a", "#f5a37a"], day: ["#5f9fd8", "#cfe6f7"], dusk: ["#2b2a5a", "#f08a5a"], night: ["#0b1022", "#24304f"],
+  };
   function makeWindow(T) {
-    const city = canvasTex(T, 512, 384, (g, w, h) => {
-      const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, "#0b1022"); sky.addColorStop(1, "#24304f");
-      g.fillStyle = sky; g.fillRect(0, 0, w, h);
-      g.fillStyle = "rgba(255,255,255,.75)"; g.beginPath(); g.arc(400, 70, 26, 0, 7); g.fill();
-      for (let x = 0; x < w; x += 46) {
-        const bh = 110 + ((x * 37) % 170);
-        g.fillStyle = "#0e1428"; g.fillRect(x, h - bh, 42, bh);
-        for (let y = h - bh + 10; y < h - 8; y += 16) for (let wx = x + 6; wx < x + 38; wx += 10) {
-          if (((wx * 13 + y * 7) % 11) < 4) { g.fillStyle = "rgba(255,210,120,.85)"; g.fillRect(wx, y, 5, 7); }
-        }
-      }
-    });
+    const c = document.createElement("canvas"); c.width = 512; c.height = 384;
+    const city = new T.CanvasTexture(c); city.encoding = T.sRGBEncoding;
+    const g = c.getContext("2d");
     const rainCanvas = document.createElement("canvas"); rainCanvas.width = 256; rainCanvas.height = 192;
     const rain = new T.CanvasTexture(rainCanvas); rain.encoding = T.sRGBEncoding;
-    const drops = Array.from({ length: 70 }, () => [Math.random() * 256, Math.random() * 192, 6 + Math.random() * 10]);
+    const drops = Array.from({ length: 90 }, () => [Math.random() * 256, Math.random() * 192, 6 + Math.random() * 10]);
     const rg = rainCanvas.getContext("2d");
+    let raining = false, heavy = false;
     return {
       city, rain,
+      paint(phase, weather) {
+        const w = 512, h = 384, [top, bottom] = SKIES[phase];
+        const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, top); sky.addColorStop(1, bottom);
+        g.fillStyle = sky; g.fillRect(0, 0, w, h);
+        const overcast = weather !== "clear";
+        if (!overcast || weather === "cloudy") {  // the sun or the moon, where the sky is clear enough
+          const low = phase === "dawn" || phase === "dusk";
+          g.fillStyle = phase === "night" ? "rgba(255,255,255,.8)" : low ? "rgba(255,200,120,.95)" : "rgba(255,248,220,.95)";
+          g.beginPath(); g.arc(phase === "dusk" ? 110 : 400, low ? 230 : 70, phase === "night" ? 26 : 34, 0, 7); g.fill();
+        }
+        if (overcast) {  // clouds: light on a calm day, heavy and dark in a storm
+          const shade = weather === "storm" ? "rgba(40,44,56,.85)" : phase === "night" ? "rgba(70,78,98,.6)" : "rgba(230,232,238,.75)";
+          g.fillStyle = shade;
+          for (let i = 0; i < 9; i++) { g.beginPath(); g.ellipse((i * 83) % 560, 40 + (i * 37) % 90, 90, 30, 0, 0, 7); g.fill(); }
+          if (weather === "rain" || weather === "storm") { g.fillStyle = "rgba(20,24,34,.35)"; g.fillRect(0, 0, w, h); }
+        }
+        const lit = phase === "night" || phase === "dusk" || weather === "storm";
+        for (let x = 0; x < w; x += 46) {  // the city across the street
+          const bh = 110 + ((x * 37) % 170);
+          g.fillStyle = phase === "day" ? "#5a6a80" : phase === "night" ? "#0e1428" : "#2a2f48"; g.fillRect(x, h - bh, 42, bh);
+          for (let y = h - bh + 10; y < h - 8; y += 16) for (let wx = x + 6; wx < x + 38; wx += 10) {
+            if (lit && ((wx * 13 + y * 7) % 11) < 4) { g.fillStyle = "rgba(255,210,120,.85)"; g.fillRect(wx, y, 5, 7); }
+            else if (!lit && ((wx * 7 + y * 3) % 9) < 2) { g.fillStyle = "rgba(200,225,255,.5)"; g.fillRect(wx, y, 5, 7); }
+          }
+        }
+        if (weather === "fog") { g.fillStyle = "rgba(205,210,220,.62)"; g.fillRect(0, 0, w, h); }
+        city.needsUpdate = true;
+        raining = weather === "rain" || weather === "storm"; heavy = weather === "storm";
+        if (!raining) { rg.clearRect(0, 0, 256, 192); rain.needsUpdate = true; }
+      },
       update(dt) {
-        rg.clearRect(0, 0, 256, 192); rg.strokeStyle = "rgba(190,210,255,.55)"; rg.lineWidth = 1;
-        for (const d of drops) {
-          d[1] += d[2] * dt * 40; d[0] -= dt * 30;
+        if (!raining) return;
+        rg.clearRect(0, 0, 256, 192); rg.strokeStyle = "rgba(190,210,255,.55)"; rg.lineWidth = heavy ? 1.4 : 1;
+        for (const d of drops.slice(0, heavy ? 90 : 60)) {
+          d[1] += d[2] * dt * (heavy ? 60 : 40); d[0] -= dt * (heavy ? 60 : 30);
           if (d[1] > 192) { d[1] = -10; d[0] = Math.random() * 280; }
           rg.beginPath(); rg.moveTo(d[0], d[1]); rg.lineTo(d[0] - 2, d[1] + d[2]); rg.stroke();
         }
         rain.needsUpdate = true;
       },
     };
+  }
+
+  function phaseOf(date) {
+    const h = date.getHours() + date.getMinutes() / 60;
+    return h >= 5 && h < 7 ? "dawn" : h >= 7 && h < 17 ? "day" : h >= 17 && h < 19 ? "dusk" : "night";
+  }
+  // the room's mood for a time of day and a weather: window light, fill, desk lamp, blind stripes
+  const MOODS = {
+    night: { bg: 0x0a0d15, fogFar: 13, exposure: 0.95, hemi: [0x51618c, 0x1a120c, 0.34], sun: [0x8fb0ff, 0.45], rim: 0.6, lamp: 3.8, stripes: [0x96b4ff, 0.22] },
+    dawn: { bg: 0x2a1f22, fogFar: 16, exposure: 1.0, hemi: [0xffc9a8, 0x2a1a14, 0.6], sun: [0xffc090, 1.1], rim: 0.35, lamp: 2.8, stripes: [0xffc090, 0.35] },
+    day: { bg: 0x3a3632, fogFar: 22, exposure: 1.1, hemi: [0xfff4e0, 0x3a2a1c, 0.95], sun: [0xfff1d0, 1.8], rim: 0.25, lamp: 1.6, stripes: [0xfff0c0, 0.45] },
+    dusk: { bg: 0x241822, fogFar: 15, exposure: 1.0, hemi: [0xffb07a, 0x2a1a10, 0.6], sun: [0xff9a5a, 1.2], rim: 0.4, lamp: 3.0, stripes: [0xffa060, 0.4] },
+  };
+  const WEATHER_LIGHT = { clear: 1, cloudy: 0.65, rain: 0.5, storm: 0.35, fog: 0.55 };
+
+  function applyMood(rig, phase, weather) {
+    const m = MOODS[phase], k = WEATHER_LIGHT[weather];
+    rig.scene.background.setHex(m.bg); rig.scene.fog.color.setHex(m.bg); rig.scene.fog.far = m.fogFar;
+    rig.renderer.toneMappingExposure = m.exposure;
+    rig.hemi.color.setHex(m.hemi[0]); rig.hemi.groundColor.setHex(m.hemi[1]); rig.hemi.intensity = m.hemi[2] * (0.75 + 0.25 * k);
+    rig.sun.color.setHex(m.sun[0]); rig.sunBase = m.sun[1] * k; rig.sun.intensity = rig.sunBase;
+    rig.rim.intensity = m.rim; rig.lampLight.intensity = m.lamp;
+    rig.blinds.material.color.setHex(m.stripes[0]); rig.blinds.material.opacity = m.stripes[1] * k;
+    rig.shaft.material.color.setHex(m.stripes[0]); rig.shaft.material.opacity = 0.18 * k;
+    rig.win.paint(phase, weather);
   }
 
   // ── the office ────────────────────────────────────────────────────────────────────────────
@@ -231,7 +283,7 @@
     };
 
     // light: a dim blue night, a warm desk lamp with shadows, moonlight through the window
-    scene.add(new T.HemisphereLight(0x51618c, 0x1a120c, 0.34));
+    const hemi = new T.HemisphereLight(0x51618c, 0x1a120c, 0.34); scene.add(hemi);
     const lampLight = new T.SpotLight(0xffc98a, 3.8, 9, 0.95, 0.7, 1.3);
     lampLight.position.set(-1.25, 2.0, -0.35); lampLight.target.position.set(-0.6, 0.6, -0.4);
     lampLight.castShadow = true; lampLight.shadow.mapSize.set(1024, 1024); lampLight.shadow.bias = -0.0006;
@@ -282,6 +334,7 @@
     const win = makeWindow(T);
     add(new T.Mesh(new T.PlaneGeometry(1.5, 1.15), new T.MeshBasicMaterial({ map: win.city })), -2.1, 2.05, -2.99, { cast: false, receive: false });
     add(new T.Mesh(new T.PlaneGeometry(1.5, 1.15), new T.MeshBasicMaterial({ map: win.rain, transparent: true })), -2.1, 2.05, -2.985, { cast: false, receive: false });
+    const flash = add(new T.Mesh(new T.PlaneGeometry(1.5, 1.15), new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, toneMapped: false })), -2.1, 2.05, -2.982, { cast: false, receive: false });
     const frameMat = std(0x3b2a1b, 0.7);
     [[0, 0.62, 1.62, 0.08], [0, -0.62, 1.62, 0.08], [-0.79, 0, 0.08, 1.3], [0.79, 0, 0.08, 1.3], [0, 0, 0.05, 1.2]].forEach(([x, y, w, h]) =>
       add(new T.Mesh(new T.BoxGeometry(w, h, 0.08), frameMat), -2.1 + x, 2.05 + y, -2.96));
@@ -290,13 +343,13 @@
       g.clearRect(0, 0, w, h);
       for (let y = 18; y < h - 18; y += 34) {
         const band = g.createLinearGradient(0, 0, w, 0);
-        band.addColorStop(0, "rgba(150,180,255,0)"); band.addColorStop(0.5, "rgba(150,180,255,.9)"); band.addColorStop(1, "rgba(150,180,255,0)");
+        band.addColorStop(0, "rgba(255,255,255,0)"); band.addColorStop(0.5, "rgba(255,255,255,.9)"); band.addColorStop(1, "rgba(255,255,255,0)");
         g.fillStyle = band; g.fillRect(16, y, w - 32, 16);
       }
     });
     const blinds = new T.Mesh(new T.PlaneGeometry(2.2, 2.4), new T.MeshBasicMaterial({ map: stripes, transparent: true, opacity: 0.22, depthWrite: false, blending: T.AdditiveBlending }));
     blinds.rotation.x = -Math.PI / 2; blinds.rotation.z = 0.35; blinds.position.set(-1.25, 0.009, -1.25); scene.add(blinds);
-    const shaft = new T.Mesh(new T.PlaneGeometry(1.4, 3.2), new T.MeshBasicMaterial({ map: radialTex(T, "rgba(150,180,255,.5)", "rgba(150,180,255,0)"), transparent: true, opacity: 0.18, depthWrite: false, blending: T.AdditiveBlending }));
+    const shaft = new T.Mesh(new T.PlaneGeometry(1.4, 3.2), new T.MeshBasicMaterial({ map: radialTex(T, "rgba(255,255,255,.5)", "rgba(255,255,255,0)"), transparent: true, opacity: 0.18, depthWrite: false, blending: T.AdditiveBlending }));
     shaft.position.set(-1.75, 1.35, -2.0); shaft.rotation.set(-0.55, 0.3, 0); scene.add(shaft);
 
     // the bookshelf on the left wall
@@ -322,7 +375,10 @@
     const clockFace = canvasTex(T, 256, 256, (g) => {
       g.fillStyle = "#f3eee5"; g.beginPath(); g.arc(128, 128, 120, 0, 7); g.fill();
       g.strokeStyle = "#23201b"; g.lineWidth = 10; g.stroke();
-      for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; g.fillStyle = "#23201b"; g.fillRect(128 + Math.sin(a) * 95 - 3, 128 - Math.cos(a) * 95 - 8, 6, 16); }
+      g.fillStyle = "#23201b";
+      for (let i = 0; i < 60; i++) { const a = i * Math.PI / 30, r = i % 5 ? 2 : 3.5; g.beginPath(); g.arc(128 + Math.sin(a) * 108, 128 - Math.cos(a) * 108, r, 0, 7); g.fill(); }
+      g.font = "700 30px Georgia, serif"; g.textAlign = "center"; g.textBaseline = "middle";
+      for (let n = 1; n <= 12; n++) { const a = n * Math.PI / 6; g.fillText(String(n), 128 + Math.sin(a) * 84, 130 - Math.cos(a) * 84); }
     });
     add(new T.Mesh(new T.CylinderGeometry(0.28, 0.28, 0.05, 32), std(0x3b2a1b, 0.6)), 0.25, 2.75, -2.97, { cast: false }).rotation.x = Math.PI / 2;
     add(new T.Mesh(new T.CircleGeometry(0.25, 32), new T.MeshBasicMaterial({ map: clockFace })), 0.25, 2.75, -2.94, { cast: false, receive: false });
@@ -456,7 +512,12 @@
     // seated, the robot's hips sit 0.29 up and 0.24 behind its feet: lift and shift it onto the cushion
     const SEAT = new T.Vector3(CHAIR.x - 0.24 * Math.sin(SEAT_YAW) * -1, 0.26, CHAIR.z - 0.24 * Math.cos(SEAT_YAW) * -1);
     const AISLE = new T.Vector3(-0.4, 0, -0.2), PIN_SPOT = new T.Vector3(BOARD.x, 0, -2.3);
-    return { renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, board, dust, kaneShadow, clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, CHAIR, SEAT, SEAT_YAW, AISLE, PIN_SPOT, FACE, YOU, yaw: YOU };
+    const AWAY = new T.Vector3(-Math.sin(SEAT_YAW), 0, -Math.cos(SEAT_YAW));     // away from the desk
+    const OUT = CHAIR.clone().addScaledVector(AWAY, 0.5);                         // the chair pulled out
+    const SIDE = OUT.clone().addScaledVector(new T.Vector3(AWAY.z, 0, -AWAY.x), 0.55);  // beside it, room side
+    const STAND = OUT.clone().addScaledVector(AWAY, -0.3);                        // in front of the pulled-out chair
+    const SEAT_OUT = SEAT.clone().addScaledVector(AWAY, 0.5);                    // seated, before sliding in
+    return { renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, board, dust, kaneShadow, hemi, sun: moon, rim, lampLight, blinds, shaft, flash, clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, CHAIR, SEAT, SEAT_YAW, chair, OUT, SIDE, STAND, SEAT_OUT, AISLE, PIN_SPOT, FACE, YOU, yaw: YOU };
   }
 
   // ── Detective Kane: the CC0 robot, recoloured, with a fedora and a magnifying glass ───────
@@ -588,10 +649,26 @@
       },
     };
   }
-  const standUp = (rig, kane) => move(0.45, (k) => kane.model.position.lerpVectors(rig.SEAT, rig.CHAIR, k),
-    () => { if (rig.seated) kane.hold("Standing"); else kane.model.position.copy(rig.CHAIR); rig.seated = false; });
-  const sitDown = (rig, kane) => move(0.5, (k) => kane.model.position.lerpVectors(rig.CHAIR, rig.SEAT, k),
-    () => { rig.yaw = rig.SEAT_YAW; kane.model.rotation.y = rig.SEAT_YAW; kane.hold("Sitting"); rig.seated = true; });
+  const faceChair = (rig) => { rig.yaw = Math.atan2(rig.OUT.x - rig.SIDE.x, rig.OUT.z - rig.SIDE.z); };
+  const slideChair = (rig, kane, from, to, withKane) => move(0.6, (k) => {
+    rig.chair.position.lerpVectors(from, to, k);
+    if (withKane) kane.model.position.lerpVectors(withKane[0], withKane[1], k);
+  }, () => { if (!withKane) { kane.loop("Idle"); faceChair(rig); } });
+  const sitAtDesk = (rig, kane) => [
+    walkTo(rig, kane, rig.SIDE),
+    slideChair(rig, kane, rig.CHAIR, rig.OUT),                                 // pull the chair out
+    walkTo(rig, kane, rig.STAND),
+    move(0.5, (k) => kane.model.position.lerpVectors(rig.STAND, rig.SEAT_OUT, k),
+      () => { rig.yaw = rig.SEAT_YAW; kane.model.rotation.y = rig.SEAT_YAW; kane.hold("Sitting"); rig.seated = true; }),
+    slideChair(rig, kane, rig.OUT, rig.CHAIR, [rig.SEAT_OUT, rig.SEAT]),        // slide in to the desk
+  ];
+  const getUp = (rig, kane) => [
+    slideChair(rig, kane, rig.CHAIR, rig.OUT, [rig.SEAT, rig.SEAT_OUT]),        // slide back from the desk
+    move(0.45, (k) => kane.model.position.lerpVectors(rig.SEAT_OUT, rig.STAND, k),
+      () => { kane.hold("Standing"); rig.seated = false; }),
+    walkTo(rig, kane, rig.SIDE),
+    slideChair(rig, kane, rig.OUT, rig.CHAIR),                                 // push the chair back in
+  ];
   const pinCard = (rig, kane, tex) => {
     let pinned = false;
     return move(1.0, (k) => { if (!pinned && k > 0.45) { pinned = true; rig.board.add(tex); } },
@@ -599,7 +676,7 @@
   };
   const toBoardAndBack = (rig, kane, tex) => [
     walkTo(rig, kane, rig.AISLE), walkTo(rig, kane, rig.PIN_SPOT), pinCard(rig, kane, tex),
-    walkTo(rig, kane, rig.AISLE), walkTo(rig, kane, rig.CHAIR), sitDown(rig, kane),
+    walkTo(rig, kane, rig.AISLE), ...sitAtDesk(rig, kane),
   ];
 
   function plan(rig, kane, step) {
@@ -635,7 +712,7 @@
           const b = S.state.body;
           if (b && !b.result && k > 0.5) { b.result = a.failed ? "fail" : "pass"; S.draw(); if (a.failed) rig.alarmUntil = performance.now() + 2200; }
         }, () => { S.state.body = { kind: "check", label: a.label, result: null }; S.draw(); }),
-        standUp(rig, kane),
+        ...(rig.seated ? getUp(rig, kane) : []),
         move(1.8, (k) => { if (k >= 1) kane.face("Surprised", 0); },
           () => { rig.yaw = rig.YOU; kane.play(a.failed ? "No" : "Yes"); if (a.failed) kane.face("Surprised", 1); }),
         ...toBoardAndBack(rig, kane, tex),
@@ -654,7 +731,7 @@
       walkTo(rig, kane, rig.DOOR),
       move(1.7, (k) => door(1 - Math.min(1, k * 3)), () => { rig.yaw = rig.YOU; kane.loop("Idle"); kane.play("Wave"); }),
       walkTo(rig, kane, rig.PIN_SPOT), pinCard(rig, kane, tex),
-      walkTo(rig, kane, rig.AISLE), walkTo(rig, kane, rig.CHAIR), sitDown(rig, kane),
+      walkTo(rig, kane, rig.AISLE), ...sitAtDesk(rig, kane),
     ];
   }
 
@@ -693,6 +770,21 @@
       rig.renderer.setSize(w, h, false); rig.camera.aspect = w / h; rig.camera.updateProjectionMatrix();
     };
     fit();
+
+    // the time of day follows this computer's clock; the weather is a surprise each visit
+    const weather = ["clear", "clear", "cloudy", "rain", "rain", "storm", "fog"][Math.floor(Math.random() * 7)];
+    const label = document.createElement("div"); label.className = "kane3d-time"; stage.append(label);
+    const WEATHER_ICON = { clear: "☀", cloudy: "☁", rain: "🌧", storm: "⛈", fog: "🌫" };
+    let phase = null;
+    const tickMood = () => {
+      const d = new Date(), now = phaseOf(d);
+      if (now !== phase) { phase = now; applyMood(rig, phase, weather); }
+      const icon = weather === "clear" && phase === "night" ? "☾" : WEATHER_ICON[weather];
+      label.textContent = `${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · ${phase} · ${icon} ${weather}`;
+    };
+    tickMood();
+    setInterval(() => { if (canvas.isConnected) tickMood(); }, 20000);
+    let nextFlash = performance.now() + 4000;
     new ResizeObserver(fit).observe(canvas);
 
     // the case so far: a fresh case gets Kane's entrance; one already under way shows him at work,
@@ -777,6 +869,9 @@
       }
       if (now - rainAt > 60) { rig.win.update(Math.min(0.2, (now - rainAt) / 1000)); rainAt = now; }
       rig.dust.update(dt);
+      if (weather === "storm" && now > nextFlash) { rig.flashAt = now; nextFlash = now + 6000 + Math.random() * 9000; }
+      const f = rig.flashAt ? Math.max(0, 1 - (now - rig.flashAt) / 260) * (Math.sin((now - rig.flashAt) / 40) > -0.3 ? 1 : 0.3) : 0;
+      rig.flash.material.opacity = f * 0.85; rig.sun.intensity = rig.sunBase + f * 4;
       rig.kaneShadow.visible = kane.model.visible;
       rig.kaneShadow.position.set(kane.model.position.x, 0.009, kane.model.position.z);
       const d = new Date();

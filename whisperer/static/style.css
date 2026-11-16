@@ -784,3 +784,8 @@ details.card summary { cursor: pointer; font-weight: 700; }
 }
 .kane3d-screen span { display: block; padding: 4px 8px; font: 800 10.5px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: #ffd166; }
 .kane3d-screen canvas { display: block; width: 100%; height: auto; }
+.kane3d-time {  /* the time on this computer, and the weather outside Kane's window */
+  position: absolute; right: 12px; bottom: 12px; z-index: 2; padding: 6px 10px; border-radius: 8px;
+  background: rgba(21, 24, 42, .82); color: #f3eee5; font: 700 12.5px/1.2 var(--mono); letter-spacing: .04em;
+  border: 2px solid #f3eee5; text-transform: capitalize;
+}
