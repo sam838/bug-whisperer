@@ -777,3 +777,10 @@ details.card summary { cursor: pointer; font-weight: 700; }
   background: radial-gradient(ellipse at 45% 50%, transparent 58%, rgba(0, 0, 0, .5));
 }
 .room-acts .act { min-width: 0; overflow-wrap: anywhere; }  /* long text wraps inside its room */
+.kane3d-screen {  /* "Kane's screen": what his 3D monitor shows, readable while he sits in front of it */
+  position: absolute; top: 12px; left: 12px; width: min(30%, 280px); z-index: 2;
+  border: 3px solid #f3eee5; border-radius: 8px; overflow: hidden; background: #15182a;
+  box-shadow: 0 0 0 3px #15182a, 0 10px 24px -10px rgba(0, 0, 0, .7);
+}
+.kane3d-screen span { display: block; padding: 4px 8px; font: 800 10.5px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: #ffd166; }
+.kane3d-screen canvas { display: block; width: 100%; height: auto; }

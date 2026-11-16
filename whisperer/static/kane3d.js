@@ -95,9 +95,9 @@
         const b = state.body;
         if (b && b.kind === "check" && b.result) {  // the verdict, as a badge on the real page
           g.fillStyle = b.result === "fail" ? "rgba(179,38,30,.92)" : "rgba(15,122,82,.92)";
-          g.fillRect(380, 300, 240, 80);
-          g.fillStyle = "#fff"; g.font = "800 30px Inter, sans-serif";
-          g.fillText(b.result === "fail" ? "✗ Not as expected" : "✓ As expected", 392, 350);
+          g.fillRect(300, 300, 320, 80);
+          g.fillStyle = "#fff"; g.font = "800 28px Inter, sans-serif";
+          g.fillText(b.result === "fail" ? "✗ Not as expected" : "✓ As expected", 316, 350);
         }
         tex.needsUpdate = true;
         return;
@@ -134,7 +134,7 @@
       tex.needsUpdate = true;
     }
     draw();
-    return { tex, state, draw };
+    return { tex, state, draw, canvas: c };
   }
 
   function makeSign(T) {
@@ -316,9 +316,9 @@
     part(new T.CylinderGeometry(0.018, 0.018, 0.7), std(0x8a8a8a, 0.3, { metalness: 0.8 }), -0.72, 1.3, -0.25);
     const shade = part(new T.ConeGeometry(0.2, 0.22, 24, 1, true), std(0x2f6b4f, 0.4, { metalness: 0.4, side: T.DoubleSide }), -0.62, 1.66, -0.18);
     shade.rotation.z = -0.5;
-    // an office chair, pulled out to the side of the desk (out of the camera's view of the screen)
+    // an office chair in front of the computer: Kane sits here while he works
     const leather = std(0x2a2422, 0.45), steel = std(0x9aa0a8, 0.3, { metalness: 0.75 });
-    const chair = new T.Group(); chair.position.set(-2.05, 0, 0.14); chair.rotation.y = 2.67; scene.add(chair);
+    const chair = new T.Group(); chair.position.set(-1.09, 0, -0.46); chair.rotation.y = Math.PI / 4 + Math.PI; scene.add(chair);
     const cp = (geo, mat, x, y, z, rx = 0, ry = 0) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, 0); m.castShadow = m.receiveShadow = true; chair.add(m); return m; };
     for (let i = 0; i < 5; i++) {
       const a = i * Math.PI * 2 / 5;
@@ -332,6 +332,38 @@
     cp(new T.BoxGeometry(0.48, 0.5, 0.07), leather, 0, 0.92, -0.27, -0.12);
     cp(new T.BoxGeometry(0.42, 0.44, 0.04), std(0x3a302c, 0.6), 0, 0.92, -0.225, -0.12);
     [-0.27, 0.27].forEach((x) => { cp(new T.BoxGeometry(0.05, 0.04, 0.3), leather, x, 0.68, -0.02); cp(new T.BoxGeometry(0.03, 0.17, 0.03), steel, x, 0.6, -0.02); });
+
+    // the corkboard on the back wall, where Kane pins the case's evidence as he finds it
+    const corkTex = canvasTex(T, 512, 320, (g, w, h) => {
+      g.fillStyle = "#b8875a"; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 2400; i++) { g.fillStyle = i % 2 ? "rgba(70,40,15,.22)" : "rgba(255,240,215,.14)"; g.fillRect((i * 97) % w, (i * 57) % h, 2, 2); }
+    });
+    const BOARD = new T.Vector3(-0.25, 1.72, -2.965);
+    add(new T.Mesh(new T.BoxGeometry(1.72, 1.12, 0.05), std(0x6e4a2c, 0.7)), BOARD.x, BOARD.y, -2.985, { cast: false });
+    add(new T.Mesh(new T.PlaneGeometry(1.6, 1.0), std(0xffffff, 0.95, { map: corkTex })), BOARD.x, BOARD.y, BOARD.z - 0.004, { cast: false });
+    const pinned = new T.Group(); scene.add(pinned);
+    const board = {
+      cards: [],
+      add(tex) {
+        const slot = this.cards.length % 6, col = slot % 3, row = Math.floor(slot / 3);
+        if (this.cards.length >= 6) pinned.remove(this.cards[slot].group);  // a full board: the oldest card makes room
+        const group = new T.Group();
+        group.position.set(BOARD.x + (col - 1) * 0.5, BOARD.y + (row ? -0.23 : 0.22), BOARD.z + 0.01 + this.cards.length * 0.0005);
+        group.rotation.z = [0.05, -0.04, 0.03, -0.06, 0.04, -0.03][slot];
+        const card = new T.Mesh(new T.PlaneGeometry(0.42, 0.31), new T.MeshStandardMaterial({ map: tex, roughness: 0.9 }));
+        const pin = new T.Mesh(new T.SphereGeometry(0.022, 10, 8), std(0xc62828, 0.4)); pin.position.set(0, 0.13, 0.015);
+        group.add(card, pin); pinned.add(group);
+        this.cards[slot] = { group, pin };
+        // red string from the last card to this one
+        const prev = this.last, here = new T.Vector3(); pin.getWorldPosition(here);
+        if (prev) {
+          const mid = prev.clone().add(here).multiplyScalar(0.5); mid.y -= 0.06; mid.z += 0.01;
+          const curve = new T.QuadraticBezierCurve3(prev, mid, here);
+          pinned.add(new T.Line(new T.BufferGeometry().setFromPoints(curve.getPoints(16)), new T.LineBasicMaterial({ color: 0xd32f2f })));
+        }
+        this.last = here;
+      },
+    };
 
     // the door to the app's next page, with its sign
     const frameWood = std(0x2b1d12, 0.7);
@@ -351,8 +383,13 @@
     const DESK = new T.Vector3(-0.38, 0, -0.12), DOOR = new T.Vector3(1.45, 0, -2.25);
     const FACE = Math.atan2(-1.73 - DESK.x, -1.03 - DESK.z);  // toward the screen
     const YOU = -0.55;                                          // three-quarters toward the camera
-    const INSIDE = new T.Vector3(1.45, 0, -2.85);  // in the doorway, about to go through
-    return { renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, FACE, YOU, yaw: YOU };
+    const INSIDE = new T.Vector3(1.45, 0, -2.85);  // in the doorway
+    const CHAIR = new T.Vector3(-1.09, 0, -0.46);   // standing by the chair
+    const SEAT_YAW = Math.PI / 4 + Math.PI;           // facing the computer
+    // seated, the robot's hips sit 0.29 up and 0.24 behind its feet: lift and shift it onto the cushion
+    const SEAT = new T.Vector3(CHAIR.x - 0.24 * Math.sin(SEAT_YAW) * -1, 0.26, CHAIR.z - 0.24 * Math.cos(SEAT_YAW) * -1);
+    const AISLE = new T.Vector3(-0.4, 0, -0.2), PIN_SPOT = new T.Vector3(BOARD.x, 0, -2.3);
+    return { renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, board, clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, CHAIR, SEAT, SEAT_YAW, AISLE, PIN_SPOT, FACE, YOU, yaw: YOU };
   }
 
   // ── Detective Kane: the CC0 robot, recoloured, with a fedora and a magnifying glass ───────
@@ -436,6 +473,15 @@
         if (oneShot) oneShot.fadeOut(0.1);
         a.reset().fadeIn(0.15).play(); base.fadeOut(0.15); oneShot = a;
       },
+      // a one-off move whose last pose is kept (sitting down, standing up)
+      hold(name) {
+        const a = clips[name];
+        if (!a || a === base) return;
+        a.reset(); a.setLoop(T.LoopOnce, 1); a.clampWhenFinished = true;
+        a.fadeIn(0.15).play();
+        if (oneShot) { oneShot.fadeOut(0.1); oneShot = null; }
+        base.fadeOut(0.15); base = a;
+      },
       face(name, amount) {
         headMeshes.forEach((m) => {
           const i = m.morphTargetDictionary[name];
@@ -445,66 +491,104 @@
     };
   }
 
-  // ── actions: each a short timeline driven by one real step ────────────────────────────────
-  const DUR = { go: 5.0, type: 2.0, click: 1.4, check: 2.4, wait: 1.0 };
-
-  function start(rig, kane, step) {
-    const a = parseStep(step);
-    a.t = 0; a.dur = DUR[a.action] || 1;
-    const s = rig.screen;
-    if (a.action !== "go" && a.action !== "wait") rig.yaw = rig.FACE;  // turn to the screen
-    if (a.action === "type") s.state.body = { kind: "type", field: a.field, shown: "", caret: true };
-    if (a.action === "click") { s.state.body = { kind: "click", label: a.label, field: a.field, pressed: false }; kane.play("Punch"); }
-    if (a.action === "check") s.state.body = { kind: "check", label: a.label, result: null };
-    s.draw();
-    return a;
+  // ── evidence cards for the corkboard: always the case's real text ─────────────────────────
+  function cardTex(T, { title, body, mark, hand }) {
+    return canvasTex(T, 336, 248, (g, w, h) => {
+      g.fillStyle = "#fffcf2"; g.fillRect(0, 0, w, h);
+      g.fillStyle = "#6f6a62"; g.font = "700 15px 'JetBrains Mono', monospace"; g.fillText(String(title).toUpperCase(), 16, 28);
+      if (mark) {
+        g.fillStyle = mark === "fail" ? "#b3261e" : "#0f7a52"; g.font = "800 46px Inter, sans-serif";
+        g.fillText(mark === "fail" ? "✗" : "✓", w - 52, 46);
+      }
+      g.fillStyle = hand ? "#1f3a8a" : "#23201b";
+      g.font = hand ? "600 25px Caveat, cursive" : "600 17px Inter, sans-serif";
+      wrapText(g, body, 16, hand ? 62 : 60, w - 32, hand ? 28 : 23, hand ? 6 : 7);
+    });
   }
 
-  function tick(rig, kane, a, dt, speed) {
-    a.t += dt * speed;
-    const p = Math.min(1, a.t / a.dur);
-    const body = kane.model;
+  // ── actions: each real step becomes a short script of moves ──────────────────────────────
+  // A move: { dur (seconds), enter(), run(k) with k from 0 to 1 }.
+  const move = (dur, run = () => {}, enter = () => {}) => ({ dur, run, enter });
+
+  function walkTo(rig, kane, target) {
+    let from;
+    return {
+      get dur() { return from ? Math.max(0.35, from.distanceTo(target) / 1.3) : 1; },
+      enter() { from = kane.model.position.clone(); from.y = 0; kane.loop("Walking"); rig.seated = false; },
+      run(k) {
+        kane.model.position.lerpVectors(from, target, k);
+        rig.yaw = Math.atan2(target.x - from.x, target.z - from.z); kane.model.rotation.y = rig.yaw;
+      },
+    };
+  }
+  const standUp = (rig, kane) => move(0.45, (k) => kane.model.position.lerpVectors(rig.SEAT, rig.CHAIR, k),
+    () => { if (rig.seated) kane.hold("Standing"); else kane.model.position.copy(rig.CHAIR); rig.seated = false; });
+  const sitDown = (rig, kane) => move(0.5, (k) => kane.model.position.lerpVectors(rig.CHAIR, rig.SEAT, k),
+    () => { rig.yaw = rig.SEAT_YAW; kane.model.rotation.y = rig.SEAT_YAW; kane.hold("Sitting"); rig.seated = true; });
+  const pinCard = (rig, kane, tex) => {
+    let pinned = false;
+    return move(1.0, (k) => { if (!pinned && k > 0.45) { pinned = true; rig.board.add(tex); } },
+      () => { rig.yaw = Math.PI; kane.model.rotation.y = Math.PI; kane.loop("Idle"); kane.play("Punch"); });  // he presses the pin in
+  };
+  const toBoardAndBack = (rig, kane, tex) => [
+    walkTo(rig, kane, rig.AISLE), walkTo(rig, kane, rig.PIN_SPOT), pinCard(rig, kane, tex),
+    walkTo(rig, kane, rig.AISLE), walkTo(rig, kane, rig.CHAIR), sitDown(rig, kane),
+  ];
+
+  function plan(rig, kane, step) {
+    const a = parseStep(step), S = rig.screen, T = window.THREE;
     if (a.action === "go") {
-      // Going to a page: he walks to the door, it opens outward onto the lit doorway, he steps
-      // through and is gone, the door closes and the sign changes to the page he went to, then
-      // the door opens and he comes back out and returns to the desk.
-      const home = rig.DESK, door = rig.DOOR, inside = rig.INSIDE;
-      const span = (from, to) => Math.min(1, Math.max(0, (p - from) / (to - from)));
-      const walk = (from, to, k, yaw) => { kane.loop("Walking"); body.position.lerpVectors(from, to, k); body.rotation.y = rig.yaw = yaw; };
-      let open = 0;
-      if (p < 0.24) walk(home, door, span(0, 0.24), Math.atan2(door.x - home.x, door.z - home.z));
-      else if (p < 0.32) { kane.loop("Idle"); body.rotation.y = rig.yaw = Math.PI; open = span(0.24, 0.32); }
-      else if (p < 0.42) { walk(door, inside, span(0.32, 0.42), Math.PI); open = 1; }
-      else if (p < 0.5) { body.visible = false; open = 1 - span(0.42, 0.5); }
-      else if (p < 0.58) {
-        if (!a.signed) { a.signed = true; rig.sign.set(a.label); rig.screen.state.path = a.label; rig.screen.state.body = null; rig.screen.draw(); }
-        open = span(0.5, 0.58); body.visible = p > 0.55; body.position.copy(inside); body.rotation.y = rig.yaw = 0;
-      } else if (p < 0.68) { body.visible = true; walk(inside, door, span(0.58, 0.68), 0); open = 1; }
-      else if (p < 0.74) { kane.loop("Idle"); open = 1 - span(0.68, 0.74); }
-      else walk(door, home, span(0.74, 1), Math.atan2(home.x - door.x, home.z - door.z));
-      if (p < 0.42 && rig.screen.state.body?.kind !== "loading" && !rig.screen.state.live) { rig.screen.state.body = { kind: "loading" }; rig.screen.draw(); }
-      rig.hinge.rotation.y = open * 1.35;  // outward, away from the room
-      rig.doorLight.intensity = open * 1.8;
-      if (p >= 1) { body.visible = true; body.position.copy(home); rig.yaw = rig.YOU; kane.loop("Idle"); }
-    } else if (a.action === "type") {
-      kane.loop("Idle");
-      const shown = a.value.slice(0, Math.ceil(a.value.length * Math.min(1, p / 0.8)));
-      const b = rig.screen.state.body;
-      if (b && (b.shown !== shown || b.caret !== p < 1)) { b.shown = shown; b.caret = p < 1; rig.screen.draw(); }
-    } else if (a.action === "click") {
-      const b = rig.screen.state.body, pressed = p > 0.3 && p < 0.65;
-      if (b && b.pressed !== pressed) { b.pressed = pressed; rig.screen.draw(); }
-    } else if (a.action === "check") {
-      const b = rig.screen.state.body;
-      if (b && !b.result && p > 0.35) {
-        b.result = a.failed ? "fail" : "pass"; rig.screen.draw(); rig.yaw = rig.YOU;  // turn to you with the verdict
-        if (a.failed) { kane.play("No"); kane.face("Surprised", 1); rig.alarmUntil = performance.now() + 2200; }
-        else kane.play("Yes");
-      }
-      if (p >= 1) kane.face("Surprised", 0);
+      // at the computer: the address bar types the page, it loads, the door's sign shows where he is
+      return [move(1.5, (k) => {
+        const typed = a.label.slice(0, Math.ceil(a.label.length * Math.min(1, k / 0.55)));
+        if (S.state.path !== typed || (k > 0.95 && S.state.body)) {
+          S.state.path = typed; S.state.body = k < 0.95 ? { kind: "loading" } : null; S.draw();
+        }
+        if (k > 0.95 && !a.signed) { a.signed = true; rig.sign.set(a.label); }
+      })];
     }
-    if (p >= 1 && a.action !== "go") rig.yaw = rig.YOU;  // done: back to you
-    return p >= 1;
+    if (a.action === "type") {
+      return [move(2.0, (k) => {
+        const shown = a.value.slice(0, Math.ceil(a.value.length * Math.min(1, k / 0.8)));
+        const b = S.state.body;
+        if (b && (b.shown !== shown || b.caret !== k < 1)) { b.shown = shown; b.caret = k < 1; S.draw(); }
+      }, () => { S.state.body = { kind: "type", field: a.field, shown: "", caret: true }; S.draw(); })];
+    }
+    if (a.action === "click") {
+      return [move(1.1, (k) => {
+        const b = S.state.body, pressed = k > 0.3 && k < 0.65;
+        if (b && b.pressed !== pressed) { b.pressed = pressed; S.draw(); }
+      }, () => { S.state.body = { kind: "click", label: a.label, field: a.field, pressed: false }; S.draw(); })];
+    }
+    if (a.action === "check") {
+      // the result on screen; he stands, turns to you to nod or shake his head, then pins it up
+      const tex = cardTex(T, { title: a.failed ? "Clue: not as expected" : "Checked", body: a.label, mark: a.failed ? "fail" : "pass" });
+      return [
+        move(1.1, (k) => {
+          const b = S.state.body;
+          if (b && !b.result && k > 0.5) { b.result = a.failed ? "fail" : "pass"; S.draw(); if (a.failed) rig.alarmUntil = performance.now() + 2200; }
+        }, () => { S.state.body = { kind: "check", label: a.label, result: null }; S.draw(); }),
+        standUp(rig, kane),
+        move(1.8, (k) => { if (k >= 1) kane.face("Surprised", 0); },
+          () => { rig.yaw = rig.YOU; kane.play(a.failed ? "No" : "Yes"); if (a.failed) kane.face("Surprised", 1); }),
+        ...toBoardAndBack(rig, kane, tex),
+      ];
+    }
+    return [move(0.6)];
+  }
+
+  // the case opens: Kane comes in through the door, pins the witness statement, sits at the computer
+  function entrance(rig, kane, statement) {
+    const T = window.THREE;
+    const tex = cardTex(T, { title: "Witness statement", body: statement || "(the user's report)", hand: true });
+    const door = (k) => { rig.hinge.rotation.y = k * 1.35; rig.doorLight.intensity = k * 1.8; };
+    return [
+      move(0.6, door, () => { kane.model.position.copy(rig.INSIDE); kane.model.visible = true; rig.yaw = 0; kane.model.rotation.y = 0; rig.seated = false; }),
+      walkTo(rig, kane, rig.DOOR),
+      move(1.7, (k) => door(1 - Math.min(1, k * 3)), () => { rig.yaw = rig.YOU; kane.loop("Idle"); kane.play("Wave"); }),
+      walkTo(rig, kane, rig.PIN_SPOT), pinCard(rig, kane, tex),
+      walkTo(rig, kane, rig.AISLE), walkTo(rig, kane, rig.CHAIR), sitDown(rig, kane),
+    ];
   }
 
   // ── wiring it to the page ─────────────────────────────────────────────────────────────────
@@ -515,6 +599,7 @@
     let rig, kane;
     try {
       await loadEngine();
+      if (document.fonts) await Promise.all(["600 25px Caveat", "600 17px Inter"].map((f) => document.fonts.load(f).catch(() => {})));
       rig = buildOffice(window.THREE, canvas);
       kane = await loadKane(window.THREE, rig);
     } catch (e) {
@@ -523,8 +608,15 @@
     }
     stage.classList.add("ready");
     stage.dataset.ready = "1";
-    const queue = [];
-    let seen = trackerSteps().total, current = null, last = performance.now(), lastDraw = 0, rainAt = 0;
+    const T = window.THREE;
+
+    // "Kane's screen": the same picture as the 3D monitor, readable even with Kane sitting in front of it
+    const hud = document.createElement("div");
+    hud.className = "kane3d-screen";
+    hud.innerHTML = "<span>Kane's screen</span>";
+    hud.append(rig.screen.canvas);
+    stage.append(hud);
+
     const fit = () => {
       const w = canvas.clientWidth, h = canvas.clientHeight;
       if (!w || !h) return;
@@ -533,14 +625,30 @@
     fit();
     new ResizeObserver(fit).observe(canvas);
 
-    // where Kane already is when the page opens: the latest page he went to
-    const already = trackerSteps().steps.filter((s) => s.kind === "go").pop();
-    if (already) { const a = parseStep(already); rig.sign.set(a.label); rig.screen.state.path = a.label; rig.screen.draw(); }
-    kane.play("Wave");  // he greets you when you join him at the scene
+    // the case so far: a fresh case gets Kane's entrance; one already under way shows him at work,
+    // with the statement and the checks he has already made pinned up
+    const statement = (document.querySelector("#live .complaint")?.textContent || "").trim();
+    const sofar = trackerSteps();
+    const script = [];
+    if (sofar.total === 0) {
+      kane.model.visible = false;
+      script.push(...entrance(rig, kane, statement));
+    } else {
+      rig.board.add(cardTex(T, { title: "Witness statement", body: statement, hand: true }));
+      sofar.steps.filter((st) => st.kind === "check" || st.kind === "look").forEach((st) => {
+        const a = parseStep(st);
+        rig.board.add(cardTex(T, { title: a.failed ? "Clue: not as expected" : "Checked", body: a.label, mark: a.failed ? "fail" : "pass" }));
+      });
+      const go = sofar.steps.filter((st) => st.kind === "go").pop();
+      if (go) { const a = parseStep(go); rig.sign.set(a.label); rig.screen.state.path = a.label; rig.screen.draw(); }
+      kane.model.position.copy(rig.SEAT); rig.yaw = rig.SEAT_YAW; kane.model.rotation.y = rig.SEAT_YAW;
+      kane.hold("Sitting"); rig.seated = true;
+    }
 
+    let seen = sofar.total, current = null, last = performance.now(), lastDraw = 0, rainAt = 0;
     const update = () => {
       const now = trackerSteps();
-      if (now.total > seen) { now.steps.slice(-(now.total - seen)).forEach((s) => queue.push(s)); seen = now.total; }
+      if (now.total > seen) { now.steps.slice(-(now.total - seen)).forEach((st) => script.push({ step: st })); seen = now.total; }
     };
     document.addEventListener("kane:update", update);
 
@@ -560,26 +668,42 @@
     };
     pollLive();
 
+    // the next move: queued steps are expanded into their moves as they come up
+    const nextMove = () => {
+      while (script.length) {
+        const item = script.shift();
+        if (item.step) { script.unshift(...plan(rig, kane, item.step)); continue; }
+        item.enter(); item.t = 0;
+        return item;
+      }
+      return null;
+    };
+
     const frame = (now) => {
       if (!canvas.isConnected) { document.removeEventListener("kane:update", update); rig.renderer.dispose(); return; }
       requestAnimationFrame(frame);
       if (document.hidden || now - lastDraw < 30) return;  // about 30 frames a second, none when hidden
       const dt = Math.min(0.1, (now - last) / 1000); last = now; lastDraw = now;
-      const mode = document.querySelector("#live .scene-live")?.dataset.mode || "idle";
-      if (!current && queue.length) current = start(rig, kane, queue.shift());
-      const speed = queue.length > 2 ? 2.2 : queue.length ? 1.4 : 1;  // catch up when Kane is quick
+      const backlog = script.filter((x) => x.step).length;
+      const speed = backlog > 2 ? 2.2 : backlog ? 1.4 : 1;  // catch up when Kane is quick
+      if (!current) current = nextMove();
       kane.mixer.update(dt * (current ? speed : 1));
-      const turn = Math.atan2(Math.sin(rig.yaw - kane.model.rotation.y), Math.cos(rig.yaw - kane.model.rotation.y));
-      kane.model.rotation.y += turn * Math.min(1, dt * 7);
       if (current) {
-        kane.bubble.visible = false;
-        if (tick(rig, kane, current, dt, speed)) current = null;
-      } else {
-        kane.bubble.visible = trackerSteps().thinking || mode === "reading";
-        kane.bubble.position.set(kane.model.position.x + 0.32, 2.2 + Math.sin(now / 300) * 0.03, kane.model.position.z);
-        if (mode === "reading" && rig.screen.state.body?.kind !== "note") {
-          rig.screen.state.body = { kind: "note", label: "Claude is writing my orders…" }; rig.screen.draw();
-        }
+        current.t += dt * speed;
+        const k = Math.min(1, current.t / current.dur);
+        current.run(k);
+        if (k >= 1) current = null;
+      }
+      if (!rig.seated || !current) {  // turn smoothly toward where he means to face
+        const turn = Math.atan2(Math.sin(rig.yaw - kane.model.rotation.y), Math.cos(rig.yaw - kane.model.rotation.y));
+        kane.model.rotation.y += turn * Math.min(1, dt * 7);
+      }
+      const mode = document.querySelector("#live .scene-live")?.dataset.mode || "idle";
+      kane.bubble.visible = !current && (trackerSteps().thinking || mode === "reading");
+      const head = kane.model.position;
+      kane.bubble.position.set(head.x + 0.3, (rig.seated ? 1.85 : 2.2) + Math.sin(now / 300) * 0.03, head.z);
+      if (!current && mode === "reading" && rig.screen.state.body?.kind !== "note") {
+        rig.screen.state.body = { kind: "note", label: "Claude is writing my orders…" }; rig.screen.draw();
       }
       if (now - rainAt > 60) { rig.win.update(Math.min(0.2, (now - rainAt) / 1000)); rainAt = now; }
       const d = new Date();
