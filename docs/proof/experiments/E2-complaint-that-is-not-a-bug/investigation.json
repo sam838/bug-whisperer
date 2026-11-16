@@ -1,0 +1,315 @@
+{
+  "report": "cant add a patient!!! i put the name and press add and it says something red. pls fix asap",
+  "app": "Clinic Records",
+  "screenshot": null,
+  "id": "20261116-221518-01af",
+  "app_file": null,
+  "created": "2026-11-16 22:15",
+  "status": "done",
+  "verdict": "not_reproduced",
+  "plan": {
+    "understanding": "The user opened the New patient form, typed only the patient's full name, clicked 'Add patient', and got a red error instead of a saved patient.",
+    "enough_info": true,
+    "question": "",
+    "expected": "A new patient with only a full name filled in is saved: the app leaves the form and shows the new patient's record (or the patient list), with no red error.",
+    "objective": "Go to http://127.0.0.1:8001/login. Enter {{account1_email}} in the Email field. Enter {{account1_password}} in the Password field. Click 'Log in'. Go to http://127.0.0.1:8001/patients/new. Enter 'Maria Lopez' in the Full name field. Leave Phone, Date of birth, Diagnosis and Notes empty. Click 'Add patient'. Store what the page shows after that as 'what_happened'. Verify that the page shows the patient 'Maria Lopez' and no red error message.",
+    "_cost_usd": 0.2287212
+  },
+  "kane": {
+    "verdict": "passed",
+    "exit_code": 0,
+    "status": "passed",
+    "reason": "Objective completed",
+    "summary": "Entered \u201cMaria Lopez\u201d as the full name and left the Phone, Date of birth, Diagnosis, and Notes fields blank.\nClicked \u201cAdd patient\u201d to create the patient record.\nThe patient profile for Maria Lopez was displayed, with no red error message shown.",
+    "final_state": {
+      "url": "http://127.0.0.1:8001/patients/457",
+      "patient_name": "Maria Lopez",
+      "red_error_message_visible": "false"
+    },
+    "failed_step": null,
+    "steps": [
+      "navigate: Navigate to http://127.0.0.1:8001/login",
+      "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+      "type: Type \"{{global.account1_email}}\" into \"Email\"",
+      "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+      "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+      "click: Clicking Log in button",
+      "wait: Waiting confirm successful login on the Patients page",
+      "navigate: Navigate to http://127.0.0.1:8001/patients/new",
+      "type: Typing Maria Lopez into the Full name field",
+      "click: Clicking Add patient",
+      "wait: PRIMARY: wait for the patient details page to load",
+      "analyze: ANALYZE(textual_visual, 'What the page shows after that is stored as {{what_happ",
+      "assert: the page shows the patient 'Maria Lopez' and no red error message"
+    ],
+    "errors": [],
+    "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\fb3503ac-a380-4d22-8e9b-a0a68dca2d2c",
+    "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M7JEVECMRZN1GMVEVTKD1DX7/dashboard/share/US_F2RIGCMCIL2GW8VYBSPSFEHFSO9B9OV23370BCV1B0Z949IJSAHBLBD71YG03YKJ?type=summary&agentView=true&fqdn=summary-page",
+    "credits": 32.19983500000001,
+    "duration": 126.5,
+    "attempt": 1,
+    "shots": [
+      {
+        "ordinal": 1,
+        "file": "001.jpg",
+        "summary": "navigate: Navigate to http://127.0.0.1:8001/login",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 2,
+        "file": "002.jpg",
+        "summary": "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 3,
+        "file": "003.png",
+        "summary": "type: Type \"{{global.account1_email}}\" into \"Email\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 4,
+        "file": "004.jpg",
+        "summary": "",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 5,
+        "file": "005.jpg",
+        "summary": "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 6,
+        "file": "006.png",
+        "summary": "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 7,
+        "file": "007.jpg",
+        "summary": "",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 8,
+        "file": "008.png",
+        "summary": "click: Clicking Log in button",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 9,
+        "file": "009.jpg",
+        "summary": "wait: Waiting confirm successful login on the Patients page",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients"
+      },
+      {
+        "ordinal": 10,
+        "file": "010.jpg",
+        "summary": "navigate: Navigate to http://127.0.0.1:8001/patients/new",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients/new"
+      },
+      {
+        "ordinal": 11,
+        "file": "011.png",
+        "summary": "type: Typing Maria Lopez into the Full name field",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients/new"
+      },
+      {
+        "ordinal": 12,
+        "file": "012.png",
+        "summary": "click: Clicking Add patient",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients/new"
+      },
+      {
+        "ordinal": 13,
+        "file": "013.jpg",
+        "summary": "wait: PRIMARY: wait for the patient details page to load",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients/457"
+      },
+      {
+        "ordinal": 14,
+        "file": "014.jpg",
+        "summary": "analyze: ANALYZE(textual_visual, 'What the page shows after that is stored as {{what_happ",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients/457"
+      },
+      {
+        "ordinal": 15,
+        "file": "015.jpg",
+        "summary": "assert: the page shows the patient 'Maria Lopez' and no red error message",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients/457"
+      }
+    ],
+    "failure_title": null,
+    "shots_dir": "shots-reproduce-1"
+  },
+  "judgement": {},
+  "attempts": [
+    {
+      "objective": "Go to http://127.0.0.1:8001/login. Enter {{account1_email}} in the Email field. Enter {{account1_password}} in the Password field. Click 'Log in'. Go to http://127.0.0.1:8001/patients/new. Enter 'Maria Lopez' in the Full name field. Leave Phone, Date of birth, Diagnosis and Notes empty. Click 'Add patient'. Store what the page shows after that as 'what_happened'. Verify that the page shows the patient 'Maria Lopez' and no red error message.",
+      "kane": {
+        "verdict": "passed",
+        "exit_code": 0,
+        "status": "passed",
+        "reason": "Objective completed",
+        "summary": "Entered \u201cMaria Lopez\u201d as the full name and left the Phone, Date of birth, Diagnosis, and Notes fields blank.\nClicked \u201cAdd patient\u201d to create the patient record.\nThe patient profile for Maria Lopez was displayed, with no red error message shown.",
+        "final_state": {
+          "url": "http://127.0.0.1:8001/patients/457",
+          "patient_name": "Maria Lopez",
+          "red_error_message_visible": "false"
+        },
+        "failed_step": null,
+        "steps": [
+          "navigate: Navigate to http://127.0.0.1:8001/login",
+          "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+          "type: Type \"{{global.account1_email}}\" into \"Email\"",
+          "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+          "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+          "click: Clicking Log in button",
+          "wait: Waiting confirm successful login on the Patients page",
+          "navigate: Navigate to http://127.0.0.1:8001/patients/new",
+          "type: Typing Maria Lopez into the Full name field",
+          "click: Clicking Add patient",
+          "wait: PRIMARY: wait for the patient details page to load",
+          "analyze: ANALYZE(textual_visual, 'What the page shows after that is stored as {{what_happ",
+          "assert: the page shows the patient 'Maria Lopez' and no red error message"
+        ],
+        "errors": [],
+        "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\fb3503ac-a380-4d22-8e9b-a0a68dca2d2c",
+        "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M7JEVECMRZN1GMVEVTKD1DX7/dashboard/share/US_F2RIGCMCIL2GW8VYBSPSFEHFSO9B9OV23370BCV1B0Z949IJSAHBLBD71YG03YKJ?type=summary&agentView=true&fqdn=summary-page",
+        "credits": 32.19983500000001,
+        "duration": 126.5,
+        "attempt": 1,
+        "shots": [
+          {
+            "ordinal": 1,
+            "file": "001.jpg",
+            "summary": "navigate: Navigate to http://127.0.0.1:8001/login",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 2,
+            "file": "002.jpg",
+            "summary": "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 3,
+            "file": "003.png",
+            "summary": "type: Type \"{{global.account1_email}}\" into \"Email\"",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 4,
+            "file": "004.jpg",
+            "summary": "",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 5,
+            "file": "005.jpg",
+            "summary": "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 6,
+            "file": "006.png",
+            "summary": "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 7,
+            "file": "007.jpg",
+            "summary": "",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 8,
+            "file": "008.png",
+            "summary": "click: Clicking Log in button",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 9,
+            "file": "009.jpg",
+            "summary": "wait: Waiting confirm successful login on the Patients page",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/patients"
+          },
+          {
+            "ordinal": 10,
+            "file": "010.jpg",
+            "summary": "navigate: Navigate to http://127.0.0.1:8001/patients/new",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/patients/new"
+          },
+          {
+            "ordinal": 11,
+            "file": "011.png",
+            "summary": "type: Typing Maria Lopez into the Full name field",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/patients/new"
+          },
+          {
+            "ordinal": 12,
+            "file": "012.png",
+            "summary": "click: Clicking Add patient",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/patients/new"
+          },
+          {
+            "ordinal": 13,
+            "file": "013.jpg",
+            "summary": "wait: PRIMARY: wait for the patient details page to load",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/patients/457"
+          },
+          {
+            "ordinal": 14,
+            "file": "014.jpg",
+            "summary": "analyze: ANALYZE(textual_visual, 'What the page shows after that is stored as {{what_happ",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/patients/457"
+          },
+          {
+            "ordinal": 15,
+            "file": "015.jpg",
+            "summary": "assert: the page shows the patient 'Maria Lopez' and no red error message",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/patients/457"
+          }
+        ],
+        "failure_title": null,
+        "shots_dir": "shots-reproduce-1"
+      }
+    }
+  ],
+  "fix": {},
+  "fix_history": [],
+  "claim": {},
+  "note": "Proof experiment E2-complaint-that-is-not-a-bug (pre-registered in docs/proof/experiments.json)",
+  "guard": []
+}

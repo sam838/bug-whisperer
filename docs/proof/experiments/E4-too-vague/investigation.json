@@ -1,0 +1,26 @@
+{
+  "report": "it doesnt work",
+  "app": "Clinic Records",
+  "screenshot": null,
+  "id": "20261116-222052-c57b",
+  "app_file": null,
+  "created": "2026-11-16 22:20",
+  "status": "done",
+  "verdict": "needs_info",
+  "plan": {
+    "understanding": "The user hit some problem in Clinic Records, but the report doesn't say which page, action or result was wrong.",
+    "enough_info": false,
+    "question": "What were you trying to do when it didn't work (for example log in, add a patient, or book an appointment)? Which values did you enter, and what did the page show instead of what you expected?",
+    "expected": "",
+    "objective": "",
+    "_cost_usd": 0.1493787
+  },
+  "kane": {},
+  "judgement": {},
+  "attempts": [],
+  "fix": {},
+  "fix_history": [],
+  "claim": {},
+  "note": "Proof experiment E4-too-vague (pre-registered in docs/proof/experiments.json)",
+  "guard": []
+}

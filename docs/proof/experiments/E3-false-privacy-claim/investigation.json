@@ -1,0 +1,255 @@
+{
+  "report": "i logged in as sunrise clinic and in my patient list i can see harbor clinic's patients too!! that is private medical data, you have to fix this now",
+  "app": "Clinic Records",
+  "screenshot": null,
+  "id": "20261116-221823-0adc",
+  "app_file": null,
+  "created": "2026-11-16 22:18",
+  "status": "done",
+  "verdict": "not_reproduced",
+  "plan": {
+    "understanding": "The user logged in as Sunrise Clinic, opened the patient list, and saw Harbor Clinic's patients there as well as Sunrise's, so private patient records are showing up for the wrong clinic.",
+    "enough_info": true,
+    "question": "",
+    "expected": "After logging in as Sunrise Clinic, the patient list shows only Sunrise Clinic's own patients. No Harbor Clinic patient, such as Liam O'Connor, Sofia Rossi or Kenji Watanabe, appears there.",
+    "objective": "Go to http://127.0.0.1:8001/login. Type {{account1_email}} in the Email field. Type {{account1_password}} in the Password field. Click the Log in button. Go to http://127.0.0.1:8001/patients. Store the names in the patient list as 'what_happened'. Verify that the patient list does not contain Liam O'Connor, Sofia Rossi or Kenji Watanabe.",
+    "_cost_usd": 0.2503816
+  },
+  "kane": {
+    "verdict": "passed",
+    "exit_code": 0,
+    "status": "passed",
+    "reason": "Objective completed",
+    "summary": "Logged in using the provided account credentials.\nOpened the patient list page.\nThe patient list contained Aisha Rahman, James Carter, Maria Santos, and Tom Becker.\nConfirmed that Liam O'Connor, Sofia Rossi, and Kenji Watanabe were not listed.",
+    "final_state": {
+      "url": "http://127.0.0.1:8001/patients",
+      "patient_names": "Aisha Rahman, James Carter, Maria Santos, Tom Becker",
+      "liam_oconnor_present": "false",
+      "sofia_rossi_present": "false",
+      "kenji_watanabe_present": "false"
+    },
+    "failed_step": null,
+    "steps": [
+      "navigate: Navigate to http://127.0.0.1:8001/login",
+      "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+      "type: Type \"{{global.account1_email}}\" into \"Email\"",
+      "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+      "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+      "click: Clicking the Log in button",
+      "wait: PRIMARY: wait for the Patients page to finish loading",
+      "analyze: ANALYZE(textual_visual, 'the names in the patient list are stored as {{what_happ",
+      "assert: the patient list does not contain Liam O'Connor, Sofia Rossi or Kenji Watanabe."
+    ],
+    "errors": [],
+    "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\7c1f324e-4a34-41bc-89e1-70b8542f5bf0",
+    "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M7JF14W19E7QA3FAAKZVQ66X/dashboard/share/US_AX6DWWVIZ1R774GYXQEQQ1S47ZXRO5BVD1DHK8CNWJ8JCUN6P09YU2NAH16SPCYR?type=summary&agentView=true&fqdn=summary-page",
+    "credits": 23.631185,
+    "duration": 89.5,
+    "attempt": 1,
+    "shots": [
+      {
+        "ordinal": 1,
+        "file": "001.jpg",
+        "summary": "navigate: Navigate to http://127.0.0.1:8001/login",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 2,
+        "file": "002.jpg",
+        "summary": "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 3,
+        "file": "003.png",
+        "summary": "type: Type \"{{global.account1_email}}\" into \"Email\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 4,
+        "file": "004.jpg",
+        "summary": "",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 5,
+        "file": "005.jpg",
+        "summary": "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 6,
+        "file": "006.png",
+        "summary": "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 7,
+        "file": "007.jpg",
+        "summary": "",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 8,
+        "file": "008.png",
+        "summary": "click: Clicking the Log in button",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/login"
+      },
+      {
+        "ordinal": 9,
+        "file": "009.jpg",
+        "summary": "wait: PRIMARY: wait for the Patients page to finish loading",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients"
+      },
+      {
+        "ordinal": 10,
+        "file": "010.jpg",
+        "summary": "analyze: ANALYZE(textual_visual, 'the names in the patient list are stored as {{what_happ",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients"
+      },
+      {
+        "ordinal": 11,
+        "file": "011.jpg",
+        "summary": "assert: the patient list does not contain Liam O'Connor, Sofia Rossi or Kenji Watanabe.",
+        "status": "passed",
+        "url": "http://127.0.0.1:8001/patients"
+      }
+    ],
+    "failure_title": null,
+    "shots_dir": "shots-reproduce-1"
+  },
+  "judgement": {},
+  "attempts": [
+    {
+      "objective": "Go to http://127.0.0.1:8001/login. Type {{account1_email}} in the Email field. Type {{account1_password}} in the Password field. Click the Log in button. Go to http://127.0.0.1:8001/patients. Store the names in the patient list as 'what_happened'. Verify that the patient list does not contain Liam O'Connor, Sofia Rossi or Kenji Watanabe.",
+      "kane": {
+        "verdict": "passed",
+        "exit_code": 0,
+        "status": "passed",
+        "reason": "Objective completed",
+        "summary": "Logged in using the provided account credentials.\nOpened the patient list page.\nThe patient list contained Aisha Rahman, James Carter, Maria Santos, and Tom Becker.\nConfirmed that Liam O'Connor, Sofia Rossi, and Kenji Watanabe were not listed.",
+        "final_state": {
+          "url": "http://127.0.0.1:8001/patients",
+          "patient_names": "Aisha Rahman, James Carter, Maria Santos, Tom Becker",
+          "liam_oconnor_present": "false",
+          "sofia_rossi_present": "false",
+          "kenji_watanabe_present": "false"
+        },
+        "failed_step": null,
+        "steps": [
+          "navigate: Navigate to http://127.0.0.1:8001/login",
+          "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+          "type: Type \"{{global.account1_email}}\" into \"Email\"",
+          "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+          "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+          "click: Clicking the Log in button",
+          "wait: PRIMARY: wait for the Patients page to finish loading",
+          "analyze: ANALYZE(textual_visual, 'the names in the patient list are stored as {{what_happ",
+          "assert: the patient list does not contain Liam O'Connor, Sofia Rossi or Kenji Watanabe."
+        ],
+        "errors": [],
+        "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\7c1f324e-4a34-41bc-89e1-70b8542f5bf0",
+        "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M7JF14W19E7QA3FAAKZVQ66X/dashboard/share/US_AX6DWWVIZ1R774GYXQEQQ1S47ZXRO5BVD1DHK8CNWJ8JCUN6P09YU2NAH16SPCYR?type=summary&agentView=true&fqdn=summary-page",
+        "credits": 23.631185,
+        "duration": 89.5,
+        "attempt": 1,
+        "shots": [
+          {
+            "ordinal": 1,
+            "file": "001.jpg",
+            "summary": "navigate: Navigate to http://127.0.0.1:8001/login",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 2,
+            "file": "002.jpg",
+            "summary": "wait: queued plan (3 steps): type \"Email\"; type \"Password\"; click \"Log in\"",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 3,
+            "file": "003.png",
+            "summary": "type: Type \"{{global.account1_email}}\" into \"Email\"",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 4,
+            "file": "004.jpg",
+            "summary": "",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 5,
+            "file": "005.jpg",
+            "summary": "wait: queued plan (2 steps): type \"Password\"; click \"Log in\"",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 6,
+            "file": "006.png",
+            "summary": "type: Type \"{{secrets.user.account1_password}}\" into \"Password\"",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 7,
+            "file": "007.jpg",
+            "summary": "",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 8,
+            "file": "008.png",
+            "summary": "click: Clicking the Log in button",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/login"
+          },
+          {
+            "ordinal": 9,
+            "file": "009.jpg",
+            "summary": "wait: PRIMARY: wait for the Patients page to finish loading",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/patients"
+          },
+          {
+            "ordinal": 10,
+            "file": "010.jpg",
+            "summary": "analyze: ANALYZE(textual_visual, 'the names in the patient list are stored as {{what_happ",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/patients"
+          },
+          {
+            "ordinal": 11,
+            "file": "011.jpg",
+            "summary": "assert: the patient list does not contain Liam O'Connor, Sofia Rossi or Kenji Watanabe.",
+            "status": "passed",
+            "url": "http://127.0.0.1:8001/patients"
+          }
+        ],
+        "failure_title": null,
+        "shots_dir": "shots-reproduce-1"
+      }
+    }
+  ],
+  "fix": {},
+  "fix_history": [],
+  "claim": {},
+  "note": "Proof experiment E3-false-privacy-claim (pre-registered in docs/proof/experiments.json)",
+  "guard": []
+}

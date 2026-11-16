@@ -1,0 +1,191 @@
+{
+  "report": "your search is useless, i searched for iphone and got nothing at all",
+  "app": "LambdaTest eCommerce Playground",
+  "screenshot": null,
+  "id": "20261116-222111-adaf",
+  "app_file": null,
+  "created": "2026-11-16 22:21",
+  "status": "done",
+  "verdict": "not_reproduced",
+  "plan": {
+    "understanding": "The user typed 'iphone' into the shop's header search box, submitted it, and the results page showed no products, even though the shop sells iPhones.",
+    "enough_info": true,
+    "question": "",
+    "expected": "Searching for 'iphone' with All Categories selected shows a results page listing at least one product whose name contains 'iPhone'.",
+    "objective": "Go to https://ecommerce-playground.lambdatest.io. In the header search bar, select 'All Categories' in the category dropdown. Type 'iphone' in the 'Search For Products' box. Click the SEARCH button. Store what the page shows after that as 'what_happened'. Verify that the search results list at least one product whose name contains 'iPhone'.",
+    "_cost_usd": 0.175662
+  },
+  "kane": {
+    "verdict": "passed",
+    "exit_code": 0,
+    "status": "passed",
+    "reason": "Objective completed",
+    "summary": "Searched all product categories for \u201ciphone\u201d using the site\u2019s header search.\nThe search results page showed \u201cProducts meeting the search criteria.\u201d\nThe results included at least one product with \u201ciPhone\u201d in its name.",
+    "final_state": {
+      "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=iphone",
+      "search_results_heading": "Products meeting the search criteria",
+      "iphone_product_in_search_results": "true"
+    },
+    "failed_step": null,
+    "steps": [
+      "navigate: Navigate to https://ecommerce-playground.lambdatest.io",
+      "click: Selecting All Categories in the dropdown",
+      "type: Typing iphone in the Search For Products box",
+      "click: Clicking the Search button",
+      "wait: PRIMARY: wait for the search results page to load",
+      "analyze: ANALYZE(textual_visual, 'What the page shows after clicking the SEARCH button is",
+      "assert: The search results list contains at least one product whose name contains 'iPhon"
+    ],
+    "errors": [],
+    "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\6bd37790-6a29-4e80-8a89-6f6c093b94af",
+    "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M7JF5X86C9DT3772CMA8Y9NG/dashboard/share/US_C2ORTFADG4RTXM9SWRMW58JAOILX2CM6AU90OMX0BGG7A6D3CNSANHKVEUEB23B2?type=summary&agentView=true&fqdn=summary-page",
+    "credits": 20.730275000000002,
+    "duration": 71.3,
+    "attempt": 1,
+    "shots": [
+      {
+        "ordinal": 1,
+        "file": "001.jpg",
+        "summary": "navigate: Navigate to https://ecommerce-playground.lambdatest.io",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/"
+      },
+      {
+        "ordinal": 2,
+        "file": "002.png",
+        "summary": "click: Selecting All Categories in the dropdown",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/"
+      },
+      {
+        "ordinal": 3,
+        "file": "003.png",
+        "summary": "type: Typing iphone in the Search For Products box",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/"
+      },
+      {
+        "ordinal": 4,
+        "file": "004.png",
+        "summary": "click: Clicking the Search button",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/"
+      },
+      {
+        "ordinal": 5,
+        "file": "005.jpg",
+        "summary": "wait: PRIMARY: wait for the search results page to load",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=iphone"
+      },
+      {
+        "ordinal": 6,
+        "file": "006.jpg",
+        "summary": "analyze: ANALYZE(textual_visual, 'What the page shows after clicking the SEARCH button is",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=iphone"
+      },
+      {
+        "ordinal": 7,
+        "file": "007.jpg",
+        "summary": "assert: The search results list contains at least one product whose name contains 'iPhon",
+        "status": "passed",
+        "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=iphone"
+      }
+    ],
+    "failure_title": null,
+    "shots_dir": "shots-reproduce-1"
+  },
+  "judgement": {},
+  "attempts": [
+    {
+      "objective": "Go to https://ecommerce-playground.lambdatest.io. In the header search bar, select 'All Categories' in the category dropdown. Type 'iphone' in the 'Search For Products' box. Click the SEARCH button. Store what the page shows after that as 'what_happened'. Verify that the search results list at least one product whose name contains 'iPhone'.",
+      "kane": {
+        "verdict": "passed",
+        "exit_code": 0,
+        "status": "passed",
+        "reason": "Objective completed",
+        "summary": "Searched all product categories for \u201ciphone\u201d using the site\u2019s header search.\nThe search results page showed \u201cProducts meeting the search criteria.\u201d\nThe results included at least one product with \u201ciPhone\u201d in its name.",
+        "final_state": {
+          "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=iphone",
+          "search_results_heading": "Products meeting the search criteria",
+          "iphone_product_in_search_results": "true"
+        },
+        "failed_step": null,
+        "steps": [
+          "navigate: Navigate to https://ecommerce-playground.lambdatest.io",
+          "click: Selecting All Categories in the dropdown",
+          "type: Typing iphone in the Search For Products box",
+          "click: Clicking the Search button",
+          "wait: PRIMARY: wait for the search results page to load",
+          "analyze: ANALYZE(textual_visual, 'What the page shows after clicking the SEARCH button is",
+          "assert: The search results list contains at least one product whose name contains 'iPhon"
+        ],
+        "errors": [],
+        "session_dir": "C:\\Users\\Samuel Christian/.testmuai/kaneai/sessions\\6bd37790-6a29-4e80-8a89-6f6c093b94af",
+        "test_url": "https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M7JF5X86C9DT3772CMA8Y9NG/dashboard/share/US_C2ORTFADG4RTXM9SWRMW58JAOILX2CM6AU90OMX0BGG7A6D3CNSANHKVEUEB23B2?type=summary&agentView=true&fqdn=summary-page",
+        "credits": 20.730275000000002,
+        "duration": 71.3,
+        "attempt": 1,
+        "shots": [
+          {
+            "ordinal": 1,
+            "file": "001.jpg",
+            "summary": "navigate: Navigate to https://ecommerce-playground.lambdatest.io",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/"
+          },
+          {
+            "ordinal": 2,
+            "file": "002.png",
+            "summary": "click: Selecting All Categories in the dropdown",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/"
+          },
+          {
+            "ordinal": 3,
+            "file": "003.png",
+            "summary": "type: Typing iphone in the Search For Products box",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/"
+          },
+          {
+            "ordinal": 4,
+            "file": "004.png",
+            "summary": "click: Clicking the Search button",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/"
+          },
+          {
+            "ordinal": 5,
+            "file": "005.jpg",
+            "summary": "wait: PRIMARY: wait for the search results page to load",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=iphone"
+          },
+          {
+            "ordinal": 6,
+            "file": "006.jpg",
+            "summary": "analyze: ANALYZE(textual_visual, 'What the page shows after clicking the SEARCH button is",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=iphone"
+          },
+          {
+            "ordinal": 7,
+            "file": "007.jpg",
+            "summary": "assert: The search results list contains at least one product whose name contains 'iPhon",
+            "status": "passed",
+            "url": "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=iphone"
+          }
+        ],
+        "failure_title": null,
+        "shots_dir": "shots-reproduce-1"
+      }
+    }
+  ],
+  "fix": {},
+  "fix_history": [],
+  "claim": {},
+  "note": "Proof experiment E6-other-site-not-a-bug (pre-registered in docs/proof/experiments.json)",
+  "guard": []
+}

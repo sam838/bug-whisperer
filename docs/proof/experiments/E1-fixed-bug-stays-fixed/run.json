@@ -1,0 +1,7 @@
+{
+  "id": "E1-fixed-bug-stays-fixed",
+  "case_id": "20261116-221155-2b20",
+  "ran_at": "2026-11-16 22:15",
+  "seconds": 203,
+  "verdict": "not_reproduced"
+}

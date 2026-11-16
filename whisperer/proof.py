@@ -77,7 +77,9 @@ def _experiments() -> list[dict]:
             row.update(ran=True, verdict=inv.get("verdict"), as_expected=inv.get("verdict") in exp["expected"],
                        app=inv.get("app"), kane_runs=len(runs), credits=_credits(runs), seconds=run.get("seconds"),
                        ran_at=run.get("ran_at"), explanation=(inv.get("judgement") or {}).get("explanation")
-                       or (inv.get("plan") or {}).get("question") or "",
+                       or ("Asked the user: " + inv["plan"]["question"] if (inv.get("plan") or {}).get("question") else "")
+                       or ("Kane: " + " ".join((inv.get("kane") or {}).get("summary", "").splitlines())
+                           if (inv.get("kane") or {}).get("summary") else ""),
                        kane_said=(inv.get("kane") or {}).get("summary") or "",
                        folder=f"docs/proof/experiments/{exp['id']}")
         rows.append(row)
