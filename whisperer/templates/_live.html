@@ -53,6 +53,9 @@
       <div class="verdict neutral"><span class="stamp">Open</span> Kane retraced the steps and the app behaved correctly. Kane needs more from the user.</div>
     {% elif inv.verdict == 'needs_info' %}
       <div class="verdict neutral"><span class="stamp">Open</span> Not enough to go on yet. Ask the user: <em>{{ inv.plan.get('question') }}</em></div>
+    {% elif inv.verdict == 'inconclusive' and active %}
+      {# a retry is under way: the first try isn't the verdict, so no stamp yet #}
+      <div class="verdict neutral"><b>First try didn't finish.</b> {{ inv.judgement.get('explanation', '') }} Kane is going back with clearer steps.</div>
     {% elif inv.verdict == 'inconclusive' %}
       <div class="verdict warn"><span class="stamp">Unsolved</span> {{ inv.judgement.get('explanation') or "Kane couldn't finish at the scene, so nothing is claimed." }}</div>
     {% endif %}

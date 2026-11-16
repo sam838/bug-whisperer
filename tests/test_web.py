@@ -51,6 +51,16 @@ def test_reproduced_report_offers_a_fix(client, tmp_path):
     assert "Confirmed" in page and "Repair it" in page and "Past dates accepted" in page
 
 
+def test_a_retry_in_progress_is_not_stamped_unsolved(client, tmp_path):
+    lost = {"explanation": "Kane got stuck on the Book button.", "agent_lost": True}
+    inv = save(tmp_path, status="re-planning", verdict="inconclusive", judgement=lost)
+    page = client.get(f"/r/{inv.id}/live").text
+    assert "First try didn" in page and ">Unsolved<" not in page
+    inv.status = "done"
+    inv.save()
+    assert ">Unsolved<" in client.get(f"/r/{inv.id}/live").text
+
+
 def test_fixed_report_shows_reply_and_no_fix_button(client, tmp_path):
     inv = save(tmp_path, status="done", verdict="reproduced", plan={"expected": "Refuse past dates."},
                fix={"status": "done", "verdict": "fixed", "attempts": [

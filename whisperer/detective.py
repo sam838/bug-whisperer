@@ -123,6 +123,11 @@ Rules for the objective:
   like {{{{account1_email}}}}. Never write real passwords.
 - Then the user's steps, concretely: which page, which fields, which exact values, which button.
 - No "if" or "for example": choose every value yourself. Fewer words means fewer steps for Kane.
+- Forms: one short sentence per field, in page order, e.g. "Type 2025-03-03 into the Date field.
+  Type 09:00 into the Time field." Fill every field a form needs (date AND time), even ones the
+  report doesn't mention. Before the submit button, add "Check that every field is filled."
+  Kane can't see the browser's "please fill in this field" bubble, so a missed field leaves it
+  clicking a button that seems to do nothing.
 - Dates: write exact dates (YYYY-MM-DD), never "today" or "tomorrow". Unless the report is about a
   specific date, pick one well in the future (at least a year ahead), so the steps still mean the
   same thing when they are replayed months later.
@@ -138,7 +143,9 @@ A previous attempt with this objective did not finish, so its result says nothin
 </previous_objective>
 What went wrong, in Kane's own words: {kane_summary}
 {judge_note}
-Write a shorter, more direct objective that avoids that problem.
+Write a shorter, more direct objective that avoids that problem. If Kane kept clicking a submit
+button that seemed to do nothing, a required field was almost certainly left empty: spell out every
+field as its own sentence, and add "Check that every field is filled." before the click.
 """
 
 JUDGE_PROMPT = """A user reported a bug. A browser agent (Kane CLI) tried to reproduce it, and its
