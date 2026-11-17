@@ -9,7 +9,7 @@
   </div>
   {% if track.hidden %}<p class="tracker-more">… {{ track.hidden }} earlier step{{ 's' if track.hidden > 1 }}</p>{% endif %}
   {% if track.steps %}
-    <ol class="steps live track-list" data-total="{{ track.total }}">
+    <ol class="steps live track-list" data-total="{{ track.total }}" data-run="{{ track.run }}">
       {% for s in track.steps %}
         <li class="{{ s.status }}" data-kind="{{ s.kind }}">
           <span class="ico" aria-hidden="true">{{ step_icons.get(s.kind, '•') }}</span>

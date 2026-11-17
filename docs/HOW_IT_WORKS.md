@@ -102,5 +102,5 @@ on slower computers.
 | [`apps/`](../apps/) | Connected apps (the clinic, LambdaTest's demo shop, and Bug Whisperer itself) |
 | [`.testmuai/`](../.testmuai/) | Saved Kane tests, the closed cases and Kane's standing instructions |
 | [`docs/`](./) | Evidence from real Kane runs, the proof, and how the clinic app was built |
-| [`tests/`](../tests/) | 117 tests, with a fake Kane CLI: no credits, no Chrome |
+| [`tests/`](../tests/) | 118 tests, with a fake Kane CLI: no credits, no Chrome |
 | [AGENTS.md](../AGENTS.md) | Rules for AI agents in this repo, including Bug Whisperer's own fixer |

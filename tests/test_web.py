@@ -151,6 +151,22 @@ def test_tracker_shows_kane_working_on_the_next_step(client, tmp_path):
     assert web.live_track(inv)["steps"][-1]["status"] == "done"  # finished: nothing left in progress
 
 
+def test_tracker_names_the_kane_run_so_a_recheck_starts_counting_again(client, tmp_path):
+    """The re-check after a repair is a new Kane run with its own step 1. The page names the run, so
+    3D Kane acts its steps out even when it has fewer steps than the reproduction had."""
+    import os, time
+    inv = save(tmp_path, status="reproducing")
+    step = lambda n: json.dumps({"step": n, "status": "done", "remark": "navigate: Navigate to http://127.0.0.1:8001/login"})
+    (inv.folder / "reproduce-1.ndjson").write_text("\n".join(step(n) for n in range(1, 6)), encoding="utf-8")
+    assert web.live_track(inv)["run"] == "reproduce-1"
+    verify = inv.folder / "verify-1-1.ndjson"
+    verify.write_text(step(1), encoding="utf-8")
+    os.utime(verify, (time.time() + 5, time.time() + 5))
+    track = web.live_track(inv)
+    assert track["run"] == "verify-1-1" and track["total"] == 1
+    assert 'data-run="verify-1-1"' in client.get(f"/r/{inv.id}/live").text
+
+
 def test_case_files_are_pinned_on_a_corkboard(client, tmp_path):
     a = save(tmp_path, status="done", verdict="reproduced", id="20261116-100000-aaaa")
     b = save(tmp_path, status="done", verdict="not_reproduced", id="20261116-110000-bbbb")

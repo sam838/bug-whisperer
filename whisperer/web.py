@@ -169,7 +169,7 @@ def live_track(inv: Investigation) -> dict:
     touches Kane's browser."""
     logs = sorted(inv.folder.glob("*.ndjson"), key=lambda p: p.stat().st_mtime)
     if not logs:
-        return {"steps": [], "total": 0, "hidden": 0, "elapsed": 0}
+        return {"steps": [], "total": 0, "hidden": 0, "elapsed": 0, "run": ""}
     started, busy = None, False
     steps: dict[int, dict] = {}
     for line in logs[-1].read_text(encoding="utf-8", errors="replace").splitlines():
@@ -198,7 +198,7 @@ def live_track(inv: Investigation) -> dict:
         ordered.append({"status": "running", "remark": "Working out the next move…", "kind": "think"})
     elapsed = int(time.time() - started) if started else 0
     return {"steps": ordered[-14:], "total": total, "hidden": max(0, len(ordered) - 14),
-            "elapsed": max(0, elapsed)}
+            "elapsed": max(0, elapsed), "run": logs[-1].stem}  # which Kane run: its steps count from 1
 
 
 def live_steps(inv: Investigation) -> list[dict]:

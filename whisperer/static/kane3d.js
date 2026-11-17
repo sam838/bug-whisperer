@@ -43,14 +43,15 @@
   // ── reading the real steps from the live tracker ──────────────────────────────────────────
   function trackerSteps() {
     const list = document.querySelector("#live .track-list");
-    if (!list) return { total: 0, steps: [], thinking: false };
+    if (!list) return { total: 0, steps: [], run: "", thinking: false };
     const items = [...list.querySelectorAll("li")].map((li) => ({
       kind: li.dataset.kind || "do",
       status: li.classList.contains("failed") ? "failed" : li.classList.contains("running") ? "running" : "done",
       text: (li.querySelector(".txt")?.textContent || "").trim(),
     }));
     const done = items.filter((s) => s.status !== "running");
-    return { total: Number(list.dataset.total || done.length), steps: done, thinking: items.some((s) => s.status === "running") };
+    return { total: Number(list.dataset.total || done.length), steps: done, run: list.dataset.run || "",
+             thinking: items.some((s) => s.status === "running") };
   }
 
   function parseStep(step) {
@@ -1063,7 +1064,7 @@
       kane.hold("Sitting"); rig.seated = true;
     }
 
-    let seen = sofar.total, current = null, last = performance.now(), lastDraw = 0, rainAt = 0, shadowTick = 0;
+    let seen = sofar.total, seenRun = sofar.run, current = null, last = performance.now(), lastDraw = 0, rainAt = 0, shadowTick = 0;
     let idleFor = 0, restFor = 4, lastErrand = -1;  // the first errand soon: Claude often plans quickly
     // real work comes first: drop what is left of an errand (he still walks back and sits down)
     const cutErrand = () => {
@@ -1072,6 +1073,9 @@
     };
     const update = () => {
       const now = trackerSteps();
+      // a new Kane run (the re-check after a repair, or a claim double-check) counts its steps
+      // from 1 again: start over, or its first steps would look already done
+      if (now.run && now.run !== seenRun) { seenRun = now.run; seen = 0; }
       if (now.total > seen) {
         cutErrand();
         now.steps.slice(-(now.total - seen)).forEach((st) => script.push({ step: st })); seen = now.total;
