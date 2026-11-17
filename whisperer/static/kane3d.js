@@ -290,6 +290,7 @@
     renderer.outputEncoding = T.sRGBEncoding;
     renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95;
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    renderer.shadowMap.autoUpdate = false;  // redrawn only when something moves (see frame)
     const scene = new T.Scene();
     scene.background = new T.Color(0x0a0d15);
     scene.fog = new T.Fog(0x0a0d15, 7, 14);
@@ -484,8 +485,9 @@
       for (let n = 1; n <= 12; n++) { const a = n * Math.PI / 6; g.fillText(String(n), 128 + Math.sin(a) * 88, 130 - Math.cos(a) * 88); }
     });
     const CLOCK = new T.Vector3(1.75, 3.15, -2.97);
-    cyl(0.3, 0.3, 0.06, std(0x3a2214, 0.4), CLOCK.x, CLOCK.y, CLOCK.z, scene, [Math.PI / 2, 0, 0], 40);
-    cyl(0.31, 0.31, 0.02, BRASS, CLOCK.x, CLOCK.y, CLOCK.z + 0.02, scene, [Math.PI / 2, 0, 0], 40);
+    // every layer at its own depth: two faces at the same depth flicker (z-fighting)
+    cyl(0.3, 0.3, 0.05, std(0x3a2214, 0.4), CLOCK.x, CLOCK.y, CLOCK.z - 0.005, scene, [Math.PI / 2, 0, 0], 40);
+    put(new T.TorusGeometry(0.285, 0.022, 10, 48), BRASS, CLOCK.x, CLOCK.y, CLOCK.z + 0.025, scene, [0, 0, 0], false);
     put(new T.CircleGeometry(0.26, 40), new T.MeshBasicMaterial({ map: clockFace }), CLOCK.x, CLOCK.y, CLOCK.z + 0.035, scene, [0, 0, 0], false);
     const hands = new T.Group(); hands.position.set(CLOCK.x, CLOCK.y, CLOCK.z + 0.045); scene.add(hands);
     const hourHand = new T.Mesh(new T.BoxGeometry(0.025, 0.13, 0.01), std(0x23201b)); hourHand.position.y = 0.06;
@@ -572,20 +574,6 @@
     blob(1.2, 0.8, -1.25, 2.0, -0.35);
     const kaneShadow = blob(0.9, 0.9, 0, 0);
 
-    // dust drifting in the lamplight
-    const dustGeo = new T.BufferGeometry(), dustPos = new Float32Array(90 * 3);
-    for (let i = 0; i < 90; i++) { dustPos[i * 3] = -2.1 + Math.random() * 1.6; dustPos[i * 3 + 1] = 0.8 + Math.random() * 1.2; dustPos[i * 3 + 2] = -1.6 + Math.random() * 1.3; }
-    dustGeo.setAttribute("position", new T.BufferAttribute(dustPos, 3));
-    const dust = new T.Points(dustGeo, new T.PointsMaterial({ size: 0.018, color: 0xffd9a0, transparent: true, opacity: 0.55, depthWrite: false, blending: T.AdditiveBlending }));
-    scene.add(dust);
-    dust.update = (dt) => {
-      for (let i = 0; i < 90; i++) {
-        dustPos[i * 3 + 1] += dt * 0.03 * (1 + (i % 3)); dustPos[i * 3] += Math.sin((dustPos[i * 3 + 1] + i) * 3) * dt * 0.02;
-        if (dustPos[i * 3 + 1] > 2.0) dustPos[i * 3 + 1] = 0.8;
-      }
-      dustGeo.attributes.position.needsUpdate = true;
-    };
-
     // Kane's spots. He starts to the right of the desk, three-quarters to you.
     const DESK = new T.Vector3(-0.38, 0, -0.12), YOU = -0.55;
     const DOOR = new T.Vector3(DX, 0, -2.25), INSIDE = new T.Vector3(DX, 0, -2.85);  // inside the room, in the doorway
@@ -601,7 +589,7 @@
     const STEP_IN = STAND.clone().addScaledVector(ALONG, 0.8);                     // the same gap, from the side
     const SEAT_OUT = SEAT.clone().addScaledVector(AWAY, PULL);                     // seated, before sliding in
     return {
-      renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, board, dust, kaneShadow, loads,
+      renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, board, kaneShadow, loads,
       hemi, sun, rim, lampLight, pictureLight, doorLamp, halos: [boardHalo, lampHalo], blinds, shaft, flash,
       clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, CHAIR, SEAT, SEAT_YAW, chair, OUT, SIDE, STAND, STEP_IN, SEAT_OUT, PIN_SPOT, YOU, yaw: YOU,
     };
@@ -1036,7 +1024,7 @@
       kane.hold("Sitting"); rig.seated = true;
     }
 
-    let seen = sofar.total, current = null, last = performance.now(), lastDraw = 0, rainAt = 0;
+    let seen = sofar.total, current = null, last = performance.now(), lastDraw = 0, rainAt = 0, shadowTick = 0;
     const update = () => {
       const now = trackerSteps();
       if (now.total > seen) { now.steps.slice(-(now.total - seen)).forEach((st) => script.push({ step: st })); seen = now.total; }
@@ -1074,7 +1062,8 @@
     const frame = (now) => {
       if (!canvas.isConnected) { document.removeEventListener("kane:update", update); rig.renderer.dispose(); return; }
       requestAnimationFrame(frame);
-      if (document.hidden || now - lastDraw < 30) return;  // about 30 frames a second, none when hidden
+      // about 30 frames a second while Kane moves, 20 while he sits and works, none when hidden
+      if (document.hidden || now - lastDraw < (current ? 30 : 48)) return;
       const dt = Math.min(0.1, (now - last) / 1000); last = now; lastDraw = now;
       const backlog = script.filter((x) => x.step).length;
       const speed = backlog > 2 ? 2.2 : backlog ? 1.4 : 1;  // catch up when Kane is quick
@@ -1097,8 +1086,7 @@
       if (!current && mode === "reading" && rig.screen.state.body?.kind !== "note") {
         rig.screen.state.body = { kind: "note", label: "Claude is writing my orders…" }; rig.screen.draw();
       }
-      if (now - rainAt > 60) { rig.win.update(Math.min(0.2, (now - rainAt) / 1000)); rainAt = now; }
-      rig.dust.update(dt);
+      if (now - rainAt > 100) { rig.win.update(Math.min(0.2, (now - rainAt) / 1000)); rainAt = now; }
       if (weather === "storm" && now > nextFlash) { rig.flashAt = now; nextFlash = now + 6000 + Math.random() * 9000; }
       const f = rig.flashAt ? Math.max(0, 1 - (now - rig.flashAt) / 260) * (Math.sin((now - rig.flashAt) / 40) > -0.3 ? 1 : 0.3) : 0;
       rig.flash.material.opacity = f * 0.85; rig.sun.intensity = rig.sunBase + f * 4;
@@ -1109,12 +1097,12 @@
       rig.clock.hourPivot.rotation.z = -((d.getHours() % 12) + d.getMinutes() / 60) / 12 * Math.PI * 2;
       rig.alarm.intensity = rig.alarmUntil && now < rig.alarmUntil ? 2.2 + Math.sin(now / 70) * 1.2 : 0;
       const view = cameraViews[cameraAt], ease = Math.min(1, dt * 3.2);
-      const drift = cameraAt === 0 ? Math.sin(now / 6000) * 0.12 : 0;
-      rig.camera.position.x += (view.position.x + drift - rig.camera.position.x) * ease;
+      rig.camera.position.x += (view.position.x - rig.camera.position.x) * ease;
       rig.camera.position.y += (view.position.y - rig.camera.position.y) * ease;
       rig.camera.position.z += (view.position.z - rig.camera.position.z) * ease;
       rig.focus.lerp(view.focus, ease);
       rig.camera.lookAt(rig.focus);
+      if (current || ++shadowTick % 10 === 0) rig.renderer.shadowMap.needsUpdate = true;
       rig.renderer.render(rig.scene, rig.camera);
     };
     requestAnimationFrame(frame);
