@@ -1,88 +1,96 @@
 {% extends "base.html" %}
-{% from "_kane.html" import sprite, say %}
+{% from "_kane.html" import sprite %}
 {% block content %}
-<section class="hero">
-  <p class="eyebrow">🕵️ Bug reports, investigated</p>
-  <h1><span class="line">Users don't write good bug reports.</span> <em class="line">Kane doesn't need them to.</em></h1>
-  <p class="lede">Your tests cover what you expected. Your users find what you didn't. Paste what they wrote,
-    and <b>Detective Kane</b> retraces their steps in a real browser, brings back evidence, and won't close the
-    case until it sees the fix with its own eyes.</p>
+<section class="detective-hero">
+  <div class="hero-copy">
+    <p class="eyebrow"><span aria-hidden="true">✦</span> AI bug investigation</p>
+    <h1>Turn vague bug reports into <em>verified fixes.</em></h1>
+    <p class="lede">Detective Kane retraces a user's steps in a real browser, captures what happened, and won't close the case until it sees the repair work.</p>
+    <ul class="trust-row" aria-label="Investigation workflow">
+      <li><span aria-hidden="true">▣</span> Reproduce</li>
+      <li><span aria-hidden="true">⌕</span> Diagnose</li>
+      <li><span aria-hidden="true">⌁</span> Repair</li>
+      <li><span aria-hidden="true">✓</span> Re-check</li>
+    </ul>
+  </div>
+
+  <aside class="kane-console" aria-label="How Detective Kane investigates a case">
+    <div class="console-head"><span><i aria-hidden="true"></i> Detective Kane · investigation console</span><b>Ready</b></div>
+    <div class="console-body">
+      <div class="console-kane">{{ sprite("idle") }}</div>
+      <ol class="console-steps">
+        <li class="done"><span>✓</span><div><b>Read the report</b><small>Turn the complaint into testable steps</small></div></li>
+        <li class="active"><span>2</span><div><b>Reproduce in a browser</b><small>Follow the steps and capture evidence</small></div></li>
+        <li><span>3</span><div><b>Verify the repair</b><small>Repeat the same steps before closing</small></div></li>
+      </ol>
+    </div>
+  </aside>
+</section>
+
+<section class="case-workspace" data-reveal>
+  <form class="case-intake form" action="/report" method="post" enctype="multipart/form-data">
+    <div class="workspace-head">
+      <div><span class="section-kicker">Case intake</span><h2>Open a new case</h2></div>
+      <span class="muted">Usually about 2 minutes</span>
+    </div>
+
+    <label class="field">
+      <span>App <em>where the bug happened</em></span>
+      <select name="app_file" required>
+        {% for a in apps %}
+          <option value="{{ a.file }}">{{ a.name }} · {{ a.url }}{{ ' · code connected' if a.has_code }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Bug report <em>paste exactly what the user wrote</em></span>
+      <textarea name="report" rows="4" maxlength="4000"
+        placeholder="cant book!!! the button does nothing. pls fix 😡"></textarea>
+    </label>
+
+    <div class="examples">
+      <span>Try a real report:</span>
+      {% for e in examples %}
+        <button type="button" class="chip" data-example="{{ e }}">{{ e[:40] }}…</button>
+      {% endfor %}
+    </div>
+
+    <label class="evidence-drop">
+      <span class="drop-icon" aria-hidden="true">▧</span>
+      <span><b>Add evidence files</b><small>Drop in screenshots, documents, spreadsheets, or test results · up to 8 files</small></span>
+      <input type="file" name="files" multiple
+        accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.xlsx,.csv,.tsv,.docx,.txt,.md,.json,.xml,.html,.htm,.log">
+    </label>
+
+    <button class="btn primary big investigate-btn" type="submit"><span aria-hidden="true">⌁</span> Send Kane to investigate <span aria-hidden="true">→</span></button>
+  </form>
+
+  <aside class="next-panel">
+    <span class="section-kicker">Evidence trail</span>
+    <h2>What happens next</h2>
+    <p>Kane turns the report into evidence and a fix you can trust.</p>
+    <ol class="next-steps">
+      <li><span>1</span><div><b>Reproduce the bug</b><p>Follow the report in a real browser and confirm the issue.</p><div class="proof-mini proof-bug"><i></i><i></i><strong>Bug seen</strong></div></div></li>
+      <li><span>2</span><div><b>Diagnose and repair</b><p>Find the cause and make the smallest focused change.</p><div class="proof-mini proof-code"><code>- broken</code><code>+ repaired</code></div></div></li>
+      <li><span>3</span><div><b>Verify the fix</b><p>Run the same steps again. Only a pass closes the case.</p><div class="proof-mini proof-ok"><i></i><strong>Fix verified ✓</strong></div></div></li>
+    </ol>
+  </aside>
 </section>
 
 {% if featured %}
   {% set f = featured %}
-  <a class="featured card" href="/r/{{ f.inv.id }}">
-    <div class="featured-head">
-      <span class="featured-label">Case #{{ f.case_no }} · {{ f.inv.app }}</span>
-      <span class="stamp stamp-ok">Case closed</span>
-    </div>
-    <div class="featured-grid">
-      <figure class="featured-step">
-        <figcaption><span class="num">1</span> The witness statement</figcaption>
-        <blockquote class="complaint">{{ f.inv.report[:170] }}{{ '…' if f.inv.report|length > 170 }}</blockquote>
-      </figure>
-      <figure class="featured-step">
-        <figcaption><span class="num">2</span> Kane at the scene <span class="bad">❌</span></figcaption>
-        <img class="shot kane" src="/files/{{ f.inv.id }}/{{ f.before.dir }}/{{ f.before.file }}" alt="Kane's screenshot of the bug" loading="lazy">
-      </figure>
-      <figure class="featured-step">
-        <figcaption><span class="num">3</span> After Claude's repair <span class="good">✅</span></figcaption>
-        <img class="shot kane" src="/files/{{ f.inv.id }}/{{ f.after.dir }}/{{ f.after.file }}" alt="Kane's screenshot after the fix" loading="lazy">
-      </figure>
-    </div>
-    <span class="featured-cta">Open the full case file →</span>
-  </a>
+  <section class="recent-proof">
+    <div class="recent-head"><div><span class="section-kicker">Real case evidence</span><h2>See a closed case</h2></div><a href="/inbox">View all case files →</a></div>
+    <a class="featured-case" href="/r/{{ f.inv.id }}">
+      <div class="featured-summary">
+        <span class="featured-label">Case #{{ f.case_no }} · {{ f.inv.app }}</span>
+        <blockquote>{{ f.inv.report[:150] }}{{ '…' if f.inv.report|length > 150 }}</blockquote>
+        <span class="stamp stamp-ok">Fix verified</span>
+      </div>
+      <figure><figcaption>Before · Kane reproduced it</figcaption><img class="shot kane" src="/files/{{ f.inv.id }}/{{ f.before.dir }}/{{ f.before.file }}" alt="Kane's screenshot of the bug" loading="lazy"></figure>
+      <figure><figcaption>After · same steps passed</figcaption><img class="shot kane" src="/files/{{ f.inv.id }}/{{ f.after.dir }}/{{ f.after.file }}" alt="Kane's screenshot after the fix" loading="lazy"></figure>
+    </a>
+  </section>
 {% endif %}
-
-<form class="card form intake" data-reveal action="/report" method="post" enctype="multipart/form-data">
-  <div class="intake-head">
-    <h2>Open a new case</h2>
-    <span class="muted">Kane takes about 2 minutes at the scene</span>
-  </div>
-
-  {# Detective Kane's desk: the game starts here, with the case you bring him. #}
-  <div class="scene scene-case scene-desk">
-    <div class="scene-actor">{{ sprite("idle") }}</div>
-    {{ say("Bring me a case. Paste what the user wrote, messy is fine. Or drop in your whole test results, and I'll open one case for every problem I find.", key="desk") }}
-  </div>
-
-  <label class="field">
-    <span>Which app?</span>
-    <select name="app_file" required>
-      {% for a in apps %}
-        <option value="{{ a.file }}">{{ a.name }} · {{ a.url }}{{ ' · code connected' if a.has_code }}</option>
-      {% endfor %}
-    </select>
-  </label>
-
-  <label class="field">
-    <span>The witness statement <em>(what the user wrote, messy is fine)</em></span>
-    <textarea name="report" rows="4" maxlength="4000"
-      placeholder="cant book!!! the button does nothing. pls fix 😡"></textarea>
-  </label>
-
-  <div class="examples">
-    <span>Try a real one:</span>
-    {% for e in examples %}
-      <button type="button" class="chip" data-example="{{ e }}">{{ e[:44] }}…</button>
-    {% endfor %}
-  </div>
-
-  <label class="field">
-    <span>Evidence files <em>(optional: a screenshot, or your whole test results; Kane opens one case per problem)</em></span>
-    <input type="file" name="files" multiple
-      accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.xlsx,.csv,.tsv,.docx,.txt,.md,.json,.xml,.html,.htm,.log">
-    <small class="hint">Screenshots, spreadsheets (.xlsx, .csv), documents (.docx, .txt, .pdf) or test reports (JUnit .xml, .json, .html). Up to 8 files.</small>
-  </label>
-
-  <button class="btn primary big" type="submit">🕵️ Send Kane to investigate</button>
-</form>
-
-<section class="how">
-  <div><span class="num">1</span><b>The case</b><p>Claude reads the complaint and the screenshot, and works out what the user did.</p></div>
-  <div><span class="num">2</span><b>The scene</b><p>Kane retraces the steps in a real browser and captures every screen.</p></div>
-  <div><span class="num">3</span><b>The evidence</b><p>Kane checks what the user claimed. A memory or a guess doesn't count.</p></div>
-  <div><span class="num">4</span><b>The repair</b><p>If the code is connected, Claude fixes it, using only Kane's evidence.</p></div>
-  <div><span class="num">5</span><b>Case closed</b><p>Kane repeats the exact steps. Only a pass closes the case, and it stays on file.</p></div>
-</section>
 {% endblock %}

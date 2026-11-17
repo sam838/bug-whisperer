@@ -12,16 +12,19 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/">
-      <img class="brand-mark" src="/static/kane-head.svg" alt="" aria-hidden="true">
-      <span class="brand-name">Bug Whisperer</span>
-    </a>
-    <nav>
-      <a href="/" class="{{ 'on' if page == 'report' }}">Open a case</a>
-      <a href="/inbox" class="{{ 'on' if page == 'inbox' }}">Case files</a>
-      <a href="/verified" class="{{ 'on' if page == 'verified' }}">Verified</a>
-      <a href="/apps" class="{{ 'on' if page == 'apps' }}">Apps</a>
-    </nav>
+    <div class="topbar-shell">
+      <a class="brand" href="/">
+        <img class="brand-mark" src="/static/kane-head.svg" alt="" aria-hidden="true">
+        <span class="brand-name">Bug Whisperer</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="/" class="new-case {{ 'on' if page == 'report' }}"><span aria-hidden="true">＋</span> New case</a>
+        <a href="/inbox" class="{{ 'on' if page == 'inbox' }}"><span aria-hidden="true">▱</span> Case files</a>
+        <a href="/verified" class="{{ 'on' if page == 'verified' }}"><span aria-hidden="true">◇</span> Evidence</a>
+        <a href="/apps" class="{{ 'on' if page == 'apps' }}"><span aria-hidden="true">▰</span> Apps</a>
+      </nav>
+      <span class="proof-pill"><i aria-hidden="true"></i> Browser-verified</span>
+    </div>
   </header>
   {% if request.state.hosted %}
     <div class="demo-bar">
