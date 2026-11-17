@@ -7,6 +7,24 @@ document.querySelectorAll("[data-example]").forEach((chip) => {
   });
 });
 
+// The evidence drop: it lights up while a file is dragged over it, and once files are chosen it
+// says so and lists them, so it is clear what will be sent.
+document.querySelectorAll(".evidence-drop").forEach((drop) => {
+  const input = drop.querySelector("input[type=file]");
+  const title = drop.querySelector("[data-drop-title]"), list = drop.querySelector("[data-drop-list]");
+  const empty = [title.textContent, list.textContent];
+  const show = () => {
+    const names = [...input.files].map((f) => f.name);
+    drop.classList.toggle("has-files", names.length > 0);
+    title.textContent = names.length ? `✓ ${names.length} file${names.length > 1 ? "s" : ""} ready to send` : empty[0];
+    list.textContent = names.length ? names.join(" · ") : empty[1];
+  };
+  input.addEventListener("change", show);
+  input.addEventListener("dragenter", () => drop.classList.add("dragging"));
+  ["dragleave", "drop"].forEach((e) => input.addEventListener(e, () => drop.classList.remove("dragging")));
+  window.addEventListener("pageshow", show);  // back to this page: the browser may still hold the files
+});
+
 // Home page: sections below the fold rise once as they scroll into view.
 // Nothing is hidden until this runs, so the page still reads fine without JavaScript.
 const revealable = document.querySelectorAll("[data-reveal], .how");

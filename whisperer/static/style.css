@@ -927,7 +927,11 @@ a.btn { text-decoration: none; }
   border-radius: 12px; background: color-mix(in srgb, var(--paper) 35%, transparent);
   transition: border-color 150ms ease, background-color 150ms ease;
 }
-.evidence-drop:hover { border-color: var(--accent); background: var(--accent-soft); }
+.evidence-drop:hover, .evidence-drop.dragging { border-color: var(--accent); background: var(--accent-soft); }
+.evidence-drop.has-files { border-style: solid; border-color: #0f7a52; background: color-mix(in srgb, #0f7a52 8%, transparent); }
+.evidence-drop.has-files .drop-icon { color: #0f7a52; background: color-mix(in srgb, #0f7a52 14%, transparent); }
+.evidence-drop.has-files b { color: #0f7a52; }
+.evidence-drop.has-files small { color: var(--ink, inherit); overflow-wrap: anywhere; }
 .evidence-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .drop-icon { display: grid; place-items: center; width: 42px; height: 42px; color: var(--accent); border-radius: 10px; background: var(--accent-soft); font-size: 24px; }
 .evidence-drop b, .evidence-drop small { display: block; }
