@@ -1064,7 +1064,7 @@
     }
 
     let seen = sofar.total, current = null, last = performance.now(), lastDraw = 0, rainAt = 0, shadowTick = 0;
-    let idleFor = 0, restFor = 9, lastErrand = -1;
+    let idleFor = 0, restFor = 4, lastErrand = -1;  // the first errand soon: Claude often plans quickly
     // real work comes first: drop what is left of an errand (he still walks back and sits down)
     const cutErrand = () => {
       for (let i = script.length - 1; i >= 0; i--) if (script[i].errand) script.splice(i, 1);
@@ -1080,7 +1080,8 @@
     document.addEventListener("kane:update", update);
     // what he is doing, for checking from the page (see tests)
     stage.kaneNow = () => ({ seated: !!rig.seated, errand: !!current?.errand || script.some((x) => x.errand),
-      x: +kane.model.position.x.toFixed(2), z: +kane.model.position.z.toFixed(2) });
+      x: +kane.model.position.x.toFixed(2), z: +kane.model.position.z.toFixed(2),
+      screen: rig.screen.state.body?.label || rig.screen.state.body?.kind || "" });
 
     // Kane's real browser on the 3D screen, whenever the live camera is filming it
     let misses = 0;
@@ -1143,8 +1144,16 @@
       kane.bubble.visible = !current && (trackerSteps().thinking || mode === "reading");
       const head = kane.model.position;
       kane.bubble.position.set(head.x + 0.3, (rig.seated ? 1.85 : 2.2) + Math.sin(now / 300) * 0.03, head.z);
-      if (!current && mode === "reading" && rig.screen.state.body?.kind !== "note") {
-        rig.screen.state.body = { kind: "note", label: "Claude is writing my orders…" }; rig.screen.draw();
+      // between real steps the screen says what is really going on: which part Claude is doing, or
+      // that Kane's real browser is starting (a step's own result stays up until the next step)
+      const chapter = document.querySelector("#live .game-chapter")?.textContent || "";
+      const note = mode === "reading"
+        ? (/repair/i.test(chapter) ? "Claude is repairing the code…" : /evidence|verdict/i.test(chapter)
+          ? "Claude is checking my evidence…" : "Claude is writing my orders…")
+        : mode === "walking" && trackerSteps().total === 0 ? "Opening a real Chrome browser…" : null;
+      const shown = rig.screen.state.body;
+      if (!current && note && shown?.label !== note && (mode === "reading" || !shown || shown.kind === "note")) {
+        rig.screen.state.body = { kind: "note", label: note }; rig.screen.draw();
       }
       if (now - rainAt > 100) { rig.win.update(Math.min(0.2, (now - rainAt) / 1000)); rainAt = now; }
       if (weather === "storm" && now > nextFlash) { rig.flashAt = now; nextFlash = now + 6000 + Math.random() * 9000; }
