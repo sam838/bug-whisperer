@@ -85,6 +85,14 @@
     g.fillText(line, x, y + n * lh);
   }
 
+  function fitTextEnd(g, text, width) {
+    const value = String(text || "");
+    if (g.measureText(value).width <= width) return value;
+    let tail = value;
+    while (tail.length > 1 && g.measureText("…" + tail).width > width) tail = tail.slice(1);
+    return "…" + tail;
+  }
+
   function makeScreen(T) {
     const c = document.createElement("canvas"); c.width = 640; c.height = 400;
     const tex = new T.CanvasTexture(c); tex.encoding = T.sRGBEncoding;
@@ -114,7 +122,10 @@
       else if (b.kind === "type") {
         g.fillStyle = "#4b5263"; g.font = "700 26px Inter, sans-serif"; g.fillText(b.field || "Input", 60, 140);
         g.strokeStyle = "#7a5af8"; g.lineWidth = 4; g.strokeRect(60, 158, 520, 64);
-        g.fillStyle = "#17181d"; g.font = "600 32px 'JetBrains Mono', monospace"; g.fillText(b.shown + (b.caret ? "▌" : ""), 76, 202);
+        g.fillStyle = "#17181d"; g.font = "600 32px 'JetBrains Mono', monospace";
+        const typed = fitTextEnd(g, b.shown + (b.caret ? "▌" : ""), 486);
+        g.save(); g.beginPath(); g.rect(68, 162, 504, 54); g.clip();
+        g.fillText(typed, 76, 202); g.restore();
       } else if (b.kind === "click") {
         if (b.field) { g.fillStyle = "#4b5263"; g.font = "700 24px Inter, sans-serif"; g.fillText(b.field, 60, 130); }
         g.fillStyle = b.pressed ? "#0b5e44" : "#0f7a52"; g.fillRect(140, 160, 360, 78);
@@ -513,11 +524,12 @@
     const SEAT = new T.Vector3(CHAIR.x - 0.24 * Math.sin(SEAT_YAW) * -1, 0.26, CHAIR.z - 0.24 * Math.cos(SEAT_YAW) * -1);
     const AISLE = new T.Vector3(-0.4, 0, -0.2), PIN_SPOT = new T.Vector3(BOARD.x, 0, -2.3);
     const AWAY = new T.Vector3(-Math.sin(SEAT_YAW), 0, -Math.cos(SEAT_YAW));     // away from the desk
-    const OUT = CHAIR.clone().addScaledVector(AWAY, 0.5);                         // the chair pulled out
+    const OUT = CHAIR.clone().addScaledVector(AWAY, 0.6);                         // the chair pulled out
     const SIDE = OUT.clone().addScaledVector(new T.Vector3(AWAY.z, 0, -AWAY.x), 0.55);  // beside it, room side
-    const STAND = OUT.clone().addScaledVector(AWAY, -0.3);                        // in front of the pulled-out chair
-    const SEAT_OUT = SEAT.clone().addScaledVector(AWAY, 0.5);                    // seated, before sliding in
-    return { renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, board, dust, kaneShadow, hemi, sun: moon, rim, lampLight, blinds, shaft, flash, clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, CHAIR, SEAT, SEAT_YAW, chair, OUT, SIDE, STAND, SEAT_OUT, AISLE, PIN_SPOT, FACE, YOU, yaw: YOU };
+    const STAND = OUT.clone().addScaledVector(AWAY, -0.35);                       // in front of the pulled-out chair
+    const STEP_IN = STAND.clone().addScaledVector(new T.Vector3(AWAY.z, 0, -AWAY.x), 0.55);  // between chair and desk, from the side
+    const SEAT_OUT = SEAT.clone().addScaledVector(AWAY, 0.6);                    // seated, before sliding in
+    return { renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, board, dust, kaneShadow, hemi, sun: moon, rim, lampLight, blinds, shaft, flash, clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, CHAIR, SEAT, SEAT_YAW, chair, OUT, SIDE, STAND, STEP_IN, SEAT_OUT, AISLE, PIN_SPOT, FACE, YOU, yaw: YOU };
   }
 
   // ── Detective Kane: the CC0 robot, recoloured, with a fedora and a magnifying glass ───────
@@ -638,14 +650,125 @@
   // A move: { dur (seconds), enter(), run(k) with k from 0 to 1 }.
   const move = (dur, run = () => {}, enter = () => {}) => ({ dur, run, enter });
 
-  function walkTo(rig, kane, target) {
-    let from;
+  // ── finding the way: A* on a coarse floor grid around the furniture ───────────────────────
+  // Following the game-ai skill: one route per walk (never every frame), octile heuristic with
+  // √2 diagonals, no cutting across obstacle corners, a cap on the search, then line-of-sight
+  // smoothing so the route is a few straight legs. Furniture is grown by Kane's radius; the chair
+  // is read where it actually is, tucked in or pulled out.
+  const NAV = { x0: -3.2, x1: 3.3, z0: -2.95, z1: 3.0, step: 0.1, radius: 0.3, chair: 0.32 };
+  function makeNav(rig) {
+    const R = NAV.radius;
+    const boxes = [  // footprints: centre, half sizes, turn (as set in buildOffice)
+      { cx: -1.55, cz: -0.85, hx: 0.95, hz: 0.5, a: Math.PI / 4 },   // desk
+      { cx: -3.3, cz: 1.1, hx: 0.7, hz: 0.2, a: Math.PI / 2 },       // bookshelf
+      { cx: 2.75, cz: -2.6, hx: 0.3, hz: 0.3, a: 0 },                // filing cabinet
+    ];
+    const blocked = (x, z) => {
+      if (z < -2.7 && !(x > 1.1 && x < 1.8)) return true;          // the back wall, except the doorway
+      if (x < NAV.x0 || x > NAV.x1 || z < NAV.z0 || z > NAV.z1) return true;
+      for (const b of boxes) {
+        const dx = x - b.cx, dz = z - b.cz, c = Math.cos(b.a), sn = Math.sin(b.a);
+        if (Math.abs(dx * c - dz * sn) < b.hx + R && Math.abs(dx * sn + dz * c) < b.hz + R) return true;
+      }
+      const ch = rig.chair.position;
+      return (x - ch.x) ** 2 + (z - ch.z) ** 2 < (NAV.chair + R) ** 2;
+    };
+    const cols = Math.round((NAV.x1 - NAV.x0) / NAV.step) + 1, rows = Math.round((NAV.z1 - NAV.z0) / NAV.step) + 1;
+    const cellX = (i) => NAV.x0 + (i % cols) * NAV.step, cellZ = (i) => NAV.z0 + Math.floor(i / cols) * NAV.step;
+    const cellOf = (x, z) => Math.min(rows - 1, Math.max(0, Math.round((z - NAV.z0) / NAV.step))) * cols
+                           + Math.min(cols - 1, Math.max(0, Math.round((x - NAV.x0) / NAV.step)));
+    const free = (i) => !blocked(cellX(i), cellZ(i));
+    const nearestFree = (i) => {  // a start or goal inside a grown footprint: the closest free cell
+      if (free(i)) return i;
+      const c0 = i % cols, r0 = Math.floor(i / cols);
+      for (let d = 1; d < 15; d++)
+        for (let dr = -d; dr <= d; dr++) for (let dc = -d; dc <= d; dc++) {
+          if (Math.max(Math.abs(dr), Math.abs(dc)) !== d) continue;
+          const r = r0 + dr, c = c0 + dc;
+          if (r >= 0 && r < rows && c >= 0 && c < cols && free(r * cols + c)) return r * cols + c;
+        }
+      return i;
+    };
+    function search(s, g, useHeuristic = true) {
+      const gx = g % cols, gz = Math.floor(g / cols);
+      const h = (i) => {
+        if (!useHeuristic) return 0;
+        const dx = Math.abs(i % cols - gx), dz = Math.abs(Math.floor(i / cols) - gz);
+        return (dx + dz + (Math.SQRT2 - 2) * Math.min(dx, dz)) * NAV.step;  // octile
+      };
+      const cost = new Map([[s, 0]]), came = new Map(), heap = [[h(s), s]], closed = new Set();
+      const push = (item) => { heap.push(item); let i = heap.length - 1; while (i && heap[(i - 1) >> 1][0] > heap[i][0]) { [heap[i], heap[(i - 1) >> 1]] = [heap[(i - 1) >> 1], heap[i]]; i = (i - 1) >> 1; } };
+      const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0;
+        for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === i) break; [heap[i], heap[m]] = [heap[m], heap[i]]; i = m; } } return top; };
+      let expanded = 0;
+      while (heap.length && expanded < 25000) {
+        const [, i] = pop();
+        if (closed.has(i)) continue;
+        if (i === g) break;
+        closed.add(i); expanded++;
+        const c = i % cols, r = Math.floor(i / cols);
+        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+          if (!dr && !dc) continue;
+          const nr = r + dr, nc = c + dc;
+          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+          const n = nr * cols + nc;
+          if (!free(n)) continue;
+          if (dr && dc && (!free(r * cols + nc) || !free(nr * cols + c))) continue;  // no corner cutting
+          const next = cost.get(i) + (dr && dc ? Math.SQRT2 : 1) * NAV.step;
+          if (next < (cost.has(n) ? cost.get(n) : Infinity)) { cost.set(n, next); came.set(n, i); push([next + h(n), n]); }
+        }
+      }
+      if (!cost.has(g)) return null;
+      const cells = [g];
+      while (cells[0] !== s) cells.unshift(came.get(cells[0]));
+      return { cells, cost: cost.get(g) };
+    }
+    const clear = (a, b) => {  // a straight leg with nothing in the way
+      const n = Math.ceil(a.distanceTo(b) / 0.05);
+      for (let k = 1; k < n; k++) if (blocked(a.x + (b.x - a.x) * k / n, a.z + (b.z - a.z) * k / n)) return false;
+      return true;
+    };
     return {
-      get dur() { return from ? Math.max(0.35, from.distanceTo(target) / 1.3) : 1; },
-      enter() { from = kane.model.position.clone(); from.y = 0; kane.loop("Walking"); rig.seated = false; },
+      blocked, search,
+      cellOf, nearestFree, cols, rows,
+      route(from, to) {
+        const T = window.THREE;
+        const s = nearestFree(cellOf(from.x, from.z)), g = nearestFree(cellOf(to.x, to.z));
+        const found = search(s, g);
+        if (!found) return [from.clone(), to.clone()];  // nowhere to go round: walk straight
+        const pts = found.cells.map((i) => new T.Vector3(cellX(i), 0, cellZ(i)));
+        const smooth = [pts[0]];
+        for (let i = 0; i < pts.length - 1;) {  // keep the farthest point still in plain sight
+          let j = pts.length - 1;
+          while (j > i + 1 && !clear(pts[i], pts[j])) j--;
+          smooth.push(pts[j]); i = j;
+        }
+        return [from.clone(), ...smooth, to.clone()].filter((p, k, all) => !k || p.distanceTo(all[k - 1]) > 0.02);
+      },
+    };
+  }
+
+  // walk to a spot along the route the navigator finds (direct: a short step in a tight spot)
+  function walkTo(rig, kane, target, direct = false) {
+    let pts = [], lengths = [0], total = 0;
+    return {
+      get dur() { return total ? Math.max(0.35, total / 1.3) : 0.35; },
+      enter() {
+        const from = kane.model.position.clone(); from.y = 0;
+        pts = direct ? [from, target.clone()] : rig.nav.route(from, target);
+        lengths = [0];
+        for (let i = 1; i < pts.length; i++) lengths.push(lengths[i - 1] + pts[i].distanceTo(pts[i - 1]));
+        total = lengths[lengths.length - 1];
+        kane.loop("Walking"); rig.seated = false;
+      },
       run(k) {
-        kane.model.position.lerpVectors(from, target, k);
-        rig.yaw = Math.atan2(target.x - from.x, target.z - from.z); kane.model.rotation.y = rig.yaw;
+        if (!total) return;
+        const d = k * total;
+        let i = 0;
+        while (i < pts.length - 2 && lengths[i + 1] < d) i++;
+        const leg = lengths[i + 1] - lengths[i] || 1, t = Math.min(1, (d - lengths[i]) / leg);
+        kane.model.position.lerpVectors(pts[i], pts[i + 1], t);
+        rig.yaw = Math.atan2(pts[i + 1].x - pts[i].x, pts[i + 1].z - pts[i].z);  // he turns smoothly into each leg
       },
     };
   }
@@ -657,7 +780,8 @@
   const sitAtDesk = (rig, kane) => [
     walkTo(rig, kane, rig.SIDE),
     slideChair(rig, kane, rig.CHAIR, rig.OUT),                                 // pull the chair out
-    walkTo(rig, kane, rig.STAND),
+    walkTo(rig, kane, rig.STEP_IN, true),                                      // in between chair and desk
+    walkTo(rig, kane, rig.STAND, true),
     move(0.5, (k) => kane.model.position.lerpVectors(rig.STAND, rig.SEAT_OUT, k),
       () => { rig.yaw = rig.SEAT_YAW; kane.model.rotation.y = rig.SEAT_YAW; kane.hold("Sitting"); rig.seated = true; }),
     slideChair(rig, kane, rig.OUT, rig.CHAIR, [rig.SEAT_OUT, rig.SEAT]),        // slide in to the desk
@@ -666,7 +790,8 @@
     slideChair(rig, kane, rig.CHAIR, rig.OUT, [rig.SEAT, rig.SEAT_OUT]),        // slide back from the desk
     move(0.45, (k) => kane.model.position.lerpVectors(rig.SEAT_OUT, rig.STAND, k),
       () => { kane.hold("Standing"); rig.seated = false; }),
-    walkTo(rig, kane, rig.SIDE),
+    walkTo(rig, kane, rig.STEP_IN, true),
+    walkTo(rig, kane, rig.SIDE, true),
     slideChair(rig, kane, rig.OUT, rig.CHAIR),                                 // push the chair back in
   ];
   const pinCard = (rig, kane, tex) => {
@@ -675,8 +800,7 @@
       () => { rig.yaw = Math.PI; kane.model.rotation.y = Math.PI; kane.loop("Idle"); kane.play("Punch"); });  // he presses the pin in
   };
   const toBoardAndBack = (rig, kane, tex) => [
-    walkTo(rig, kane, rig.AISLE), walkTo(rig, kane, rig.PIN_SPOT), pinCard(rig, kane, tex),
-    walkTo(rig, kane, rig.AISLE), ...sitAtDesk(rig, kane),
+    walkTo(rig, kane, rig.PIN_SPOT), pinCard(rig, kane, tex), ...sitAtDesk(rig, kane),
   ];
 
   function plan(rig, kane, step) {
@@ -730,8 +854,7 @@
       move(0.6, door, () => { kane.model.position.copy(rig.INSIDE); kane.model.visible = true; rig.yaw = 0; kane.model.rotation.y = 0; rig.seated = false; }),
       walkTo(rig, kane, rig.DOOR),
       move(1.7, (k) => door(1 - Math.min(1, k * 3)), () => { rig.yaw = rig.YOU; kane.loop("Idle"); kane.play("Wave"); }),
-      walkTo(rig, kane, rig.PIN_SPOT), pinCard(rig, kane, tex),
-      walkTo(rig, kane, rig.AISLE), ...sitAtDesk(rig, kane),
+      walkTo(rig, kane, rig.PIN_SPOT), pinCard(rig, kane, tex), ...sitAtDesk(rig, kane),
     ];
   }
 
@@ -752,6 +875,8 @@
     }
     stage.classList.add("ready");
     stage.dataset.ready = "1";
+    rig.nav = makeNav(rig);
+    stage.kaneNav = rig.nav;  // for checking the routes from the page (see tests)
     const T = window.THREE;
     const cameraViews = [
       { label: "Office", position: new T.Vector3(0.9, 1.95, 3.7), focus: new T.Vector3(-0.65, 1.12, -0.95) },
