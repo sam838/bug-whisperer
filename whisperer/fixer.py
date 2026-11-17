@@ -8,6 +8,7 @@ After 3 failed attempts a human is asked.
 
 from __future__ import annotations
 
+import difflib
 import json
 import subprocess
 import time
@@ -137,13 +138,51 @@ def fix(app: App, inv: Investigation, on_update=None) -> dict:
     return record
 
 
-def _snapshot(code_dir: Path) -> str:
-    """Stash-free snapshot: the current tree as a git object, so we can diff only the fixer's work."""
+SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", "dist", "build", ".next"}
+
+
+def _in_git(code_dir: Path) -> bool:
+    try:
+        out = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], cwd=code_dir, capture_output=True, text=True)
+    except OSError:  # git isn't installed
+        return False
+    return out.returncode == 0 and out.stdout.strip() == "true"
+
+
+def _read_tree(code_dir: Path) -> dict[str, str]:
+    """The app's text files, for a diff when its code isn't in git (a fresh `init --sample`)."""
+    files = {}
+    for path in sorted(code_dir.rglob("*")):
+        if len(files) >= 5000:
+            break
+        if not path.is_file() or SKIP_DIRS & set(path.relative_to(code_dir).parts) or path.stat().st_size > 1_000_000:
+            continue
+        try:
+            files[path.relative_to(code_dir).as_posix()] = path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue  # a database, an image: not code to show in a diff
+    return files
+
+
+def _snapshot(code_dir: Path) -> str | dict:
+    """The code before the fixer's work, so we can diff only that work: a git object (stash-free)
+    when the code is in git, otherwise a copy of its text files."""
+    if not _in_git(code_dir):
+        return _read_tree(code_dir)
     out = subprocess.run(["git", "stash", "create"], cwd=code_dir, capture_output=True, text=True)
     return out.stdout.strip() or "HEAD"
 
 
-def _diff(code_dir: Path, since: str) -> str:
+def _diff(code_dir: Path, since: str | dict) -> str:
+    if isinstance(since, dict):
+        now = _read_tree(code_dir)
+        chunks = []
+        for rel in sorted(set(since) | set(now)):
+            if since.get(rel) != now.get(rel):
+                chunks.extend(difflib.unified_diff(
+                    (since.get(rel) or "").splitlines(keepends=True), (now.get(rel) or "").splitlines(keepends=True),
+                    fromfile=f"a/{code_dir.name}/{rel}", tofile=f"b/{code_dir.name}/{rel}"))
+        return "".join(chunks)
     out = subprocess.run(["git", "diff", since, "--", "."], cwd=code_dir, capture_output=True,
                          text=True, encoding="utf-8", errors="replace")
     return out.stdout

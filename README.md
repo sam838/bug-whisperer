@@ -130,18 +130,53 @@ You follow the case live: what Claude is doing, then each step Kane takes in the
 plain words (`·` done, `✗` a check that failed), then the verdict: **🐛 CONFIRMED** with a
 ready-made ticket, **📂 OPEN**, **❓** the one question to ask the user, or **⚠️ INCONCLUSIVE**
 when Kane couldn't finish. If the bug is confirmed and the code is connected, it asks
-*"Repair it now?"*, and Kane re-runs the same steps to prove the repair. A report too vague to
-test, exactly as it came out:
+*"Repair it now?"*, and Kane re-runs the same steps to prove the repair. A real run on the
+sample app, from a fresh `pipx` install (Nov 17; `…` marks steps left out here):
 
 ```
-━━ Case 20261117-151602-3295 · Clinic Records
-   “it doesnt work”
+━━ Case 20261117-152922-9e58 · Clinic Records
 
 🧠 Claude is reading the report and writing Kane's orders…
+🕵️  Kane is at the scene, in a real Chrome browser:
+   · I went to http://127.0.0.1:8051/login.
+   …
+   · I picked Aisha Rahman in Patient.
+   · I typed 2025-03-03 into Date.
+   · I typed 10:30 into Time.
+   · I clicked Book appointment button to book the appointment.
+   …
+   ✗ I checked: the appointment was not saved and the page shows an error saying the date cannot.
+⚖️  Kane found something. Claude is checking it matches the report…
 
-❓ OPEN  Not enough to go on yet. Ask the user:
-   What were you trying to do when it stopped working (for example adding a patient, booking an appointment, or logging in), and what did you see on the screen instead?
-   On the website: http://127.0.0.1:8000/r/20261117-151602-3295
+🐛 CONFIRMED  Kane logged in and filled in the booking form for Aisha Rahman with a date of 3 March
+   2025, which is in the past. When it clicked Book appointment, the app saved the booking and moved
+   to her patient page. It showed no warning, which is the problem the clinic reported.
+   Ticket: Appointments can be booked with a past date and are saved without any error
+   …
+
+━━ Repairing case 20261117-152922-9e58: Claude works from Kane's evidence only, then Kane checks.
+
+🛠️  fixing (attempt 1)
+🛠️  waiting for the app to reload (attempt 1)
+🛠️  Kane re-checking (attempt 1)
+   · I went to http://127.0.0.1:8051/login.
+   …
+   · I clicked Book appointment button.
+   · I checked: the appointment was not saved and the page shows an error saying the date cannot.
+
+✅ CASE CLOSED  Kane repeated the same steps and saw the fix with his own eyes.
+   The passing test is saved, and replayed whenever this app's code changes.
+```
+
+The repair Claude made, from Kane's evidence alone:
+
+```diff
+ def validate_appointment(appt_date: str, appt_time: str) -> list[str]:
+     errors = []
+     try:
+-        date.fromisoformat(appt_date)
++        if date.fromisoformat(appt_date) < date.today():
++            errors.append("Appointment date cannot be in the past.")
 ```
 
 - `bug-whisperer report --file results.xlsx`: a tester's results (Excel, CSV, XML, PDF, screenshots…),
@@ -185,7 +220,7 @@ To check that old bugs stay fixed: `bug-whisperer guard` (Kane revisits every cl
 python -m venv .venv
 .venv\Scripts\activate             # macOS/Linux: source .venv/bin/activate
 pip install -e ".[dev]"
-python -m pytest -q tests          # 114 tests with a fake Kane: no credits, no Chrome
+python -m pytest -q tests          # 117 tests with a fake Kane: no credits, no Chrome
 bug-whisperer up                   # run from the repository, it uses the repository's apps and cases
 python -m whisperer selfcheck      # Kane checks Bug Whisperer's own pages
 python -m whisperer proof          # rebuild docs/proof/RESULTS.md from the records
@@ -251,7 +286,7 @@ least 2 GB of RAM.
 | [`apps/`](apps/) | Connected apps (the clinic, LambdaTest's demo shop, and Bug Whisperer itself) |
 | [`.testmuai/`](.testmuai/) | Saved Kane tests, the closed cases and Kane's standing instructions |
 | [`docs/`](docs/) | Evidence from real Kane runs, the proof, and how the clinic app was built |
-| [`tests/`](tests/) | 114 tests, with a fake Kane CLI: no credits, no Chrome |
+| [`tests/`](tests/) | 117 tests, with a fake Kane CLI: no credits, no Chrome |
 | [AGENTS.md](AGENTS.md) | Rules for AI agents in this repo, including Bug Whisperer's own fixer |
 
 ## Honesty

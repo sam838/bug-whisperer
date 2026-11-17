@@ -67,13 +67,15 @@ class Follow:
     """Prints Kane's steps as they happen, read from the newest NDJSON log in a case folder (the
     same log the website's live tracker reads)."""
 
-    def __init__(self, folder: Path, out=print):
-        self.folder, self.out = folder, out
+    def __init__(self, folder: Path, out=print, new_only: bool = False):
+        self.folder, self.out, self.new_only = folder, out, new_only
         self.log, self.done = None, 0
         self._stop = threading.Event()
         self._thread = threading.Thread(target=self._loop, daemon=True)
 
     def __enter__(self):
+        if self.new_only:  # a repair: Kane's earlier runs in this case were already shown
+            self.poll(quiet=True)
         self._thread.start()
         return self
 
@@ -86,7 +88,7 @@ class Follow:
         while not self._stop.wait(0.5):
             self.poll()
 
-    def poll(self) -> None:
+    def poll(self, quiet: bool = False) -> None:
         logs = sorted(self.folder.glob("*.ndjson"), key=lambda p: p.stat().st_mtime)
         if not logs:
             return
@@ -97,8 +99,9 @@ class Follow:
         except OSError:
             return
         lines = text.split("\n")[:-1]  # only whole lines: the last one may still be being written
-        for line in lines[self.done:]:
-            self.say(line)
+        if not quiet:
+            for line in lines[self.done:]:
+                self.say(line)
         self.done = len(lines)
 
     def say(self, line: str) -> None:
@@ -170,7 +173,7 @@ def run_case(inv: Investigation, app: App, out=print) -> Investigation:
 def repair(inv: Investigation, app: App, out=print) -> dict:
     from .fixer import fix
     out(f"\n━━ Repairing case {inv.id}: Claude works from Kane's evidence only, then Kane checks.\n")
-    with Follow(inv.folder, out):
+    with Follow(inv.folder, out, new_only=True):
         record = fix(app, inv, on_update=lambda s: out(f"🛠️  {s}"))
     out("")
     if record["verdict"] == "fixed":

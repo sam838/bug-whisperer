@@ -118,3 +118,15 @@ def test_cases_lists_the_newest_first_with_a_plain_stamp(runs):
     rows = terminal.list_cases()
     assert rows[0].startswith("20261117-110000-bbbb") and "asked" in rows[0]
     assert "closed, fix proven" in rows[1] and "cant book" in rows[1]
+
+
+def test_a_repair_shows_only_kanes_new_runs(tmp_path):
+    (tmp_path / "reproduce-1.ndjson").write_text(step(1, "click: Clicked Book appointment") + "\n", encoding="utf-8")
+    said = []
+    with terminal.Follow(tmp_path, said.append, new_only=True) as follow:
+        import os, time
+        verify = tmp_path / "verify-1-1.ndjson"
+        verify.write_text(step(1, "navigate: Opened http://127.0.0.1:8001/login") + "\n", encoding="utf-8")
+        os.utime(verify, (time.time() + 5, time.time() + 5))  # newer than the reproduction's log
+        follow.poll()
+    assert len(said) == 1 and "127.0.0.1:8001" in said[0]
