@@ -20,3 +20,8 @@ runs/
 
 # Passwords for apps connected through the website
 apps/secrets/
+
+# Python packaging
+dist/
+build/
+*.egg-info/

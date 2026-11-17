@@ -17,8 +17,8 @@ from pathlib import Path
 from urllib.parse import urljoin
 
 from . import camera, claude, evidence, fields, kane
+from .paths import ROOT
 
-ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "runs"
 
 

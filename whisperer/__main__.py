@@ -1,4 +1,10 @@
-"""Command line: python -m whisperer investigate apps/clinic.json "cant book!!!" [--screenshot x.png]"""
+"""Command line: `bug-whisperer` when installed, `python -m whisperer` from the repository.
+
+  bug-whisperer init --sample     a project folder with the sample clinic app
+  bug-whisperer doctor            check the setup (spends no Kane credits)
+  bug-whisperer up                the website
+  bug-whisperer investigate apps/clinic.json "cant book!!!" [--screenshot x.png]
+"""
 
 import argparse
 import json
@@ -8,8 +14,30 @@ from .detective import App, investigate
 
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(prog="whisperer")
+    for stream in (sys.stdout, sys.stderr):  # a console that can't show ✅ shows ? instead of failing
+        try:
+            stream.reconfigure(errors="replace")
+        except (AttributeError, ValueError):
+            pass
+    parser = argparse.ArgumentParser(prog="bug-whisperer",
+                                     description="Turn messy bug reports into Kane CLI reproductions and proven fixes.")
     sub = parser.add_subparsers(dest="cmd", required=True)
+    it = sub.add_parser("init", help="Set up this folder: the sample app (--sample) or your own app")
+    it.add_argument("--sample", action="store_true", help="Copy the sample clinic app, bugs included")
+    it.add_argument("--name", help="Your app's name, e.g. 'My Shop'")
+    it.add_argument("--url", help="Where it runs, e.g. http://localhost:3000")
+    it.add_argument("--about", default="", help="One sentence on what the app is for (helps Claude plan)")
+    it.add_argument("--login-path", default="", help="The login page's path, e.g. /login")
+    it.add_argument("--account", action="append", default=[], metavar="LABEL=EMAIL",
+                    help="A test account (repeatable); its password is asked for and kept in apps/secrets/")
+    it.add_argument("--code", help="Your app's code folder: Bug Whisperer may then repair bugs in it")
+    it.add_argument("--start", help="The command that starts your app, run in --code")
+    it.add_argument("--reset", help="The command that resets its test data, run in --code")
+    dr = sub.add_parser("doctor", help="Check Kane CLI, Claude Code, Chrome and your apps (spends no credits)")
+    dr.add_argument("--port", type=int, default=8000)
+    upp = sub.add_parser("up", help="Start the website")
+    upp.add_argument("--port", type=int, default=8000)
+    upp.add_argument("--host", default="127.0.0.1")
     inv = sub.add_parser("investigate", help="Reproduce a messy bug report with Kane CLI")
     inv.add_argument("app", help="Path to an app JSON file, e.g. apps/clinic.json")
     inv.add_argument("report", help="The user's bug report, as they wrote it")
@@ -26,6 +54,34 @@ def main(argv=None) -> int:
     sc = sub.add_parser("selfcheck", help="Kane checks Bug Whisperer's own pages (replays the saved checks)")
     sc.add_argument("--record", action="store_true", help="Run each check once and save it as a Kane test")
     args = parser.parse_args(argv)
+
+    if args.cmd in ("init", "doctor", "up"):
+        from . import workspace
+        if args.cmd == "up":
+            workspace.up(args.port, args.host)
+            return 0
+        if args.cmd == "doctor":
+            checks = workspace.doctor(args.port)
+            for mark, found, fix in checks:
+                print(f"{mark} {found}" + (f"\n     → {fix}" if fix else ""))
+            blocked = any(mark == "❌" for mark, _, _ in checks)
+            print("\nSomething above needs fixing first." if blocked else "\nReady. Start it with: bug-whisperer up")
+            return 1 if blocked else 0
+        if args.sample:
+            for line in workspace.init_sample():
+                print(f"  {line}")
+        elif args.name and args.url:
+            try:
+                path = workspace.init_app(args.name, args.url, about=args.about, code=args.code, start=args.start,
+                                          reset=args.reset, login_path=args.login_path, accounts=args.account)
+            except ValueError as e:
+                parser.error(str(e))
+            print(f"  {path.relative_to(workspace.ROOT)}: {args.name} at {args.url}"
+                  + (f", code in {args.code}" if args.code else " (link only: reproduce and report)"))
+        else:
+            parser.error("init needs --sample, or --name and --url for your own app")
+        print("\nNext: bug-whisperer doctor, then bug-whisperer up")
+        return 0
 
     if args.cmd == "hook":
         from .hook import main as hook_main

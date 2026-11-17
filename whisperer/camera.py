@@ -54,6 +54,7 @@ def chrome_binary() -> str | None:
         os.environ.get("KANE_CLI_CHROME_PATH"),  # on our server: Chrome wrapped with --no-sandbox
         r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        os.path.join(os.environ.get("LOCALAPPDATA", ""), "Google", "Chrome", "Application", "chrome.exe"),
         shutil.which("google-chrome-stable"), shutil.which("google-chrome"), shutil.which("chromium"),
         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     ]

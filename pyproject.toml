@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bug-whisperer"
+version = "0.1.0"
+description = "Turn messy bug reports into Kane CLI reproductions, and into fixes Kane has proven in a real browser."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "sam838" }]
+keywords = ["kane-cli", "testing", "bug-reports", "browser-automation", "claude-code"]
+dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
+  "jinja2",
+  "python-multipart",
+  "httpx",
+  "websocket-client",
+]
+
+[project.optional-dependencies]
+camera = ["playwright"]  # Kane's live browser view on Windows (off by default)
+dev = ["pytest"]
+
+[project.scripts]
+bug-whisperer = "whisperer.__main__:main"
+
+[project.urls]
+Source = "https://github.com/sam838/bug-whisperer"
+
+[tool.hatch.build.targets.wheel]
+packages = ["whisperer"]
+
+# What an installed package needs that lives outside whisperer/ in this repository: Kane's
+# standing instructions, and the sample clinic app as its AI builder first wrote it (bugs included).
+[tool.hatch.build.targets.wheel.force-include]
+".testmuai/context.md" = "whisperer/kane_context.md"
+"apps/clinic.json" = "whisperer/sample/clinic.json"
+"demo/clinic_original_app.py" = "whisperer/sample/clinic/app.py"
+"clinic/seed.py" = "whisperer/sample/clinic/seed.py"
+"clinic/requirements.txt" = "whisperer/sample/clinic/requirements.txt"
+"clinic/README.md" = "whisperer/sample/clinic/README.md"
+"clinic/templates" = "whisperer/sample/clinic/templates"
+"clinic/static" = "whisperer/sample/clinic/static"
+
+[tool.hatch.build.targets.sdist]
+include = ["whisperer", "clinic", "apps/clinic.json", "demo/clinic_original_app.py", ".testmuai/context.md",
+           "README.md", "pyproject.toml"]
+exclude = ["**/__pycache__", "**/*.db"]

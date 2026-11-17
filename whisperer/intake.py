@@ -20,7 +20,7 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 from . import claude, demo
-from .detective import RUNS, App, Investigation, new_id
+from .detective import ROOT, RUNS, App, Investigation, new_id
 
 TEXT_SUFFIXES = {".txt", ".md", ".csv", ".tsv", ".json", ".xml", ".html", ".htm", ".log", ".yaml", ".yml"}
 OFFICE_SUFFIXES = {".xlsx", ".docx"}
@@ -179,7 +179,7 @@ def build_prompt(intake: Intake, app: App) -> str:
 
 def run(intake: Intake, enqueue) -> Intake:
     """Read the uploads, open one case per problem, and queue each for Kane."""
-    app = App.load(Path(__file__).resolve().parent.parent / intake.app_file)
+    app = App.load(ROOT / intake.app_file)
     try:
         answer = claude.ask_json(build_prompt(intake, app))
         problems = [p for p in answer.get("problems", []) if isinstance(p, dict) and p.get("report")]

@@ -17,6 +17,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
+from .paths import PACKAGE, ROOT
+
 COMPLETION_EVENTS = {"run_end", "test_md_done", "testrun_done", "remote_done"}
 
 
@@ -50,7 +52,10 @@ class KaneResult:
 
 # What Kane should know on every website (how to fill date pickers and so on). Kane CLI reads it
 # as "local context"; passed explicitly so it doesn't depend on the folder Kane is started from.
-CONTEXT = Path(__file__).resolve().parent.parent / ".testmuai" / "context.md"
+# A project's own .testmuai/context.md wins; an installed package carries a copy of ours.
+CONTEXT = ROOT / ".testmuai" / "context.md"
+if not CONTEXT.is_file():
+    CONTEXT = PACKAGE / "kane_context.md"
 
 
 def context_args() -> list[str]:
@@ -62,6 +67,31 @@ def kane_binary() -> str:
     if not found:
         raise RuntimeError("kane-cli is not installed: npm install -g @testmuai/kane-cli")
     return found
+
+
+def version() -> str | None:
+    """Kane CLI's version, or None when it isn't installed or doesn't answer."""
+    try:
+        out = subprocess.run([kane_binary(), "--version"], capture_output=True, text=True, timeout=30)
+    except (RuntimeError, OSError, subprocess.TimeoutExpired):
+        return None
+    lines = [l.strip() for l in out.stdout.splitlines() if l.strip()]
+    return lines[-1] if out.returncode == 0 and lines else None
+
+
+def balance() -> float | None:
+    """The account's credits (this spends none), or None when Kane isn't logged in."""
+    try:
+        out = subprocess.run([kane_binary(), "balance"], capture_output=True, text=True, timeout=60)
+    except (RuntimeError, OSError, subprocess.TimeoutExpired):
+        return None
+    for line in (out.stdout + "\n" + out.stderr).splitlines():
+        if line.strip().lower().startswith("available credits:"):
+            try:
+                return float(line.split(":", 1)[1])
+            except ValueError:
+                return None
+    return None
 
 
 def run(

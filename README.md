@@ -94,35 +94,67 @@ changes `whisperer/`, the Stop hook replays them, and the session can't finish w
 To show the checks can fail, we broke the Verified page on purpose. Kane caught it (*"The /verified
 address shows a 404-style missing-case page"*), and the next run passed once it was put back.
 
-## Run it
+## Install
 
 You need Python 3.10+, Node 18+, Google Chrome, a [TestMu AI account](https://www.testmuai.com/register/)
 for Kane CLI, and [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (Bug Whisperer
 runs it headless with `claude -p` to read reports and repair code).
 
 ```bash
-npm install -g @testmuai/kane-cli
-kane-cli login
+npm install -g @testmuai/kane-cli && kane-cli login
+pipx install git+https://github.com/sam838/bug-whisperer      # or: pip install git+https://…
 
-python -m venv .venv
-.venv\Scripts\activate             # macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt pytest
-python -m pytest -q tests          # 99 tests with a fake Kane: no credits, no Chrome
-
-uvicorn whisperer.web:app --port 8000
+mkdir my-cases && cd my-cases
+bug-whisperer init --sample        # the sample clinic app, bugs included
+bug-whisperer doctor               # checks everything, spends no Kane credits
+bug-whisperer up                   # http://127.0.0.1:8000
 ```
 
-Open **http://127.0.0.1:8000**, pick a sample report (or drop in
-[docs/proof/clinic-regression-run.xlsx](docs/proof/clinic-regression-run.xlsx)), and press
-**Send Kane to investigate**. Bug Whisperer starts the sample clinic app on port 8001 by itself.
-If `claude` isn't on your PATH, set `CLAUDE_BIN`.
+`doctor` tells you exactly what's missing and how to fix it:
+
+```
+✅ Python 3.12.4
+✅ Kane CLI 0.10.4, logged in, 9,029 credits
+✅ Claude Code 2.1.325
+✅ Google Chrome
+✅ 1 app(s) connected in C:\my-cases: Clinic Records
+✅ Port 8000 is free for the website
+```
+
+Pick a sample report (or drop in
+[docs/proof/clinic-regression-run.xlsx](docs/proof/clinic-regression-run.xlsx)) and press
+**Send Kane to investigate**. Bug Whisperer starts the sample clinic on port 8001 by itself. Your
+cases, Kane's logs and any passwords stay in that folder, and `init` adds them to `.gitignore`.
+
+**Your own app** instead of the sample:
+
+```bash
+bug-whisperer init --name "My Shop" --url http://localhost:3000 \
+  --login-path /login --account "Admin=admin@shop.test" \
+  --code ./shop --start "npm start" --reset "npm run seed"
+```
+
+Leave out `--code` to only reproduce bugs and write tickets (any website, even one you don't
+own). With `--code`, Bug Whisperer also repairs them, and Kane proves each repair. The test
+account's password is asked for, sent to Kane as a secret variable, and kept in `apps/secrets/`,
+never in the app file. If `claude` isn't on your PATH, set `CLAUDE_BIN`.
 
 From the command line:
 
 ```bash
-python -m whisperer investigate apps/clinic.json "cant book in the past?? it just saved it"
-python -m whisperer fix apps/clinic.json runs/<case-id>
-python -m whisperer guard          # Kane revisits every closed case
+bug-whisperer investigate apps/clinic.json "cant book in the past?? it just saved it"
+bug-whisperer fix apps/clinic.json runs/<case-id>
+bug-whisperer guard                # Kane revisits every closed case
+```
+
+### From source
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate             # macOS/Linux: source .venv/bin/activate
+pip install -e ".[dev]"
+python -m pytest -q tests          # 107 tests with a fake Kane: no credits, no Chrome
+bug-whisperer up                   # run from the repository, it uses the repository's apps and cases
 python -m whisperer selfcheck      # Kane checks Bug Whisperer's own pages
 python -m whisperer proof          # rebuild docs/proof/RESULTS.md from the records
 ```
@@ -130,17 +162,12 @@ python -m whisperer proof          # rebuild docs/proof/RESULTS.md from the reco
 A Kane run costs about 35 credits and takes 1.5–2 minutes, because it's a real browser doing
 real steps. Replaying a saved test uses no credits.
 
-### Connect your own app
+### How an app is connected
 
-Each app is a small JSON file in [`apps/`](apps/): its URL, its test accounts and, if you want
-repairs, its code folder plus start and reset commands. See [apps/clinic.json](apps/clinic.json).
-You can also add one on the website's **Apps** page.
-
-- **Link only:** Bug Whisperer reproduces bugs and writes tickets. Works on any website.
-- **Link + code:** it also repairs them, and Kane proves each repair.
-
-Test-account passwords are sent to Kane as secret variables and never written into a test, a
-log or git (`apps/secrets/` is ignored).
+`init` writes a small JSON file in `apps/`: the app's URL, its test accounts and, for repairs,
+its code folder plus start and reset commands ([apps/clinic.json](apps/clinic.json) is the
+sample's). You can also add an app on the website's **Apps** page. Passwords are never written
+into a test, a log or git.
 
 ### The Stop hook
 
@@ -192,7 +219,7 @@ least 2 GB of RAM.
 | [`apps/`](apps/) | Connected apps (the clinic, LambdaTest's demo shop, and Bug Whisperer itself) |
 | [`.testmuai/`](.testmuai/) | Saved Kane tests, the closed cases and Kane's standing instructions |
 | [`docs/`](docs/) | Evidence from real Kane runs, the proof, and how the clinic app was built |
-| [`tests/`](tests/) | 99 tests, with a fake Kane CLI: no credits, no Chrome |
+| [`tests/`](tests/) | 107 tests, with a fake Kane CLI: no credits, no Chrome |
 | [AGENTS.md](AGENTS.md) | Rules for AI agents in this repo, including Bug Whisperer's own fixer |
 
 ## Honesty
