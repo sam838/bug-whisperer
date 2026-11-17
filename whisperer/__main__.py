@@ -33,6 +33,19 @@ def main(argv=None) -> int:
     it.add_argument("--code", help="Your app's code folder: Bug Whisperer may then repair bugs in it")
     it.add_argument("--start", help="The command that starts your app, run in --code")
     it.add_argument("--reset", help="The command that resets its test data, run in --code")
+    rp = sub.add_parser("report", help="Send Kane to investigate a bug report, and follow it live")
+    rp.add_argument("text", nargs="?", default="", help="The report, as the user wrote it")
+    rp.add_argument("--app", help="Which connected app (needed when there are several)")
+    rp.add_argument("--file", action="append", default=[], metavar="PATH",
+                    help="Test results or screenshots (repeatable): one case per real problem")
+    rp.add_argument("--screenshot", help="The user's screenshot, for a single report")
+    choice = rp.add_mutually_exclusive_group()
+    choice.add_argument("--repair", dest="repair", action="store_true", default=None,
+                        help="If Kane confirms the bug, repair it without asking")
+    choice.add_argument("--no-repair", dest="repair", action="store_false", help="Don't offer a repair")
+    rr = sub.add_parser("repair", help="Repair a confirmed case: Claude fixes it, Kane proves it")
+    rr.add_argument("case", help="The case id (see: bug-whisperer cases)")
+    sub.add_parser("cases", help="The cases on file, newest first")
     dr = sub.add_parser("doctor", help="Check Kane CLI, Claude Code, Chrome and your apps (spends no credits)")
     dr.add_argument("--port", type=int, default=8000)
     upp = sub.add_parser("up", help="Start the website")
@@ -55,6 +68,25 @@ def main(argv=None) -> int:
     sc.add_argument("--record", action="store_true", help="Run each check once and save it as a Kane test")
     args = parser.parse_args(argv)
 
+    if args.cmd in ("report", "repair", "cases"):
+        from . import terminal
+        if args.cmd == "cases":
+            rows = terminal.list_cases()
+            print("\n".join(rows) if rows else "No cases yet. Try: bug-whisperer report \"cant book!!!\"")
+            return 0
+        if args.cmd == "repair":
+            inv = terminal.load_case(args.case)
+            if inv.verdict != "reproduced":
+                print("Only a confirmed bug can be repaired: Kane has to see it first.")
+                return 1
+            app = App.load(terminal.ROOT / inv.app_file)
+            if not app.code_dir:
+                print(f"{app.name} has no code connected, so Bug Whisperer can reproduce its bugs but not repair them.")
+                return 1
+            return 0 if terminal.repair(inv, app)["verdict"] == "fixed" else 1
+        cases = terminal.report(args.text, terminal.choose_app(args.app), args.file, args.screenshot, args.repair)
+        return 0 if all(c.verdict in ("reproduced", "not_reproduced", "needs_info") for c in cases) else 1
+
     if args.cmd in ("init", "doctor", "up"):
         from . import workspace
         if args.cmd == "up":
@@ -65,7 +97,9 @@ def main(argv=None) -> int:
             for mark, found, fix in checks:
                 print(f"{mark} {found}" + (f"\n     → {fix}" if fix else ""))
             blocked = any(mark == "❌" for mark, _, _ in checks)
-            print("\nSomething above needs fixing first." if blocked else "\nReady. Start it with: bug-whisperer up")
+            print("\nSomething above needs fixing first." if blocked else
+                  '\nReady. In the terminal: bug-whisperer report "cant book!!! it just saved it"'
+                  "\n       On the website:  bug-whisperer up")
             return 1 if blocked else 0
         if args.sample:
             for line in workspace.init_sample():
@@ -80,7 +114,8 @@ def main(argv=None) -> int:
                   + (f", code in {args.code}" if args.code else " (link only: reproduce and report)"))
         else:
             parser.error("init needs --sample, or --name and --url for your own app")
-        print("\nNext: bug-whisperer doctor, then bug-whisperer up")
+        print('\nNext: bug-whisperer doctor, then bug-whisperer report "<the bug report>"'
+              " (or bug-whisperer up for the website)")
         return 0
 
     if args.cmd == "hook":

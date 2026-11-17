@@ -10,6 +10,9 @@ from __future__ import annotations
 
 import re
 
+# Kane's own bookkeeping lines: true, but noise for someone watching.
+BOOKKEEPING = re.compile(r"^(wait: queued plan|Step \d+$|analyze: ANALYZE\()")
+
 _PREFIX = re.compile(r"^(?P<kind>[a-z_]+):\s*(?:(?:PRIMARY|SECONDARY):\s*)?(?P<rest>.*)$", re.S)
 _QUOTED = re.compile(r'"([^"]+)"')
 _SECRETS = [

@@ -107,7 +107,6 @@ pipx install git+https://github.com/sam838/bug-whisperer      # or: pip install 
 mkdir my-cases && cd my-cases
 bug-whisperer init --sample        # the sample clinic app, bugs included
 bug-whisperer doctor               # checks everything, spends no Kane credits
-bug-whisperer up                   # http://127.0.0.1:8000
 ```
 
 `doctor` tells you exactly what's missing and how to fix it:
@@ -121,10 +120,49 @@ bug-whisperer up                   # http://127.0.0.1:8000
 ✅ Port 8000 is free for the website
 ```
 
-Pick a sample report (or drop in
+### In the terminal
+
+```bash
+bug-whisperer report "hi. my receptionist booked mrs aisha for 3 march 2025 by accident and it just saved it??"
+```
+
+You follow the case live: what Claude is doing, then each step Kane takes in the browser, in
+plain words (`·` done, `✗` a check that failed), then the verdict: **🐛 CONFIRMED** with a
+ready-made ticket, **📂 OPEN**, **❓** the one question to ask the user, or **⚠️ INCONCLUSIVE**
+when Kane couldn't finish. If the bug is confirmed and the code is connected, it asks
+*"Repair it now?"*, and Kane re-runs the same steps to prove the repair. A report too vague to
+test, exactly as it came out:
+
+```
+━━ Case 20261117-151602-3295 · Clinic Records
+   “it doesnt work”
+
+🧠 Claude is reading the report and writing Kane's orders…
+
+❓ OPEN  Not enough to go on yet. Ask the user:
+   What were you trying to do when it stopped working (for example adding a patient, booking an appointment, or logging in), and what did you see on the screen instead?
+   On the website: http://127.0.0.1:8000/r/20261117-151602-3295
+```
+
+- `bug-whisperer report --file results.xlsx`: a tester's results (Excel, CSV, XML, PDF, screenshots…),
+  one case per failure, run one after another.
+- `bug-whisperer repair <case>` repairs a confirmed case later, and `bug-whisperer cases` lists them.
+- `--repair` or `--no-repair` skips the question, for scripts. With several apps connected, add `--app`.
+
+### On the website
+
+```bash
+bug-whisperer up                   # http://127.0.0.1:8000
+```
+
+The same cases, with Detective Kane acting them out in 3D, the evidence board, before-and-after
+screenshots and a PDF case report. Cases started in the terminal show up there too, and the
+terminal prints each case's link. Pick a sample report (or drop in
 [docs/proof/clinic-regression-run.xlsx](docs/proof/clinic-regression-run.xlsx)) and press
-**Send Kane to investigate**. Bug Whisperer starts the sample clinic on port 8001 by itself. Your
-cases, Kane's logs and any passwords stay in that folder, and `init` adds them to `.gitignore`.
+**Send Kane to investigate**.
+
+Either way, Bug Whisperer starts the sample clinic on port 8001 by itself, and your cases, Kane's
+logs and any passwords stay in that folder (`init` adds them to `.gitignore`).
 
 **Your own app** instead of the sample:
 
@@ -139,13 +177,7 @@ own). With `--code`, Bug Whisperer also repairs them, and Kane proves each repai
 account's password is asked for, sent to Kane as a secret variable, and kept in `apps/secrets/`,
 never in the app file. If `claude` isn't on your PATH, set `CLAUDE_BIN`.
 
-From the command line:
-
-```bash
-bug-whisperer investigate apps/clinic.json "cant book in the past?? it just saved it"
-bug-whisperer fix apps/clinic.json runs/<case-id>
-bug-whisperer guard                # Kane revisits every closed case
-```
+To check that old bugs stay fixed: `bug-whisperer guard` (Kane revisits every closed case).
 
 ### From source
 

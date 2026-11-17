@@ -30,7 +30,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import demo, intake, kane
 from .detective import ROOT, RUNS, App, Investigation, investigate
-from .voice import speak
+from .voice import BOOKKEEPING, speak
 from .fixer import fix, load_investigation
 
 HERE = Path(__file__).resolve().parent
@@ -38,8 +38,7 @@ APPS = ROOT / "apps"
 ID_RE = re.compile(r"^[0-9]{8}-[0-9]{6}(-[0-9a-f]{4})?$")
 IMAGE_TYPES = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp", "image/gif": ".gif"}
 MAX_UPLOAD = 5 * 1024 * 1024
-# Kane's own bookkeeping lines: true, but noise for someone watching.
-INTERNAL_REMARK = re.compile(r"^(wait: queued plan|Step \d+$|analyze: ANALYZE\()")
+INTERNAL_REMARK = BOOKKEEPING
 
 app = FastAPI(title="Bug Whisperer")
 app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
