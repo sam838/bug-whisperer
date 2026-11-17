@@ -71,6 +71,11 @@ document.addEventListener("click", async (event) => {
     if (label) camera.querySelector("b").textContent = label;
     return;
   }
+  const view = event.target.closest("[data-game-view]");
+  if (view) {  // 3D office or simple view: the person's choice, kept for next time
+    window.kaneSetView?.(view.dataset.gameView);
+    return;
+  }
   const fullscreen = event.target.closest("[data-game-fullscreen]");
   if (!fullscreen) return;
   const game = fullscreen.closest("[data-kane-game]");

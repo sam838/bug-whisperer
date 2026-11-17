@@ -10,10 +10,9 @@
 // Kane is the CC0 "RobotExpressive" model by Tomás Laulhé (see static/models/CREDITS.md),
 // recoloured with a fedora, a red scarf and a magnifying glass: an AI detective. The furniture is
 // CC0 models from Poly Haven; the room and everything that shows the case is built in code.
-// three.js loads only on a live case; reduced motion or no WebGL keeps the 2D detective.
+// three.js loads only on a live case in the 3D view; the simple view (or no WebGL) keeps the 2D detective.
 
 (function () {
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const GLTF_LOADER = "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js";
   const ROOM_ENV = "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js";
   const MODEL = "/static/models/RobotExpressive.glb";
@@ -26,6 +25,15 @@
       document.head.append(s);
     });
   }
+  // ── 3D or simple: the person chooses with the view button (the choice is read in base.html).
+  // The simple view is the 2D detective and never starts WebGL, for slower computers.
+  const kaneView = () => document.documentElement.dataset.kaneView || "3d";
+  // the button: the page reloads into the other view (the case itself lives on the server)
+  window.kaneSetView = (view) => {
+    try { localStorage.setItem("kaneView", view); } catch { /* storage blocked: this page only */ }
+    location.reload();
+  };
+
   async function loadEngine() {
     await loadThree();  // from recon.js
     if (!window.THREE.GLTFLoader) await loadScript(GLTF_LOADER);
@@ -963,7 +971,8 @@
 
   // ── wiring it to the page ─────────────────────────────────────────────────────────────────
   async function init(stage) {
-    if (stage.dataset.ready || reduce || typeof loadThree !== "function") return;
+    if (stage.dataset.ready || typeof loadThree !== "function") return;
+    if (kaneView() === "simple") { stage.dataset.ready = "simple"; return; }
     stage.dataset.ready = "loading";
     const canvas = stage.querySelector(".kane3d-canvas");
     let rig, kane;

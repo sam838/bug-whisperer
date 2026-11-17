@@ -1157,6 +1157,20 @@ a.btn { text-decoration: none; }
 .game-controls button:active { transform: scale(.97); }
 .game-controls button > span { font-size: 15px; }
 .game-controls button small { color: #ffd166; }
+/* 3D office or simple view (chosen with the view button, read in base.html) */
+html[data-kane-view="simple"] .scene-live,
+html:not([data-kane-view="simple"]) .scene-simple { display: none; }
+.kane3d:not(.ready) .kane3d-screen { display: none; }
+.scene-simple-body { display: grid; gap: 10px; }
+.view-switch {
+  justify-self: end; display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 7px 12px;
+  color: #f3eee5; border: 2px solid #f3eee5; border-radius: 9px; background: #15182a;
+  box-shadow: 0 0 0 2px #15182a; font: 700 12px/1 var(--sans); cursor: pointer;
+  transition: transform 160ms var(--ease-out), background-color 160ms ease;
+}
+.view-switch:hover { background: #2a2f4a; }
+.view-switch:active { transform: scale(.97); }
+.view-switch > span { font-size: 15px; }
 .game-intro {
   position: absolute; z-index: 6; left: 50%; top: 50%; transform: translate(-50%, -50%);
   display: grid; justify-items: center; width: min(520px, calc(100% - 440px)); padding: 20px 28px;

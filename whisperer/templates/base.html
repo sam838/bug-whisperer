@@ -9,6 +9,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
+  <script>
+    // Kane's live scene: the 3D office or the simple 2D view, as the person last chose
+    // (the simple one by default when the system asks for less motion)
+    (function () {
+      var view = null;
+      try { view = localStorage.getItem("kaneView"); } catch (e) { /* storage blocked */ }
+      if (view !== "3d" && view !== "simple") view = matchMedia("(prefers-reduced-motion: reduce)").matches ? "simple" : "3d";
+      document.documentElement.dataset.kaneView = view;
+    })();
+  </script>
 </head>
 <body>
   <header class="topbar">

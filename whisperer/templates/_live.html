@@ -1,4 +1,4 @@
-{% from "_kane.html" import sprite, head %}
+{% from "_kane.html" import sprite, head, say %}
 {% set fixv = inv.fix.get('verdict') if inv.fix else None %}
 {% set fixs = inv.fix.get('status', '') if inv.fix else '' %}
 <div class="live-root" data-active="{{ 'true' if active else 'false' }}">
@@ -54,6 +54,7 @@
         </aside>
         <div class="game-controls">
           <button type="button" data-game-camera aria-label="Change camera view"><span aria-hidden="true">▣</span> Camera: <b>Office</b> <small>⌄</small></button>
+          <button type="button" data-game-view="simple" aria-label="Switch to the simple view (lighter, for slower computers)"><span aria-hidden="true">◐</span> Simple view</button>
           <button type="button" data-game-fullscreen aria-label="Enter fullscreen"><span aria-hidden="true">⛶</span></button>
         </div>
       </div>
@@ -65,6 +66,14 @@
         </div>
         <span class="game-thinking" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="game-live"><i aria-hidden="true"></i> Live investigation</span>
+      </div>
+    </section>
+    {# The simple view, for slower computers: the 2D detective and his dialogue box, no WebGL. #}
+    <section class="scene scene-case scene-simple">
+      <div class="scene-actor" data-keep="kane-{{ scene.mode }}">{{ sprite(scene.mode) }}</div>
+      <div class="scene-simple-body">
+        {{ say(scene.line, key=scene.line) }}
+        <button type="button" class="view-switch" data-game-view="3d"><span aria-hidden="true">◐</span> Watch in the 3D office</button>
       </div>
     </section>
   {% elif active %}
