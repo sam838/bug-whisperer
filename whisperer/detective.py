@@ -128,6 +128,8 @@ Rules for the objective:
 - Then: "Store what the page shows after that as 'what_happened'."
 - End with ONE check: "Verify that <the correct behaviour>." It must FAIL if the bug is real.
 - Only normal user actions. At most 10 actions, counting each field.
+- If the report doesn't say which account it is, use account 1. Never ask the user which test
+  account to use: that is not a reason to set enough_info to false.
 
 {fields}
 {feedback}"""

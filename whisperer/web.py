@@ -47,7 +47,8 @@ templates = Jinja2Templates(directory=HERE / "templates")
 
 EXAMPLES = [
     "hi. my receptionist booked mrs aisha for 3 march 2025 by accident (we meant 2027) and the "
-    "system just saved it?? no warning nothing. it should not let us book in the past right",
+    "system just saved it?? no warning nothing. it should not let us book in the past right. "
+    "we are sunrise clinic",
     "we have 2 patients booked at 10:00 tomorrow with the same doctor?? how did the system allow that",
     "cant add a patient!!! i put the name and press add and it says something red. pls fix asap 😡",
 ]
