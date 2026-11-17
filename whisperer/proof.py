@@ -114,6 +114,8 @@ def _revisits() -> dict:
     total = holds = reopened = unknown = 0
     for path in reports:
         for r in json.loads(path.read_text(encoding="utf-8")).get("results", []):
+            if r.get("app") == SELF_APP:
+                continue
             total += 1
             holds += r.get("verdict") == "holds"
             reopened += r.get("verdict") == "reopened"
@@ -130,7 +132,37 @@ def _revisits() -> dict:
 def _regression_tests() -> list[dict]:
     path = ROOT / ".testmuai" / "closed-cases.json"
     cases = json.loads(path.read_text(encoding="utf-8")).get("cases", []) if path.exists() else []
-    return [{"title": c["title"], "test": f".testmuai/tests/{c['test']}_test.md", "closed": c.get("closed")} for c in cases]
+    return [{"title": c["title"], "test": f".testmuai/tests/{c['test']}_test.md", "closed": c.get("closed")}
+            for c in cases if not c.get("self_check")]
+
+
+SELF_APP = "Bug Whisperer (itself)"
+
+
+def _self_checks() -> dict:
+    """Kane checking Bug Whisperer's own pages: the saved checks and their latest replay."""
+    path = ROOT / ".testmuai" / "closed-cases.json"
+    checks = [c for c in (json.loads(path.read_text(encoding="utf-8")).get("cases", []) if path.exists() else [])
+              if c.get("self_check")]
+    latest, when, caught = {}, None, []
+    notes_file = PROOF / "selfcheck-notes.json"
+    notes = json.loads(notes_file.read_text(encoding="utf-8")) if notes_file.exists() else {}
+    stamp = lambda s: f"{s[:4]}-{s[4:6]}-{s[6:8]} {s[9:11]}:{s[11:13]}"
+    for report in sorted((PROOF / "revisits").glob("guard-*.json")):
+        data = json.loads(report.read_text(encoding="utf-8"))
+        rows = [r for r in data.get("results", []) if r.get("app") == SELF_APP]
+        if rows:
+            latest, when = {r["case_id"]: r for r in rows}, report.stem.removeprefix("guard-")
+        for r in rows:  # every time a check failed: proof the checks can fail
+            if r.get("verdict") != "holds":
+                said = (r.get("fresh") or {}).get("summary") or (r.get("replay") or {}).get("summary") or ""
+                caught.append({"when": stamp(report.stem.removeprefix("guard-")), "id": r["case_id"],
+                               "title": r.get("title", ""), "kane_said": said, "note": notes.get(report.stem, "")})
+    rows = [{"id": c["case_id"], "title": c["title"], "objective": c["objective"],
+             "test": f".testmuai/tests/{c['test']}_test.md", "verdict": (latest.get(c["case_id"]) or {}).get("verdict")}
+            for c in checks]
+    return {"checks": rows, "last_run": stamp(when) if when else None,
+            "passing": sum(r["verdict"] == "holds" for r in rows), "caught": caught}
 
 
 def collect() -> dict:
@@ -145,6 +177,7 @@ def collect() -> dict:
         "evidence": evidence,
         "revisits": revisits,
         "regression_tests": tests,
+        "self_checks": _self_checks(),
         "totals": {
             "experiments_run": len(ran),
             "experiments_as_expected": sum(e["as_expected"] for e in ran),
@@ -199,6 +232,17 @@ def markdown(r: dict) -> str:
         verdict = VERDICT_WORDS.get(c.get("verdict"), "see the write-up")
         fixed = "✅ Kane saw the fix" if c.get("fixed") else "–"
         lines.append(f"| [{c['title']}](../evidence/{c['id']}/) | {c.get('app', 'Clinic Records')} | {verdict} | {fixed} | {c.get('kane_runs', '–')} |")
+    sc = r.get("self_checks") or {}
+    if sc.get("checks"):
+        lines += ["", "## Kane checks Bug Whisperer itself", "",
+                  f"Bug Whisperer's own pages are saved Kane tests too, replayed with no self-healing whenever its code "
+                  f"changes. Last run {sc['last_run']}: **{sc['passing']} of {len(sc['checks'])} passing**.", ""]
+        for c in sc["checks"]:
+            mark = {"holds": "✅", None: "–"}.get(c["verdict"], "❌")
+            lines.append(f"- {mark} {c['title']}: [`{c['test'].split('/')[-1]}`](../../{c['test']})")
+        for x in sc.get("caught", []):
+            lines.append(f"- 🔎 Caught on {x['when']}: *{x['title']}* failed. Kane: “{x['kane_said']}”"
+                         + (f" *({x['note']})*" if x.get("note") else ""))
     lines += ["", "## Kept on file as Kane regression tests", ""]
     for x in r["regression_tests"]:
         lines.append(f"- {x['title']}: [`{x['test']}`](../../{x['test']}) (closed {x['closed']})")

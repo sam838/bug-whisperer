@@ -52,6 +52,21 @@
     </table></div>
   </section>
 
+  {% set sc = r.self_checks %}
+  {% if sc and sc.checks %}
+  <section class="card">
+    <h2>🕵️ Kane checks Bug Whisperer itself</h2>
+    <p class="muted">Bug Whisperer doesn't trust its own "it works" either. Its pages are saved Kane tests, replayed with no
+      self-healing whenever its code changes; the Claude Code Stop hook won't let a coding session finish while one fails.
+      Last run {{ sc.last_run }}: <b>{{ sc.passing }} of {{ sc.checks|length }} passing</b>.</p>
+    <ul class="proof-list">{% for c in sc.checks %}<li>{{ '✅' if c.verdict == 'holds' else ('–' if not c.verdict else '❌') }} {{ c.title }}
+      <a href="{{ r.repo }}/{{ c.test }}"><code>{{ c.test.split('/')[-1] }}</code></a></li>{% endfor %}</ul>
+    {% for x in sc.caught %}
+      <p class="caught">🔎 <b>Caught {{ x.when }}:</b> “{{ x.title }}” failed. Kane: <i>“{{ x.kane_said }}”</i>{% if x.note %} <span class="muted">({{ x.note }})</span>{% endif %}</p>
+    {% endfor %}
+  </section>
+  {% endif %}
+
   <div class="grid2">
     <section class="card">
       <h2>Kept on file</h2>

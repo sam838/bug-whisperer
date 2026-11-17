@@ -23,11 +23,23 @@ def main(argv=None) -> int:
     ex = sub.add_parser("experiments", help="Run the pre-registered proof experiments (real Kane runs)")
     ex.add_argument("ids", nargs="*", help="Only these experiment ids")
     sub.add_parser("proof", help="Gather the real records into docs/proof/results.json and RESULTS.md")
+    sc = sub.add_parser("selfcheck", help="Kane checks Bug Whisperer's own pages (replays the saved checks)")
+    sc.add_argument("--record", action="store_true", help="Run each check once and save it as a Kane test")
     args = parser.parse_args(argv)
 
     if args.cmd == "hook":
         from .hook import main as hook_main
         return hook_main()
+
+    if args.cmd == "selfcheck":
+        from . import selfcheck
+        if args.record:
+            done = selfcheck.record()
+            print(f"[selfcheck] {sum(d['verdict'] == 'passed' for d in done)}/{len(done)} checks recorded")
+        report = selfcheck.run()
+        for r in report["results"]:
+            print(f"  {'✅' if r['verdict'] == 'holds' else '❌'} {r['case_id']}: {r['title']}")
+        return 1 if report["reopened"] or report["unknown"] else 0
 
     if args.cmd in ("experiments", "proof"):
         from .proof import collect, run_experiments

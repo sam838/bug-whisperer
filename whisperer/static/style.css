@@ -840,3 +840,4 @@ a.btn { text-decoration: none; }
   .paper-report section, .report-shots figure { break-inside: avoid; }
 }
 .paper-report code { background: var(--paper-2); color: var(--ink); padding: 1px 6px; border-radius: 4px; }
+.caught { margin: 12px 0 0; padding: 10px 12px; border-radius: 8px; background: var(--bug-soft); font-size: 14px; }

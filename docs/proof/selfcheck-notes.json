@@ -1,0 +1,4 @@
+{
+  "about": "Notes on self-check runs, matched by the guard report they belong to. Written by hand, and shown next to the result.",
+  "guard-20261117-090744": "A negative control, staged on purpose: docs/proof/results.json was moved aside to break the Verified page, to show the checks can fail. It was put back and the next run passed."
+}

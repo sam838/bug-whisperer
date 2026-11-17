@@ -18,6 +18,56 @@
       "objective": "Go to http://127.0.0.1:8001/login and log in with email {{account1_email}} and password {{account1_password}}. Open the appointment booking page. Book an appointment for the first patient in the patient list on 2027-11-14 at 10:00 and submit. Open the appointment booking page again. Book an appointment for the second patient in the patient list on 2027-11-14 at 10:00 and submit. Store what the page shows after that as 'what_happened'. Verify that the second booking was refused with a message that the 10:00 slot on 2027-11-14 is already taken.",
       "closed": "2026-11-13 13:05",
       "rerecorded": "Re-recorded with a fixed date (2027-11-14) instead of 'tomorrow' (old test: bug-20261113-124324-d930-4)."
+    },
+    {
+      "case_id": "self-front-desk",
+      "app_file": "apps/bug-whisperer.json",
+      "test": "self-front-desk",
+      "title": "The front desk: an example report fills the case form",
+      "report": "Self-check of Bug Whisperer's own pages",
+      "objective": "Go to http://127.0.0.1:8010/. Click the first example button under 'Try a real one'. Verify that the witness statement box now contains 'my receptionist booked mrs aisha' and the page shows a 'Send Kane to investigate' button.",
+      "closed": "2026-11-17 09:00",
+      "self_check": true
+    },
+    {
+      "case_id": "self-case-files",
+      "app_file": "apps/bug-whisperer.json",
+      "test": "self-case-files",
+      "title": "The case files: the corkboard and Kane's rank",
+      "report": "Self-check of Bug Whisperer's own pages",
+      "objective": "Go to http://127.0.0.1:8010/inbox. Verify that the page shows Detective Kane's rank card and at least one pinned case stamped 'Case closed'.",
+      "closed": "2026-11-17 09:02",
+      "self_check": true
+    },
+    {
+      "case_id": "self-closed-case",
+      "app_file": "apps/bug-whisperer.json",
+      "test": "self-closed-case",
+      "title": "A closed case: its stamp, evidence board and scene map",
+      "report": "Self-check of Bug Whisperer's own pages",
+      "objective": "Go to http://127.0.0.1:8010/r/20261113-124324-d930. Verify that the page shows a 'Case closed' stamp, a section called 'The evidence board' and a section called 'The scene map'.",
+      "closed": "2026-11-17 09:03",
+      "self_check": true
+    },
+    {
+      "case_id": "self-verified",
+      "app_file": "apps/bug-whisperer.json",
+      "test": "self-verified",
+      "title": "The Verified page: the pre-registered experiments",
+      "report": "Self-check of Bug Whisperer's own pages",
+      "objective": "Go to http://127.0.0.1:8010/verified. Verify that the page says 6/6 pre-registered experiments came out as expected and lists the experiment 'E3-false-privacy-claim'.",
+      "closed": "2026-11-17 09:04",
+      "self_check": true
+    },
+    {
+      "case_id": "self-case-report",
+      "app_file": "apps/bug-whisperer.json",
+      "test": "self-case-report",
+      "title": "The case report: steps, repair and a Save as PDF button",
+      "report": "Self-check of Bug Whisperer's own pages",
+      "objective": "Go to http://127.0.0.1:8010/r/20261113-124324-d930/report. Verify that the report has a section 'What Kane did, in a real browser', a section 'The repair' and a 'Save as PDF' button.",
+      "closed": "2026-11-17 09:05",
+      "self_check": true
     }
   ]
 }

@@ -262,3 +262,31 @@ def test_a_finished_case_exports_a_report(client, tmp_path):
 def test_no_export_while_kane_is_still_working(client, tmp_path):
     inv = save(tmp_path, status="reproducing")
     assert "Case report (PDF)" not in client.get(f"/r/{inv.id}/live").text
+
+
+def test_bug_whisperer_does_not_offer_itself_as_an_app_to_investigate(client):
+    assert all(a["file"] != "apps/bug-whisperer.json" for a in web.list_apps())
+    assert "Bug Whisperer (itself)" not in client.get("/").text
+
+
+def test_self_checks_are_kept_apart_from_the_bugs_bug_whisperer_fixed(tmp_path, monkeypatch):
+    import json as _json
+    from whisperer import proof
+    registry = tmp_path / ".testmuai" / "closed-cases.json"
+    registry.parent.mkdir()
+    registry.write_text(_json.dumps({"cases": [
+        {"case_id": "c1", "title": "Past dates", "test": "bug-1", "closed": "x", "app_file": "apps/clinic.json"},
+        {"case_id": "self-front-desk", "title": "Front desk", "test": "self-front-desk", "objective": "o",
+         "app_file": "apps/bug-whisperer.json", "self_check": True}]}), encoding="utf-8")
+    revisits = tmp_path / "docs" / "proof" / "revisits"
+    revisits.mkdir(parents=True)
+    (revisits / "guard-20261117-090000.json").write_text(_json.dumps({"results": [
+        {"case_id": "self-front-desk", "app": "Bug Whisperer (itself)", "verdict": "holds"},
+        {"case_id": "c1", "app": "Clinic Records", "verdict": "holds"}]}), encoding="utf-8")
+    monkeypatch.setattr(proof, "ROOT", tmp_path)
+    monkeypatch.setattr(proof, "PROOF", tmp_path / "docs" / "proof")
+    monkeypatch.setattr(proof, "RUNS", tmp_path / "runs")
+    assert [t["title"] for t in proof._regression_tests()] == ["Past dates"]
+    sc = proof._self_checks()
+    assert sc["passing"] == 1 and sc["last_run"] == "2026-11-17 09:00"
+    assert proof._revisits()["replays"] == 1  # the self-check isn't counted as a revisit of a closed case

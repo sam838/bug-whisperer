@@ -1,6 +1,6 @@
 # Bug Whisperer: verified results
 
-*Generated 2026-11-16 22:23 by `python -m whisperer proof` from the real records in this repo. Every verdict below is the one Kane CLI and Bug Whisperer recorded; nothing is typed in by hand.*
+*Generated 2026-11-17 09:13 by `python -m whisperer proof` from the real records in this repo. Every verdict below is the one Kane CLI and Bug Whisperer recorded; nothing is typed in by hand.*
 
 - **6 of 6** pre-registered experiments came out as expected ([the expectations were committed before any ran](experiments.json)).
 - **4** case studies with full evidence, **2** bugs fixed and kept as Kane regression tests.
@@ -50,6 +50,17 @@ What each one tested, and what was said:
 | [Evidence 003: works on a website we didn't build](../evidence/003-shop-search-any-website/) | LambdaTest eCommerce Playground | Confirmed | – | 2 |
 | [Evidence 004: the hook. Kane blocks Claude Code until an old bug is fixed again](../evidence/004-hook-reopened-case/) | Clinic Records | see the write-up | – | – |
 
+## Kane checks Bug Whisperer itself
+
+Bug Whisperer's own pages are saved Kane tests too, replayed with no self-healing whenever its code changes. Last run 2026-11-17 09:10: **5 of 5 passing**.
+
+- ✅ The front desk: an example report fills the case form: [`self-front-desk_test.md`](../../.testmuai/tests/self-front-desk_test.md)
+- ✅ The case files: the corkboard and Kane's rank: [`self-case-files_test.md`](../../.testmuai/tests/self-case-files_test.md)
+- ✅ A closed case: its stamp, evidence board and scene map: [`self-closed-case_test.md`](../../.testmuai/tests/self-closed-case_test.md)
+- ✅ The Verified page: the pre-registered experiments: [`self-verified_test.md`](../../.testmuai/tests/self-verified_test.md)
+- ✅ The case report: steps, repair and a Save as PDF button: [`self-case-report_test.md`](../../.testmuai/tests/self-case-report_test.md)
+- 🔎 Caught on 2026-11-17 09:07: *The Verified page: the pre-registered experiments* failed. Kane: “The /verified address shows a 404-style missing-case page, so the required 6/6 result and experiment entry cannot be displayed.” *(A negative control, staged on purpose: docs/proof/results.json was moved aside to break the Verified page, to show the checks can fail. It was put back and the next run passed.)*
+
 ## Kept on file as Kane regression tests
 
 - Appointments can be booked on past dates with no error: [`.testmuai/tests/bug-20261113-112727_test.md`](../../.testmuai/tests/bug-20261113-112727_test.md) (closed 2026-11-13 11:40)
@@ -57,4 +68,4 @@ What each one tested, and what was said:
 
 ## The Stop hook's revisits
 
-Between 2026-11-13 13:56 and 2026-11-16 18:16, the Claude Code Stop hook replayed the closed cases **58** times in **29** sessions: 54 still closed, 4 reopened, 0 unclear ([every report](revisits/)). The reopening that blocked a session until it was fixed is written up in [evidence 004](../evidence/004-hook-reopened-case/).
+Between 2026-11-13 13:56 and 2026-11-17 09:10, the Claude Code Stop hook replayed the closed cases **58** times in **32** sessions: 54 still closed, 4 reopened, 0 unclear ([every report](revisits/)). The reopening that blocked a session until it was fixed is written up in [evidence 004](../evidence/004-hook-reopened-case/).

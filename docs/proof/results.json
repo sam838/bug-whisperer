@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-16 22:23",
+  "generated": "2026-11-17 09:13",
   "repo": "https://github.com/sam838/bug-whisperer/blob/main",
   "experiments": [
     {
@@ -163,13 +163,13 @@
     }
   ],
   "revisits": {
-    "sessions": 29,
+    "sessions": 32,
     "replays": 58,
     "holds": 54,
     "reopened": 4,
     "unknown": 0,
     "first": "2026-11-13 13:56",
-    "last": "2026-11-16 18:16"
+    "last": "2026-11-17 09:10"
   },
   "regression_tests": [
     {
@@ -183,6 +183,56 @@
       "closed": "2026-11-13 13:05"
     }
   ],
+  "self_checks": {
+    "checks": [
+      {
+        "id": "self-front-desk",
+        "title": "The front desk: an example report fills the case form",
+        "objective": "Go to http://127.0.0.1:8010/. Click the first example button under 'Try a real one'. Verify that the witness statement box now contains 'my receptionist booked mrs aisha' and the page shows a 'Send Kane to investigate' button.",
+        "test": ".testmuai/tests/self-front-desk_test.md",
+        "verdict": "holds"
+      },
+      {
+        "id": "self-case-files",
+        "title": "The case files: the corkboard and Kane's rank",
+        "objective": "Go to http://127.0.0.1:8010/inbox. Verify that the page shows Detective Kane's rank card and at least one pinned case stamped 'Case closed'.",
+        "test": ".testmuai/tests/self-case-files_test.md",
+        "verdict": "holds"
+      },
+      {
+        "id": "self-closed-case",
+        "title": "A closed case: its stamp, evidence board and scene map",
+        "objective": "Go to http://127.0.0.1:8010/r/20261113-124324-d930. Verify that the page shows a 'Case closed' stamp, a section called 'The evidence board' and a section called 'The scene map'.",
+        "test": ".testmuai/tests/self-closed-case_test.md",
+        "verdict": "holds"
+      },
+      {
+        "id": "self-verified",
+        "title": "The Verified page: the pre-registered experiments",
+        "objective": "Go to http://127.0.0.1:8010/verified. Verify that the page says 6/6 pre-registered experiments came out as expected and lists the experiment 'E3-false-privacy-claim'.",
+        "test": ".testmuai/tests/self-verified_test.md",
+        "verdict": "holds"
+      },
+      {
+        "id": "self-case-report",
+        "title": "The case report: steps, repair and a Save as PDF button",
+        "objective": "Go to http://127.0.0.1:8010/r/20261113-124324-d930/report. Verify that the report has a section 'What Kane did, in a real browser', a section 'The repair' and a 'Save as PDF' button.",
+        "test": ".testmuai/tests/self-case-report_test.md",
+        "verdict": "holds"
+      }
+    ],
+    "last_run": "2026-11-17 09:10",
+    "passing": 5,
+    "caught": [
+      {
+        "when": "2026-11-17 09:07",
+        "id": "self-verified",
+        "title": "The Verified page: the pre-registered experiments",
+        "kane_said": "The /verified address shows a 404-style missing-case page, so the required 6/6 result and experiment entry cannot be displayed.",
+        "note": "A negative control, staged on purpose: docs/proof/results.json was moved aside to break the Verified page, to show the checks can fail. It was put back and the next run passed."
+      }
+    ]
+  },
   "totals": {
     "experiments_run": 6,
     "experiments_as_expected": 6,

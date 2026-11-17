@@ -32,6 +32,7 @@ class App:
     about: str = ""
     start: list | None = None  # command that starts the app, run in code_dir ("python" = this venv)
     reset: list | None = None  # command that resets the app's test data, run in code_dir
+    self_check: bool = False  # Bug Whisperer itself, checked by Kane (not offered for new cases)
 
     @classmethod
     def load(cls, path: str | Path) -> "App":

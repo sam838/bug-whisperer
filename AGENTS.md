@@ -65,5 +65,9 @@ python -m pytest -q tests          # must pass before you finish
 - Kane's standing instructions (how to fill date pickers and other fields) are in
   `.testmuai/context.md`, passed with `--local-context` on every run and replay. Claude's matching
   guide is `whisperer/fields.py`; `tests/test_fields.py` keeps both true to real Chrome.
+- Kane checks Bug Whisperer itself: read-only checks of its own pages are saved Kane tests
+  (`apps/bug-whisperer.json`, code folder `whisperer/`, a second copy on port 8010). When a session
+  changes `whisperer/`, the Stop hook replays them and the session can't finish while one fails.
+  Fix the site, never the check. Run them by hand with `python -m whisperer selfcheck`.
 - Save a run as a test with `--name <flow>`. Replay it with
   `kane-cli testmd run <file> --agent --no-adaptive-heal`.

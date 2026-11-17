@@ -95,7 +95,7 @@ def boot_apps() -> None:
     from . import apprunner
     for path in APPS.glob("*.json"):
         cfg = App.load(path)
-        if cfg.start and not apprunner.is_up(cfg):
+        if cfg.start and not cfg.self_check and not apprunner.is_up(cfg):
             apprunner.start(cfg)
 
 
@@ -122,6 +122,8 @@ def list_apps() -> list[dict]:
     out = []
     for path in sorted(APPS.glob("*.json")):
         cfg = App.load(path)
+        if cfg.self_check:  # Bug Whisperer's own copy for Kane's self-checks: not a case to open
+            continue
         out.append({"file": f"apps/{path.name}", "slug": path.stem, "name": cfg.name,
                     "url": cfg.base_url, "has_code": bool(cfg.code_dir), "about": cfg.about,
                     "accounts": list(cfg.accounts)})

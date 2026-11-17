@@ -1,0 +1,11 @@
+{
+  "name": "Bug Whisperer (itself)",
+  "base_url": "http://127.0.0.1:8010",
+  "login_path": "",
+  "accounts": {},
+  "code_dir": "whisperer",
+  "about": "Bug Whisperer's own website, checked by Kane like any other app. Read-only self-checks.",
+  "start": ["python", "selfserve.py"],
+  "reset": null,
+  "self_check": true
+}

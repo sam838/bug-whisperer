@@ -1,0 +1,92 @@
+{
+  "when": "20261117-090744",
+  "results": [
+    {
+      "case_id": "self-front-desk",
+      "title": "The front desk: an example report fills the case form",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 3.03
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-case-files",
+      "title": "The case files: the corkboard and Kane's rank",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 2.84
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-closed-case",
+      "title": "A closed case: its stamp, evidence board and scene map",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 2.61
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-verified",
+      "title": "The Verified page: the pre-registered experiments",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 4",
+        "summary": "The /verified address shows a 404-style missing-case page, so the required 6/6 result and experiment entry cannot be displayed.",
+        "failed_step": "assert: the page says 6/6 pre-registered experiments came out as expected and lists the ",
+        "errors": [],
+        "duration": 36.2
+      },
+      "verdict": "reopened"
+    },
+    {
+      "case_id": "self-case-report",
+      "title": "The case report: steps, repair and a Save as PDF button",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 2.39
+      },
+      "verdict": "holds"
+    }
+  ],
+  "reopened": [
+    {
+      "case_id": "self-verified",
+      "title": "The Verified page: the pre-registered experiments",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 4",
+        "summary": "The /verified address shows a 404-style missing-case page, so the required 6/6 result and experiment entry cannot be displayed.",
+        "failed_step": "assert: the page says 6/6 pre-registered experiments came out as expected and lists the ",
+        "errors": [],
+        "duration": 36.2
+      },
+      "verdict": "reopened"
+    }
+  ],
+  "unknown": []
+}
