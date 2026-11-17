@@ -10,6 +10,8 @@ argue with. If the app's code is connected, it also turns it into a fix that
   need the passcode in our submission)
 - ▶️ **Video:** _added with the submission_
 - 📊 **Every result, generated from the real records:** [docs/proof/RESULTS.md](docs/proof/RESULTS.md)
+- 🛠️ **Install and use it on your own app:** [docs/SETUP.md](docs/SETUP.md)
+- ⚙️ **How it works, and what we learned about Kane CLI:** [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md)
 
 Built during the [Kane CLI Online Hackathon](https://luma.com/kanecli-online) (Nov 12–19, 2026),
 with Claude Code as the coding agent. The first commit is from Nov 13.
@@ -26,52 +28,36 @@ with Claude Code as the coding agent. The first commit is from Nov 13.
 
 Then, on the four scores:
 
-- **Ships:** a live site that reads typed reports, screenshots and test-result files (Excel, CSV,
-  XML, PDF, Word and more). Each case runs in real Chrome.
+- **Ships:** a live site, plus a one-command install for your own apps, in the terminal or on its
+  website. It reads typed reports, screenshots and test-result files (Excel, CSV, XML, PDF, Word
+  and more). Each case runs in real Chrome.
 - **Verified:** pre-registered experiments that test whether Bug Whisperer **refuses to invent
   bugs**: a complaint that isn't a bug, a false privacy claim, a vague report, and a report with
   instructions hidden in it. 6 of 6 came out as expected.
 - **Closed loop:** Kane fails → Claude repairs with Kane's evidence → Kane re-runs the same steps →
-  only a pass closes the case → the saved test is replayed on every later code change (58 times
-  so far).
-- **Craft:** Kane also checks Bug Whisperer itself, and a check failed on purpose to prove it can
-  ([see below](#kane-checks-bug-whisperer-itself)).
+  only a pass closes the case → the saved test is replayed on every later code change (58 times so
+  far).
+- **Craft:** `bug-whisperer doctor` checks the whole setup without spending credits, and Kane
+  checks Bug Whisperer itself: a check we broke on purpose was caught
+  ([how](docs/HOW_IT_WORKS.md#kane-checks-bug-whisperer-itself)).
 
 ## How it works
 
 ```
-Messy report, screenshot or test results (.xlsx, .csv, .xml, .pdf, …)
-  → Claude writes it as a plain-English Kane test (files are split into cases, one per real problem)
-  → Kane CLI runs it in real Chrome
-       ❌ the check fails, and Kane's own words match the report  → 🐛 Confirmed
-       ✅ the check passes                                         → Open: ask the user one question
-       ⚠️ Kane couldn't run, or a step never happened             → inconclusive, nothing claimed
-  → if the report rests on a claim ("I can see the other clinic's patients"), Kane checks the claim too
-  → (code connected) Claude repairs the app, given only Kane's evidence
-  → Kane replays the same steps:  ✅ case closed   ❌ try again (at most 3)  → then a person
-  → the passing test is saved, and the Stop hook replays it whenever the app's code changes
+Messy report, screenshot or test results
+  → Claude writes it as a plain-English Kane test
+  → Kane CLI runs it in real Chrome           → 🐛 Confirmed · 📂 Open · ❓ ask the user · ⚠️ inconclusive
+  → Claude repairs the code, from Kane's evidence only
+  → Kane replays the same steps               → ✅ case closed, only on a pass
+  → the Stop hook replays the test whenever the code changes
 ```
 
 A bug only counts as **fixed** when the same Kane test **failed before** the repair and **passes
-after** it. Claude never decides that; Kane's verdict does.
-
-What you get for each case: the verdict, Kane's steps and screenshots, a ready-made ticket, the
-repair (with the failing run before it and the passing run after it), a reply for the user, and a
-case report as a PDF or Markdown.
-
-### Detective Kane
-
-On the website, every case is a game of detective. **Kane** walks into his 3D office, pins the
-witness statement on the corkboard, sits at his computer, and acts out each real step as it
-happens: the screen shows the real page and the real typed value, and every check ends in a nod
-or a head shake. Nothing in the scene is invented. While Claude is working he runs small errands
-around the office, and drops them the moment his browser starts. A **Simple view** button swaps
-the 3D office for a light 2D version on slower computers.
+after** it. Claude never decides that; Kane's verdict does. On the website, **Detective Kane** acts
+out every real step in a 3D office (or a light 2D view). Nothing in the scene is invented.
+More in [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md).
 
 ## The proof
-
-All numbers come from [`python -m whisperer proof`](docs/proof/RESULTS.md), which reads the real
-records in this repo. Nothing is typed in by hand.
 
 | | |
 |---|---|
@@ -82,212 +68,35 @@ records in this repo. Nothing is typed in by hand.
 | Kane CLI runs | about **68** |
 
 - **[001](docs/evidence/001-past-date-booking/):** appointments could be booked in the past. Reproduced, repaired, proven.
-- **[002](docs/evidence/002-double-booking/):** two patients could be booked into the same slot, all through the website. The first repair *wasn't* proven, and the reason was Bug Whisperer's own bug (the app never reloaded). That story is in the write-up.
+- **[002](docs/evidence/002-double-booking/):** two patients could be booked into the same slot. The first repair *wasn't* proven, and the reason was Bug Whisperer's own bug (the app never reloaded). That story is in the write-up.
 - **[003](docs/evidence/003-shop-search-any-website/):** a site we didn't build (LambdaTest's eCommerce Playground), with only its link.
-- **[004](docs/evidence/004-hook-reopened-case/):** the hook. A fresh Claude Code session adding an unrelated feature was blocked until it repaired a bug that had come back. (We removed the fix on purpose to stage this, and the write-up says so.)
+- **[004](docs/evidence/004-hook-reopened-case/):** the Stop hook blocked a fresh Claude Code session until it repaired a bug that had come back. (We removed the fix on purpose to stage this, and the write-up says so.)
 
-### Kane checks Bug Whisperer itself
+All numbers come from `python -m whisperer proof`, which reads the real records in this repo.
 
-Bug Whisperer's own pages are saved Kane tests ([`self-*_test.md`](.testmuai/tests/)): the front
-desk, the case files, a closed case, the Verified page and the case report. When a session
-changes `whisperer/`, the Stop hook replays them, and the session can't finish while one fails.
-To show the checks can fail, we broke the Verified page on purpose. Kane caught it (*"The /verified
-address shows a 404-style missing-case page"*), and the next run passed once it was put back.
+## Try it
 
-## Install
+**Without installing anything:** the [live demo](https://bug-whisperer-tqgg.onrender.com) runs the
+sample clinic app. Browse every case, or send Kane on a live case with the passcode.
 
-You need Python 3.10+, Node 18+, Google Chrome, a [TestMu AI account](https://www.testmuai.com/register/)
-for Kane CLI, and [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (Bug Whisperer
-runs it headless with `claude -p` to read reports and repair code).
+**On your machine** (Python, Node, Chrome and Claude Code; **no Docker**):
 
 ```bash
 npm install -g @testmuai/kane-cli && kane-cli login
-pipx install git+https://github.com/sam838/bug-whisperer      # or: pip install git+https://…
+pipx install git+https://github.com/sam838/bug-whisperer
 
 mkdir my-cases && cd my-cases
 bug-whisperer init --sample        # the sample clinic app, bugs included
 bug-whisperer doctor               # checks everything, spends no Kane credits
+
+bug-whisperer report "cant book!!! it just saved it"     # in the terminal, or…
+bug-whisperer up                                         # …on the website: http://127.0.0.1:8000
 ```
 
-`doctor` tells you exactly what's missing and how to fix it:
-
-```
-✅ Python 3.12.4
-✅ Kane CLI 0.10.4, logged in, 9,029 credits
-✅ Claude Code 2.1.325
-✅ Google Chrome
-✅ 1 app(s) connected in C:\my-cases: Clinic Records
-✅ Port 8000 is free for the website
-```
-
-### In the terminal
-
-```bash
-bug-whisperer report "hi. my receptionist booked mrs aisha for 3 march 2025 by accident and it just saved it??"
-```
-
-You follow the case live: what Claude is doing, then each step Kane takes in the browser, in
-plain words (`·` done, `✗` a check that failed), then the verdict: **🐛 CONFIRMED** with a
-ready-made ticket, **📂 OPEN**, **❓** the one question to ask the user, or **⚠️ INCONCLUSIVE**
-when Kane couldn't finish. If the bug is confirmed and the code is connected, it asks
-*"Repair it now?"*, and Kane re-runs the same steps to prove the repair. A real run on the
-sample app, from a fresh `pipx` install (Nov 17; `…` marks steps left out here):
-
-```
-━━ Case 20261117-152922-9e58 · Clinic Records
-
-🧠 Claude is reading the report and writing Kane's orders…
-🕵️  Kane is at the scene, in a real Chrome browser:
-   · I went to http://127.0.0.1:8051/login.
-   …
-   · I picked Aisha Rahman in Patient.
-   · I typed 2025-03-03 into Date.
-   · I typed 10:30 into Time.
-   · I clicked Book appointment button to book the appointment.
-   …
-   ✗ I checked: the appointment was not saved and the page shows an error saying the date cannot.
-⚖️  Kane found something. Claude is checking it matches the report…
-
-🐛 CONFIRMED  Kane logged in and filled in the booking form for Aisha Rahman with a date of 3 March
-   2025, which is in the past. When it clicked Book appointment, the app saved the booking and moved
-   to her patient page. It showed no warning, which is the problem the clinic reported.
-   Ticket: Appointments can be booked with a past date and are saved without any error
-   …
-
-━━ Repairing case 20261117-152922-9e58: Claude works from Kane's evidence only, then Kane checks.
-
-🛠️  fixing (attempt 1)
-🛠️  waiting for the app to reload (attempt 1)
-🛠️  Kane re-checking (attempt 1)
-   · I went to http://127.0.0.1:8051/login.
-   …
-   · I clicked Book appointment button.
-   · I checked: the appointment was not saved and the page shows an error saying the date cannot.
-
-✅ CASE CLOSED  Kane repeated the same steps and saw the fix with his own eyes.
-   The passing test is saved, and replayed whenever this app's code changes.
-```
-
-The repair Claude made, from Kane's evidence alone:
-
-```diff
- def validate_appointment(appt_date: str, appt_time: str) -> list[str]:
-     errors = []
-     try:
--        date.fromisoformat(appt_date)
-+        if date.fromisoformat(appt_date) < date.today():
-+            errors.append("Appointment date cannot be in the past.")
-```
-
-- `bug-whisperer report --file results.xlsx`: a tester's results (Excel, CSV, XML, PDF, screenshots…),
-  one case per failure, run one after another.
-- `bug-whisperer repair <case>` repairs a confirmed case later, and `bug-whisperer cases` lists them.
-- `--repair` or `--no-repair` skips the question, for scripts. With several apps connected, add `--app`.
-
-### On the website
-
-```bash
-bug-whisperer up                   # http://127.0.0.1:8000
-```
-
-The same cases, with Detective Kane acting them out in 3D, the evidence board, before-and-after
-screenshots and a PDF case report. Cases started in the terminal show up there too, and the
-terminal prints each case's link. Pick a sample report (or drop in
-[docs/proof/clinic-regression-run.xlsx](docs/proof/clinic-regression-run.xlsx)) and press
-**Send Kane to investigate**.
-
-Either way, Bug Whisperer starts the sample clinic on port 8001 by itself, and your cases, Kane's
-logs and any passwords stay in that folder (`init` adds them to `.gitignore`).
-
-**Your own app** instead of the sample:
-
-```bash
-bug-whisperer init --name "My Shop" --url http://localhost:3000 \
-  --login-path /login --account "Admin=admin@shop.test" \
-  --code ./shop --start "npm start" --reset "npm run seed"
-```
-
-Leave out `--code` to only reproduce bugs and write tickets (any website, even one you don't
-own). With `--code`, Bug Whisperer also repairs them, and Kane proves each repair. The test
-account's password is asked for, sent to Kane as a secret variable, and kept in `apps/secrets/`,
-never in the app file. If `claude` isn't on your PATH, set `CLAUDE_BIN`.
-
-To check that old bugs stay fixed: `bug-whisperer guard` (Kane revisits every closed case).
-
-### From source
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate             # macOS/Linux: source .venv/bin/activate
-pip install -e ".[dev]"
-python -m pytest -q tests          # 117 tests with a fake Kane: no credits, no Chrome
-bug-whisperer up                   # run from the repository, it uses the repository's apps and cases
-python -m whisperer selfcheck      # Kane checks Bug Whisperer's own pages
-python -m whisperer proof          # rebuild docs/proof/RESULTS.md from the records
-```
-
-A Kane run costs about 35 credits and takes 1.5–2 minutes, because it's a real browser doing
-real steps. Replaying a saved test uses no credits.
-
-### How an app is connected
-
-`init` writes a small JSON file in `apps/`: the app's URL, its test accounts and, for repairs,
-its code folder plus start and reset commands ([apps/clinic.json](apps/clinic.json) is the
-sample's). You can also add an app on the website's **Apps** page. Passwords are never written
-into a test, a log or git.
-
-### The Stop hook
-
-[.claude/settings.json](.claude/settings.json) adds a Claude Code **Stop hook**. When Claude tries
-to finish work in this repo, Kane replays the closed cases for any app whose code changed. If an
-old bug is back, Claude is blocked, given Kane's evidence, and has to repair it first. The hook
-fails open: if Kane can't run, Claude isn't blocked, and nothing is claimed.
-
-### The hosted demo
-
-The same website runs on Render with Kane CLI, Chrome and Claude Code on the server
-([Dockerfile](Dockerfile), [render.yaml](render.yaml)). Live runs need a passcode and have a
-daily limit, connecting other apps is off, and every live case starts from the clinic app **as
-its AI builder first wrote it, bugs included** ([demo/clinic_original_app.py](demo/clinic_original_app.py)),
-so each judge finds the same bugs. The clinic app, which runs AI-edited code, never sees the Kane
-key, the Claude token or the passcode.
-
-To deploy your own: Render → New → Blueprint → this repo, then set `DEMO_PASSCODE`,
-`LT_USERNAME`, `LT_ACCESS_KEY` and `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`). Use at
-least 2 GB of RAM.
-
-## What we learned about Kane CLI
-
-- **Read the verdict, not the vibe.** Exit code `0` passed, `1` failed, `2` setup error, `3`
-  timeout. Only `0` and `1` are evidence; anything else is *inconclusive* and never counts as fixed
-  or broken. Kane's NDJSON is read in one place only ([whisperer/kane.py](whisperer/kane.py)).
-- **A failed check isn't always a bug.** Once, Kane "clicked" Book but the form never submitted,
-  and the check failed for the wrong reason. Bug Whisperer now reads Kane's own step summary first:
-  a step that didn't happen means the run proves nothing.
-- **Date boxes are typed as digits, not text.** Typing `2027-11-11` into a US date box gave
-  `50303-02-20`. The fix is a standing instruction file passed with `--local-context` on every run
-  ([.testmuai/context.md](.testmuai/context.md)), with each example checked in real Chrome in US
-  and day-first formats. Claude decides *what* to fill; Kane's context says *how* to type it.
-- **"Store … as 'name'"** in an objective puts the value in `run_end.final_state`, which gives the
-  judge (Claude) Kane's actual observation instead of a guess.
-- **Replay with `--no-adaptive-heal`.** A regression test that heals itself can hide the very bug
-  it's guarding. Saved tests here replay exactly or fail.
-- **Fixed dates beat relative ones.** A test that books "tomorrow" changes every day. We re-recorded
-  the double-booking test with a fixed date.
-- **Kane drives local Chrome,** so it tests `localhost` directly. That's what makes the repair loop
-  fast: no deploy between a fix and its proof.
-
-## Repository
-
-| Path | What it is |
-|---|---|
-| [`whisperer/`](whisperer/) | Bug Whisperer: the website, the detective, the fix loop, the hook |
-| [`clinic/`](clinic/) | The sample clinic app that receives the bug reports. **Not the product.** |
-| [`apps/`](apps/) | Connected apps (the clinic, LambdaTest's demo shop, and Bug Whisperer itself) |
-| [`.testmuai/`](.testmuai/) | Saved Kane tests, the closed cases and Kane's standing instructions |
-| [`docs/`](docs/) | Evidence from real Kane runs, the proof, and how the clinic app was built |
-| [`tests/`](tests/) | 117 tests, with a fake Kane CLI: no credits, no Chrome |
-| [AGENTS.md](AGENTS.md) | Rules for AI agents in this repo, including Bug Whisperer's own fixer |
+To use it on **your own app**, even one running on `localhost`:
+`bug-whisperer init --name "My Shop" --url http://localhost:3000`, plus `--code ./shop` to let it
+repair bugs too. Everything else, including hosting your own copy, is in
+**[docs/SETUP.md](docs/SETUP.md)**.
 
 ## Honesty
 
