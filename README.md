@@ -185,7 +185,7 @@ To check that old bugs stay fixed: `bug-whisperer guard` (Kane revisits every cl
 python -m venv .venv
 .venv\Scripts\activate             # macOS/Linux: source .venv/bin/activate
 pip install -e ".[dev]"
-python -m pytest -q tests          # 107 tests with a fake Kane: no credits, no Chrome
+python -m pytest -q tests          # 114 tests with a fake Kane: no credits, no Chrome
 bug-whisperer up                   # run from the repository, it uses the repository's apps and cases
 python -m whisperer selfcheck      # Kane checks Bug Whisperer's own pages
 python -m whisperer proof          # rebuild docs/proof/RESULTS.md from the records
@@ -251,7 +251,7 @@ least 2 GB of RAM.
 | [`apps/`](apps/) | Connected apps (the clinic, LambdaTest's demo shop, and Bug Whisperer itself) |
 | [`.testmuai/`](.testmuai/) | Saved Kane tests, the closed cases and Kane's standing instructions |
 | [`docs/`](docs/) | Evidence from real Kane runs, the proof, and how the clinic app was built |
-| [`tests/`](tests/) | 107 tests, with a fake Kane CLI: no credits, no Chrome |
+| [`tests/`](tests/) | 114 tests, with a fake Kane CLI: no credits, no Chrome |
 | [AGENTS.md](AGENTS.md) | Rules for AI agents in this repo, including Bug Whisperer's own fixer |
 
 ## Honesty
