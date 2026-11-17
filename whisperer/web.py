@@ -674,10 +674,29 @@ def featured_case() -> dict | None:
     return None
 
 
+def recent_cases(limit: int = 3) -> list[dict]:
+    """Newest real case files for the compact front-page strip."""
+    numbers = case_numbers()
+    cards = []
+    for folder in sorted(RUNS.glob("*/investigation.json"), reverse=True):
+        try:
+            inv = load_investigation(folder.parent)
+        except (json.JSONDecodeError, TypeError):
+            continue
+        stamp, tone = case_stamp(inv)
+        ticket = (inv.judgement.get("ticket") or {}) if inv.judgement else {}
+        cards.append({"inv": inv, "case_no": numbers.get(inv.id), "stamp": stamp, "tone": tone,
+                      "title": ticket.get("title") or inv.report[:72]})
+        if len(cards) == limit:
+            break
+    return cards
+
+
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse(request, "report.html", {
-        "apps": list_apps(), "examples": EXAMPLES, "page": "report", "featured": featured_case()})
+        "apps": list_apps(), "examples": EXAMPLES, "page": "report", "featured": featured_case(),
+        "recent": recent_cases()})
 
 
 async def _read_uploads(files: list[UploadFile]) -> list[tuple[str, bytes]]:

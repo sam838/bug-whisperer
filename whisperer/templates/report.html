@@ -49,13 +49,6 @@
         placeholder="cant book!!! the button does nothing. pls fix 😡"></textarea>
     </label>
 
-    <div class="examples">
-      <span>Try a real report:</span>
-      {% for e in examples %}
-        <button type="button" class="chip" data-example="{{ e }}">{{ e[:40] }}…</button>
-      {% endfor %}
-    </div>
-
     <label class="evidence-drop">
       <span class="drop-icon" aria-hidden="true">▧</span>
       <span><b>Add evidence files</b><small>Drop in screenshots, documents, spreadsheets, or test results · up to 8 files</small></span>
@@ -78,19 +71,18 @@
   </aside>
 </section>
 
-{% if featured %}
-  {% set f = featured %}
+{% if recent %}
   <section class="recent-proof">
-    <div class="recent-head"><div><span class="section-kicker">Real case evidence</span><h2>See a closed case</h2></div><a href="/inbox">View all case files →</a></div>
-    <a class="featured-case" href="/r/{{ f.inv.id }}">
-      <div class="featured-summary">
-        <span class="featured-label">Case #{{ f.case_no }} · {{ f.inv.app }}</span>
-        <blockquote>{{ f.inv.report[:150] }}{{ '…' if f.inv.report|length > 150 }}</blockquote>
-        <span class="stamp stamp-ok">Fix verified</span>
-      </div>
-      <figure><figcaption>Before · Kane reproduced it</figcaption><img class="shot kane" src="/files/{{ f.inv.id }}/{{ f.before.dir }}/{{ f.before.file }}" alt="Kane's screenshot of the bug" loading="lazy"></figure>
-      <figure><figcaption>After · same steps passed</figcaption><img class="shot kane" src="/files/{{ f.inv.id }}/{{ f.after.dir }}/{{ f.after.file }}" alt="Kane's screenshot after the fix" loading="lazy"></figure>
-    </a>
+    <div class="recent-head"><h2><span aria-hidden="true">▱</span> Recent case files</h2><a href="/inbox">View all case files →</a></div>
+    <div class="recent-grid">
+      {% for c in recent %}
+        <a class="recent-card tone-{{ c.tone }}" href="/r/{{ c.inv.id }}">
+          <div><span class="case-ref">▱ &nbsp;BW-{{ '%04d'|format(c.case_no or loop.index) }}</span><time>{{ c.inv.created[:10] }}</time></div>
+          <b>{{ c.title }}</b>
+          <footer><span>{{ c.inv.app }}</span><strong>{{ 'Fix verified' if c.stamp == 'Case closed' else c.stamp }}</strong></footer>
+        </a>
+      {% endfor %}
+    </div>
   </section>
 {% endif %}
 {% endblock %}

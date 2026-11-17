@@ -47,6 +47,42 @@ document.addEventListener("click", async (event) => {
   }
 });
 
+// The live 3D game's lightweight controls. The WebGL stage is kept across polling, while these
+// buttons are replaced with the fresh HUD, so the selected camera is read back from the stage.
+function syncKaneControls(root = document) {
+  root.querySelectorAll("[data-kane-game]").forEach((game) => {
+    const stage = game.querySelector("[data-kane3d]");
+    const label = game.querySelector("[data-game-camera] b");
+    if (label && stage?.dataset.camera) label.textContent = stage.dataset.camera;
+    const fullscreen = game.querySelector("[data-game-fullscreen]");
+    if (fullscreen) {
+      const on = document.fullscreenElement === game;
+      fullscreen.setAttribute("aria-label", on ? "Exit fullscreen" : "Enter fullscreen");
+      fullscreen.querySelector("span").textContent = on ? "⛶" : "⛶";
+    }
+  });
+}
+
+document.addEventListener("click", async (event) => {
+  const camera = event.target.closest("[data-game-camera]");
+  if (camera) {
+    const stage = camera.closest("[data-kane-game]")?.querySelector("[data-kane3d]");
+    const label = stage?.kaneCameraNext?.();
+    if (label) camera.querySelector("b").textContent = label;
+    return;
+  }
+  const fullscreen = event.target.closest("[data-game-fullscreen]");
+  if (!fullscreen) return;
+  const game = fullscreen.closest("[data-kane-game]");
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await game.requestFullscreen();
+  } catch {
+    /* Fullscreen can be blocked by an embedded browser; the game still works in place. */
+  }
+});
+document.addEventListener("fullscreenchange", () => syncKaneControls());
+
 // Before/after compare slider: dragging moves a clip-path wipe (no layout, GPU only).
 document.addEventListener("input", (event) => {
   const range = event.target.closest(".compare-range");
@@ -343,7 +379,10 @@ if (live) {
           .filter((d) => d.open).map((d) => d.dataset.key));
         live.innerHTML = await response.text();
         live.querySelectorAll("[data-keep]").forEach((n) => {
-          if (kept[n.dataset.keep]) n.replaceWith(kept[n.dataset.keep]);
+          if (kept[n.dataset.keep]) {
+            Object.assign(kept[n.dataset.keep].dataset, n.dataset);
+            n.replaceWith(kept[n.dataset.keep]);
+          }
         });
         live.querySelectorAll("details[data-key]").forEach((d) => {
           if (open.has(d.dataset.key)) d.open = true;
@@ -358,6 +397,7 @@ if (live) {
         live.querySelectorAll("[data-trail]").forEach(initTrail);
         if (window.initRecon) live.querySelectorAll("[data-recon]").forEach(window.initRecon);
         if (window.initKane3d) window.initKane3d(live);
+        syncKaneControls(live);
         document.dispatchEvent(new Event("kane:update"));  // Kane in 3D acts out any new steps
         typeOut(live);
         const stampNow = stampText();

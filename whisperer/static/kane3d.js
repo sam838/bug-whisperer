@@ -753,6 +753,18 @@
     stage.classList.add("ready");
     stage.dataset.ready = "1";
     const T = window.THREE;
+    const cameraViews = [
+      { label: "Office", position: new T.Vector3(0.9, 1.95, 3.7), focus: new T.Vector3(-0.65, 1.12, -0.95) },
+      { label: "Desk", position: new T.Vector3(0.15, 1.7, 2.45), focus: new T.Vector3(-1.25, 1.15, -0.75) },
+      { label: "Evidence", position: new T.Vector3(0.85, 1.85, 2.05), focus: new T.Vector3(-0.25, 1.68, -2.92) },
+    ];
+    let cameraAt = Math.max(0, cameraViews.findIndex((view) => view.label === stage.dataset.camera));
+    stage.dataset.camera = cameraViews[cameraAt].label;
+    stage.kaneCameraNext = () => {
+      cameraAt = (cameraAt + 1) % cameraViews.length;
+      stage.dataset.camera = cameraViews[cameraAt].label;
+      return stage.dataset.camera;
+    };
     rig.scene.traverse((o) => {
       for (const m of [].concat(o.material || [])) if (m.isMeshStandardMaterial) m.envMapIntensity = m.metalness > 0.5 ? 0.6 : 0.1;
     });
@@ -815,10 +827,11 @@
     document.addEventListener("kane:update", update);
 
     // Kane's real browser on the 3D screen, whenever the live camera is filming it
-    const liveSrc = stage.dataset.liveSrc;
     let misses = 0;
     const pollLive = () => {
-      if (!canvas.isConnected || !liveSrc) return;
+      if (!canvas.isConnected) return;
+      const liveSrc = stage.dataset.liveSrc;
+      if (!liveSrc) { setTimeout(pollLive, 1500); return; }
       const img = new Image();
       img.onload = () => { misses = 0; rig.screen.state.live = img; rig.screen.draw(); setTimeout(pollLive, 1000); };
       img.onerror = () => {
@@ -878,7 +891,12 @@
       rig.clock.minPivot.rotation.z = -d.getMinutes() / 60 * Math.PI * 2;
       rig.clock.hourPivot.rotation.z = -((d.getHours() % 12) + d.getMinutes() / 60) / 12 * Math.PI * 2;
       rig.alarm.intensity = rig.alarmUntil && now < rig.alarmUntil ? 2.2 + Math.sin(now / 70) * 1.2 : 0;
-      rig.camera.position.x = 0.9 + Math.sin(now / 6000) * 0.12;  // a slow drift, so the shot feels alive
+      const view = cameraViews[cameraAt], ease = Math.min(1, dt * 3.2);
+      const drift = cameraAt === 0 ? Math.sin(now / 6000) * 0.12 : 0;
+      rig.camera.position.x += (view.position.x + drift - rig.camera.position.x) * ease;
+      rig.camera.position.y += (view.position.y - rig.camera.position.y) * ease;
+      rig.camera.position.z += (view.position.z - rig.camera.position.z) * ease;
+      rig.focus.lerp(view.focus, ease);
       rig.camera.lookAt(rig.focus);
       rig.renderer.render(rig.scene, rig.camera);
     };
