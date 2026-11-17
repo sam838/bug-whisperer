@@ -927,6 +927,27 @@
     return [move(0.6)];
   }
 
+  // ── while he waits on Claude (or the case is closed): a small errand away from the desk ─────
+  // Never while his real browser is working; the frame loop drops the errand the moment a real
+  // step arrives, and he walks back and sits down first.
+  const ERRANDS = [
+    { at: [-1.45, -2.45], look: [-1.45, -3] },               // watches the rain at the window
+    { at: [0.42, -2.3], look: [0.42, -3], then: "Yes" },     // studies the corkboard, nods
+    { at: [-0.4, 1.7], look: [-1.25, 2.0] },                 // looks over the evidence tray
+    { at: [1.6, -2.2], look: [1.75, -3], then: "No" },       // checks the clock, shakes his head
+  ];
+  function errand(rig, kane, e) {
+    const T = window.THREE, spot = new T.Vector3(e.at[0], 0, e.at[1]);
+    let gestured = false;
+    const away = [
+      walkTo(rig, kane, spot),
+      move(3.2, (k) => { if (e.then && !gestured && k > 0.45) { gestured = true; kane.play(e.then); } },
+        () => { rig.yaw = Math.atan2(e.look[0] - e.at[0], e.look[1] - e.at[1]); kane.loop("Idle"); }),
+    ];
+    away.forEach((m) => (m.errand = true));
+    return [...getUp(rig, kane), ...away, ...sitAtDesk(rig, kane)];
+  }
+
   // the case opens: Kane comes in through the door, pins the witness statement, sits at the computer
   function entrance(rig, kane, statement) {
     const T = window.THREE;
@@ -1034,11 +1055,23 @@
     }
 
     let seen = sofar.total, current = null, last = performance.now(), lastDraw = 0, rainAt = 0, shadowTick = 0;
+    let idleFor = 0, restFor = 9, lastErrand = -1;
+    // real work comes first: drop what is left of an errand (he still walks back and sits down)
+    const cutErrand = () => {
+      for (let i = script.length - 1; i >= 0; i--) if (script[i].errand) script.splice(i, 1);
+      if (current?.errand) current = null;
+    };
     const update = () => {
       const now = trackerSteps();
-      if (now.total > seen) { now.steps.slice(-(now.total - seen)).forEach((st) => script.push({ step: st })); seen = now.total; }
+      if (now.total > seen) {
+        cutErrand();
+        now.steps.slice(-(now.total - seen)).forEach((st) => script.push({ step: st })); seen = now.total;
+      }
     };
     document.addEventListener("kane:update", update);
+    // what he is doing, for checking from the page (see tests)
+    stage.kaneNow = () => ({ seated: !!rig.seated, errand: !!current?.errand || script.some((x) => x.errand),
+      x: +kane.model.position.x.toFixed(2), z: +kane.model.position.z.toFixed(2) });
 
     // Kane's real browser on the 3D screen, whenever the live camera is filming it
     let misses = 0;
@@ -1078,6 +1111,14 @@
       const dt = Math.min(0.1, (now - last) / 1000); last = now; lastDraw = now;
       const backlog = script.filter((x) => x.step).length;
       const speed = backlog > 2 ? 2.2 : backlog ? 1.4 : 1;  // catch up when Kane is quick
+      const mode = document.querySelector("#live .scene-live")?.dataset.mode || "idle";
+      if (mode === "walking" && (current?.errand || script.some((x) => x.errand))) cutErrand();
+      if (current || script.length) idleFor = 0;
+      else if ((idleFor += dt) > restFor && rig.seated && kane.model.visible && mode !== "walking") {
+        let pick; do pick = Math.floor(Math.random() * ERRANDS.length); while (pick === lastErrand);
+        lastErrand = pick; idleFor = 0; restFor = 8 + Math.random() * 7;
+        script.push(...errand(rig, kane, ERRANDS[pick]));
+      }
       if (!current) current = nextMove();
       kane.mixer.update(dt * (current ? speed : 1));
       if (current) {
@@ -1090,7 +1131,6 @@
         const turn = Math.atan2(Math.sin(rig.yaw - kane.model.rotation.y), Math.cos(rig.yaw - kane.model.rotation.y));
         kane.model.rotation.y += turn * Math.min(1, dt * 7);
       }
-      const mode = document.querySelector("#live .scene-live")?.dataset.mode || "idle";
       kane.bubble.visible = !current && (trackerSteps().thinking || mode === "reading");
       const head = kane.model.position;
       kane.bubble.position.set(head.x + 0.3, (rig.seated ? 1.85 : 2.2) + Math.sin(now / 300) * 0.03, head.z);
