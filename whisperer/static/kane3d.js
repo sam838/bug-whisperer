@@ -291,6 +291,9 @@
     renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95;
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
     renderer.shadowMap.autoUpdate = false;  // redrawn only when something moves (see frame)
+    // asking the driver for each shader's error log makes it compile them one by one (seconds on
+    // some laptops); without it they compile side by side
+    renderer.debug.checkShaderErrors = false;
     const scene = new T.Scene();
     scene.background = new T.Color(0x0a0d15);
     scene.fog = new T.Fog(0x0a0d15, 7, 14);
@@ -949,6 +952,12 @@
       rig = buildOffice(window.THREE, canvas);
       kane = await loadKane(window.THREE, rig);
       await Promise.race([Promise.all(rig.loads), new Promise((ok) => setTimeout(ok, 15000))]);
+      // compile every shader now, hidden things included (Kane before his entrance), so the
+      // scene never stops for a compile once it is on screen
+      const hidden = [];
+      rig.scene.traverse((o) => { if (!o.visible) { hidden.push(o); o.visible = true; } });
+      rig.renderer.compile(rig.scene, rig.camera);
+      hidden.forEach((o) => (o.visible = false));
     } catch (e) {
       stage.dataset.ready = "";  // no WebGL or no model: keep the 2D detective
       return;
@@ -1062,8 +1071,10 @@
     const frame = (now) => {
       if (!canvas.isConnected) { document.removeEventListener("kane:update", update); rig.renderer.dispose(); return; }
       requestAnimationFrame(frame);
-      // about 30 frames a second while Kane moves, 20 while he sits and works, none when hidden
-      if (document.hidden || now - lastDraw < (current ? 30 : 48)) return;
+      // full speed (up to 60 a second) while Kane or the camera moves, 30 while he sits and
+      // works, none when the tab is hidden
+      const settling = rig.camera.position.distanceToSquared(cameraViews[cameraAt].position) > 1e-4;
+      if (document.hidden || now - lastDraw < (current || settling ? 15 : 30)) return;
       const dt = Math.min(0.1, (now - last) / 1000); last = now; lastDraw = now;
       const backlog = script.filter((x) => x.step).length;
       const speed = backlog > 2 ? 2.2 : backlog ? 1.4 : 1;  // catch up when Kane is quick
