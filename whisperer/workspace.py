@@ -153,8 +153,12 @@ def doctor(port: int = 8000) -> list[tuple[str, str, str]]:
     apps = connected_apps()
     checks.append(("✅", f"{len(apps)} app(s) connected in {ROOT}: {', '.join(apps)}", "") if apps else
                   ("❌", f"No apps connected in {ROOT}", "bug-whisperer init --sample   (or --name … --url … for your own)"))
-    checks.append(("✅", f"Port {port} is free for the website", "") if _port_free(port) else
-                  ("⚠️", f"Port {port} is in use", f"bug-whisperer up --port {port + 1}"))
+    if _port_free(port):
+        checks.append(("✅", f"Port {port} is free for the website", ""))
+    else:  # 8001 is the sample clinic's, so suggest one well away from it
+        spare = next((p for p in (8080, 8090, 8100, 8888) if _port_free(p)), None)
+        checks.append(("⚠️", f"Port {port} is in use", f"bug-whisperer up --port {spare}" if spare
+                       else "stop what is using it, or pick a free port with --port"))
     return checks
 
 
