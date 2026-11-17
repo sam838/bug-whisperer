@@ -419,6 +419,28 @@ setInterval(() => {
   });
 }, 900);
 
+// Put a freshly rendered page (inside `freshRoot`) into `root` without ever taking `keep` out
+// of the page: `keep` takes the fresh contents of its twin `freshKeep`, and at each level up to
+// `root` its siblings are swapped for the fresh ones and its parent takes the fresh attributes.
+function keepInPlace(root, keep, freshRoot, freshKeep) {
+  const copyAttributes = (to, from) => {
+    [...to.attributes].forEach((a) => { if (!from.hasAttribute(a.name)) to.removeAttribute(a.name); });
+    [...from.attributes].forEach((a) => to.setAttribute(a.name, a.value));
+  };
+  copyAttributes(keep, freshKeep);
+  keep.replaceChildren(...freshKeep.childNodes);
+  let o = keep, f = freshKeep;
+  while (o !== root && f !== freshRoot) {
+    const before = [], after = [];
+    let past = false;
+    [...f.parentNode.childNodes].forEach((c) => { if (c === f) past = true; else (past ? after : before).push(c); });
+    [...o.parentNode.childNodes].forEach((c) => { if (c !== o) c.remove(); });
+    o.before(...before); o.after(...after);
+    o = o.parentNode; f = f.parentNode;
+    if (o !== root) copyAttributes(o, f);
+  }
+}
+
 // While Kane or Claude is working, refresh the live part of a case page.
 // Only what is NEW animates: steps that weren't there before, and a stamp whose words changed.
 // Without this, everything would re-animate every 2 seconds.
@@ -439,12 +461,23 @@ if (live) {
         live.querySelectorAll("[data-keep]").forEach((n) => (kept[n.dataset.keep] = n));
         const open = new Set([...live.querySelectorAll("details[data-key]")]
           .filter((d) => d.open).map((d) => d.dataset.key));
-        live.innerHTML = await response.text();
+        const fresh = document.createElement("div");
+        fresh.innerHTML = await response.text();
+        // The 3D game in full screen: its frame must never leave the page (that ends full
+        // screen), so the fresh page is built around it instead of replacing it.
+        const shell = document.fullscreenElement?.matches("[data-keep-shell]") && live.contains(document.fullscreenElement)
+          ? document.fullscreenElement : null;
+        const freshShell = shell && fresh.querySelector(`[data-keep="${shell.dataset.keep}"]`);
+        if (freshShell) keepInPlace(live, shell, fresh, freshShell);
+        else live.replaceChildren(...fresh.childNodes);
+        // a kept "shell" (the 3D game's frame) takes the fresh contents; anything kept inside
+        // it (the 3D stage) is put back after
         live.querySelectorAll("[data-keep]").forEach((n) => {
-          if (kept[n.dataset.keep]) {
-            Object.assign(kept[n.dataset.keep].dataset, n.dataset);
-            n.replaceWith(kept[n.dataset.keep]);
-          }
+          const old = kept[n.dataset.keep];
+          if (!old || old === n) return;
+          Object.assign(old.dataset, n.dataset);
+          if ("keepShell" in n.dataset) old.replaceChildren(...n.childNodes);
+          n.replaceWith(old);
         });
         live.querySelectorAll("details[data-key]").forEach((d) => {
           if (open.has(d.dataset.key)) d.open = true;
