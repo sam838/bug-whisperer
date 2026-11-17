@@ -272,3 +272,7 @@ least 2 GB of RAM.
 - **3D models and textures:** Detective Kane is the CC0 *RobotExpressive* by Tomás Laulhé
   (Quaternius), and the furniture and textures are CC0 from [Poly Haven](https://polyhaven.com/).
   Every author is listed in [whisperer/static/models/CREDITS.md](whisperer/static/models/CREDITS.md).
+
+## License
+
+[MIT](LICENSE). The 3D models and textures are CC0 (see the credits above).

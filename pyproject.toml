@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Turn messy bug reports into Kane CLI reproductions, and into fixes Kane has proven in a real browser."
 readme = "README.md"
 requires-python = ">=3.10"
+license = { text = "MIT" }
 authors = [{ name = "sam838" }]
 keywords = ["kane-cli", "testing", "bug-reports", "browser-automation", "claude-code"]
 dependencies = [
@@ -46,5 +47,5 @@ packages = ["whisperer"]
 
 [tool.hatch.build.targets.sdist]
 include = ["whisperer", "clinic", "apps/clinic.json", "demo/clinic_original_app.py", ".testmuai/context.md",
-           "README.md", "pyproject.toml"]
+           "README.md", "LICENSE", "pyproject.toml"]
 exclude = ["**/__pycache__", "**/*.db"]
