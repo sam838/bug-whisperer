@@ -7,22 +7,61 @@ document.querySelectorAll("[data-example]").forEach((chip) => {
   });
 });
 
-// The evidence drop: it lights up while a file is dragged over it, and once files are chosen it
-// says so and lists them, so it is clear what will be sent.
+// The evidence drop: files add up across picks and drops (up to 8), each listed with a button to
+// take it out again, so what will be sent is always in view. The browser's own file list is
+// rebuilt from that list, so the form sends exactly the files shown.
+const MAX_FILES = 8, MAX_BYTES = 5 * 1024 * 1024;
+const READABLE = /\.(png|jpe?g|webp|gif|pdf|xlsx|csv|tsv|docx|txt|md|json|xml|html?|log)$/i;
 document.querySelectorAll(".evidence-drop").forEach((drop) => {
   const input = drop.querySelector("input[type=file]");
-  const title = drop.querySelector("[data-drop-title]"), list = drop.querySelector("[data-drop-list]");
-  const empty = [title.textContent, list.textContent];
-  const show = () => {
-    const names = [...input.files].map((f) => f.name);
-    drop.classList.toggle("has-files", names.length > 0);
-    title.textContent = names.length ? `✓ ${names.length} file${names.length > 1 ? "s" : ""} ready to send` : empty[0];
-    list.textContent = names.length ? names.join(" · ") : empty[1];
+  const form = drop.closest("form");
+  const title = drop.querySelector("[data-drop-title]"), hint = drop.querySelector("[data-drop-list]");
+  const list = form.querySelector("[data-drop-files]"), note = form.querySelector("[data-drop-note]");
+  const empty = [title.textContent, hint.textContent];
+  let chosen = [];
+  const size = (n) => (n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1048576).toFixed(1)} MB`);
+  const say = (text) => { note.textContent = text; note.hidden = !text; };
+
+  const render = () => {
+    const box = new DataTransfer();
+    chosen.forEach((f) => box.items.add(f));
+    input.files = box.files;
+    const n = chosen.length;
+    drop.classList.toggle("has-files", n > 0);
+    title.textContent = n ? `✓ ${n} file${n > 1 ? "s" : ""} ready to send` : empty[0];
+    hint.textContent = n ? (n < MAX_FILES ? `Drop or pick more to add them · up to ${MAX_FILES} files` : `That's the most: ${MAX_FILES} files`) : empty[1];
+    list.hidden = !n;
+    list.replaceChildren(...chosen.map((f, i) => {
+      const li = document.createElement("li");
+      const name = document.createElement("span");
+      name.className = "drop-file-name"; name.textContent = f.name;
+      const meta = document.createElement("small");
+      meta.textContent = size(f.size);
+      const remove = document.createElement("button");
+      remove.type = "button"; remove.className = "drop-remove"; remove.textContent = "×";
+      remove.setAttribute("aria-label", `Remove ${f.name}`);
+      remove.addEventListener("click", () => { chosen.splice(i, 1); say(""); render(); });
+      li.append(name, meta, remove);
+      return li;
+    }));
   };
-  input.addEventListener("change", show);
+
+  input.addEventListener("change", () => {
+    const skipped = [];
+    for (const f of input.files) {
+      if (chosen.some((c) => c.name === f.name && c.size === f.size && c.lastModified === f.lastModified)) continue;
+      if (!READABLE.test(f.name)) skipped.push(`${f.name} (Bug Whisperer can't read this kind of file)`);
+      else if (f.size > MAX_BYTES) skipped.push(`${f.name} (over 5 MB)`);
+      else if (chosen.length >= MAX_FILES) skipped.push(`${f.name} (${MAX_FILES} files is the most)`);
+      else chosen.push(f);
+    }
+    say(skipped.length ? `Not added: ${skipped.join(", ")}.` : "");
+    render();
+  });
   input.addEventListener("dragenter", () => drop.classList.add("dragging"));
   ["dragleave", "drop"].forEach((e) => input.addEventListener(e, () => drop.classList.remove("dragging")));
-  window.addEventListener("pageshow", show);  // back to this page: the browser may still hold the files
+  // back to this page: start clean, so the list and what the form sends always match
+  window.addEventListener("pageshow", () => { chosen = []; say(""); render(); });
 });
 
 // Home page: sections below the fold rise once as they scroll into view.

@@ -931,7 +931,24 @@ a.btn { text-decoration: none; }
 .evidence-drop.has-files { border-style: solid; border-color: #0f7a52; background: color-mix(in srgb, #0f7a52 8%, transparent); }
 .evidence-drop.has-files .drop-icon { color: #0f7a52; background: color-mix(in srgb, #0f7a52 14%, transparent); }
 .evidence-drop.has-files b { color: #0f7a52; }
-.evidence-drop.has-files small { color: var(--ink, inherit); overflow-wrap: anywhere; }
+.evidence-drop.has-files small { overflow-wrap: anywhere; }
+/* the files that will be sent, each with a button to take it out */
+.drop-files { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 0; padding: 0; list-style: none; }
+.drop-files[hidden] { display: none; }
+.drop-files li {
+  display: inline-flex; align-items: center; gap: 8px; max-width: 100%; min-height: 34px; padding: 4px 4px 4px 12px;
+  border: 1px solid var(--line-strong); border-radius: 999px; background: var(--card); font-size: 13px;
+}
+.drop-file-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.drop-files small { flex: none; color: var(--muted); font-size: 12px; }
+.drop-remove {
+  flex: none; display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%;
+  color: var(--muted); background: transparent; font: 600 17px/1 var(--sans); cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, transform 160ms var(--ease-out);
+}
+.drop-remove:hover { color: #b3261e; background: color-mix(in srgb, #b3261e 12%, transparent); }
+.drop-remove:active { transform: scale(.92); }
+.drop-note { margin: -4px 0 0; color: #b3261e; font-size: 13px; }
 .evidence-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .drop-icon { display: grid; place-items: center; width: 42px; height: 42px; color: var(--accent); border-radius: 10px; background: var(--accent-soft); font-size: 24px; }
 .evidence-drop b, .evidence-drop small { display: block; }
