@@ -8,7 +8,8 @@
 // invented: no step, no action.
 //
 // Kane is the CC0 "RobotExpressive" model by Tomás Laulhé (see static/models/CREDITS.md),
-// recoloured with a fedora and a magnifying glass: an AI detective. The office is built in code.
+// recoloured with a fedora, a red scarf and a magnifying glass: an AI detective. The furniture is
+// CC0 models from Poly Haven; the room and everything that shows the case is built in code.
 // three.js loads only on a live case; reduced motion or no WebGL keeps the 2D detective.
 
 (function () {
@@ -191,18 +192,18 @@
     dawn: ["#3b4a7a", "#f5a37a"], day: ["#5f9fd8", "#cfe6f7"], dusk: ["#2b2a5a", "#f08a5a"], night: ["#0b1022", "#24304f"],
   };
   function makeWindow(T) {
-    const c = document.createElement("canvas"); c.width = 512; c.height = 384;
+    const c = document.createElement("canvas"); c.width = 512; c.height = 640;
     const city = new T.CanvasTexture(c); city.encoding = T.sRGBEncoding;
     const g = c.getContext("2d");
-    const rainCanvas = document.createElement("canvas"); rainCanvas.width = 256; rainCanvas.height = 192;
+    const rainCanvas = document.createElement("canvas"); rainCanvas.width = 256; rainCanvas.height = 320;
     const rain = new T.CanvasTexture(rainCanvas); rain.encoding = T.sRGBEncoding;
-    const drops = Array.from({ length: 90 }, () => [Math.random() * 256, Math.random() * 192, 6 + Math.random() * 10]);
+    const drops = Array.from({ length: 90 }, () => [Math.random() * 256, Math.random() * 320, 6 + Math.random() * 10]);
     const rg = rainCanvas.getContext("2d");
     let raining = false, heavy = false;
     return {
       city, rain,
       paint(phase, weather) {
-        const w = 512, h = 384, [top, bottom] = SKIES[phase];
+        const w = 512, h = 640, [top, bottom] = SKIES[phase];
         const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, top); sky.addColorStop(1, bottom);
         g.fillStyle = sky; g.fillRect(0, 0, w, h);
         const overcast = weather !== "clear";
@@ -219,24 +220,29 @@
         }
         const lit = phase === "night" || phase === "dusk" || weather === "storm";
         for (let x = 0; x < w; x += 46) {  // the city across the street
-          const bh = 110 + ((x * 37) % 170);
+          const bh = 190 + ((x * 37) % 260);
           g.fillStyle = phase === "day" ? "#5a6a80" : phase === "night" ? "#0e1428" : "#2a2f48"; g.fillRect(x, h - bh, 42, bh);
           for (let y = h - bh + 10; y < h - 8; y += 16) for (let wx = x + 6; wx < x + 38; wx += 10) {
             if (lit && ((wx * 13 + y * 7) % 11) < 4) { g.fillStyle = "rgba(255,210,120,.85)"; g.fillRect(wx, y, 5, 7); }
             else if (!lit && ((wx * 7 + y * 3) % 9) < 2) { g.fillStyle = "rgba(200,225,255,.5)"; g.fillRect(wx, y, 5, 7); }
           }
         }
+        // the clock tower, its face lit at night
+        g.fillStyle = phase === "day" ? "#5e6f88" : phase === "night" ? "#16203d" : "#2f3550";
+        g.fillRect(232, 200, 60, h - 200); g.beginPath(); g.moveTo(222, 200); g.lineTo(262, 120); g.lineTo(302, 200); g.fill();
+        g.fillStyle = lit ? "#ffd98a" : "#f4f1e6"; g.beginPath(); g.arc(262, 245, 22, 0, 7); g.fill();
+        g.strokeStyle = "#3a2a1a"; g.lineWidth = 3; g.beginPath(); g.moveTo(262, 245); g.lineTo(262, 230); g.moveTo(262, 245); g.lineTo(274, 250); g.stroke();
         if (weather === "fog") { g.fillStyle = "rgba(205,210,220,.62)"; g.fillRect(0, 0, w, h); }
         city.needsUpdate = true;
         raining = weather === "rain" || weather === "storm"; heavy = weather === "storm";
-        if (!raining) { rg.clearRect(0, 0, 256, 192); rain.needsUpdate = true; }
+        if (!raining) { rg.clearRect(0, 0, 256, 320); rain.needsUpdate = true; }
       },
       update(dt) {
         if (!raining) return;
-        rg.clearRect(0, 0, 256, 192); rg.strokeStyle = "rgba(190,210,255,.55)"; rg.lineWidth = heavy ? 1.4 : 1;
+        rg.clearRect(0, 0, 256, 320); rg.strokeStyle = "rgba(190,210,255,.55)"; rg.lineWidth = heavy ? 1.4 : 1;
         for (const d of drops.slice(0, heavy ? 90 : 60)) {
           d[1] += d[2] * dt * (heavy ? 60 : 40); d[0] -= dt * (heavy ? 60 : 30);
-          if (d[1] > 192) { d[1] = -10; d[0] = Math.random() * 280; }
+          if (d[1] > 320) { d[1] = -10; d[0] = Math.random() * 280; }
           rg.beginPath(); rg.moveTo(d[0], d[1]); rg.lineTo(d[0] - 2, d[1] + d[2]); rg.stroke();
         }
         rain.needsUpdate = true;
@@ -264,12 +270,20 @@
     rig.hemi.color.setHex(m.hemi[0]); rig.hemi.groundColor.setHex(m.hemi[1]); rig.hemi.intensity = m.hemi[2] * (0.75 + 0.25 * k);
     rig.sun.color.setHex(m.sun[0]); rig.sunBase = m.sun[1] * k; rig.sun.intensity = rig.sunBase;
     rig.rim.intensity = m.rim; rig.lampLight.intensity = m.lamp;
-    rig.blinds.material.color.setHex(m.stripes[0]); rig.blinds.material.opacity = m.stripes[1] * k;
+    const dim = m.lamp / MOODS.night.lamp;  // the lamps matter most at night
+    rig.pictureLight.intensity = 3.0 * dim; rig.doorLamp.intensity = 1.2 * dim;
+    rig.halos.forEach((h) => { h.material.opacity = 0.25 + 0.5 * dim; });
+    rig.blinds.material.color.setHex(m.stripes[0]); rig.blinds.material.opacity = m.stripes[1] * k * 0.85;
     rig.shaft.material.color.setHex(m.stripes[0]); rig.shaft.material.opacity = 0.18 * k;
     rig.win.paint(phase, weather);
   }
 
   // ── the office ────────────────────────────────────────────────────────────────────────────
+  // A detective's office: teal wallpaper over dark panelling, a herringbone floor and a Persian
+  // rug, a tall window on the city, the corkboard under a picture light, and the door to the app.
+  // The furniture is real CC0 models from Poly Haven (credits in static/models/CREDITS.md); the
+  // room, the screen, the board and the door are drawn in code because they show the real case.
+  const PH = "/static/models/ph", TEX = "/static/textures";
   function buildOffice(T, canvas) {
     const renderer = new T.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -278,211 +292,173 @@
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
     const scene = new T.Scene();
     scene.background = new T.Color(0x0a0d15);
-    scene.fog = new T.Fog(0x0a0d15, 6.5, 13);
+    scene.fog = new T.Fog(0x0a0d15, 7, 14);
     if (T.RoomEnvironment) {  // soft image-based lighting: varnish, brass and glass catch a little light
       const pmrem = new T.PMREMGenerator(renderer);
       scene.environment = pmrem.fromScene(new T.RoomEnvironment(), 0.04).texture;
       pmrem.dispose();
     }
-    const camera = new T.PerspectiveCamera(36, 16 / 7, 0.1, 40);
-    camera.position.set(0.9, 1.95, 3.7);
-    const focus = new T.Vector3(-0.65, 1.12, -0.95);
+    const camera = new T.PerspectiveCamera(38, 16 / 7, 0.1, 40);
+    camera.position.set(2.15, 2.25, 4.35);
+    const focus = new T.Vector3(-0.25, 1.3, -1.45);
 
+    // building blocks
+    const loads = [];
     const std = (color, rough = 0.8, extra = {}) => new T.MeshStandardMaterial({ color, roughness: rough, metalness: 0, ...extra });
-    const add = (mesh, x, y, z, { cast = true, receive = true, ry = 0 } = {}) => {
-      mesh.position.set(x, y, z); mesh.rotation.y = ry; mesh.castShadow = cast; mesh.receiveShadow = receive; scene.add(mesh); return mesh;
+    const put = (geo, mat, x, y, z, parent = scene, rot = [0, 0, 0], shadows = true) => {
+      const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(...rot);
+      m.castShadow = m.receiveShadow = shadows; parent.add(m); return m;
     };
+    const box = (w, h, d, mat, x, y, z, parent, rot) => put(new T.BoxGeometry(w, h, d), mat, x, y, z, parent, rot);
+    const cyl = (rt, rb, h, mat, x, y, z, parent, rot, seg = 24) => put(new T.CylinderGeometry(rt, rb, h, seg), mat, x, y, z, parent, rot);
+    const plane = (w, h, mat, x, y, z, parent, rot) => { const m = put(new T.PlaneGeometry(w, h), mat, x, y, z, parent, rot); m.castShadow = false; return m; };
+    const flat = (w, h, mat, x, y, z, parent, rot) => { const m = plane(w, h, mat, x, y, z, parent, rot); m.receiveShadow = false; return m; };
+    const halo = (color, size, x, y, z, opacity = 0.6, parent = scene) => {
+      const s = new T.Sprite(new T.SpriteMaterial({ map: radialTex(T, "rgba(255,255,255,1)", "rgba(255,255,255,0)"), color, transparent: true, opacity, blending: T.AdditiveBlending, depthWrite: false }));
+      s.scale.set(size, size, 1); s.position.set(x, y, z); parent.add(s); return s;
+    };
+    const gltf = new T.GLTFLoader();
+    const model = (id, x, y, z, ry = 0, scale = 1, parent = scene) => loads.push(new Promise((done) => gltf.load(`${PH}/${id}/${id}_1k.gltf`, (g) => {
+      const m = g.scene; m.position.set(x, y, z); m.rotation.y = ry; m.scale.setScalar(scale);
+      m.traverse((o) => { if (o.isMesh) o.castShadow = o.receiveShadow = true; });
+      parent.add(m); done(m);
+    }, undefined, () => done(null))));  // a missing model leaves a gap, never a broken office
+    const texLoader = new T.TextureLoader();
+    const pbr = (name, repeat, tint = 0xffffff) => {
+      const t = (kind, srgb) => {
+        let done; loads.push(new Promise((ok) => { done = ok; }));
+        const x = texLoader.load(`${TEX}/${name}_${kind}.jpg`, done, undefined, done);
+        x.wrapS = x.wrapT = T.RepeatWrapping; x.repeat.set(...repeat); x.anisotropy = 8;
+        if (srgb) x.encoding = T.sRGBEncoding;
+        return x;
+      };
+      return new T.MeshStandardMaterial({ map: t("diff", true), normalMap: t("nor"), roughnessMap: t("rough"), color: tint });
+    };
+    const BRASS = std(0xc9a24e, 0.32, { metalness: 0.9 }), WALNUT = std(0x5a341f, 0.55), DARKWOOD = std(0x3a2214, 0.6);
+    const WX = -1.45, WY = 2.15, BOARD = new T.Vector3(0.62, 1.85, -2.97), DX = 2.6;
 
-    // light: a dim blue night, a warm desk lamp with shadows, moonlight through the window
+    // light: the room's mood (time of day, weather) sets these; see MOODS
     const hemi = new T.HemisphereLight(0x51618c, 0x1a120c, 0.34); scene.add(hemi);
-    const lampLight = new T.SpotLight(0xffc98a, 3.8, 9, 0.95, 0.7, 1.3);
-    lampLight.position.set(-1.25, 2.0, -0.35); lampLight.target.position.set(-0.6, 0.6, -0.4);
+    const lampLight = new T.SpotLight(0xffcf8f, 3.8, 7, 0.9, 0.6, 1.3);
+    lampLight.position.set(-1.35, 1.75, -1.25); lampLight.target.position.set(-1.1, 0.7, -0.4);
     lampLight.castShadow = true; lampLight.shadow.mapSize.set(1024, 1024); lampLight.shadow.bias = -0.0006;
-    lampLight.shadow.normalBias = 0.02; lampLight.shadow.camera.near = 0.2; lampLight.shadow.camera.far = 9;
+    lampLight.shadow.normalBias = 0.02; lampLight.shadow.camera.near = 0.2; lampLight.shadow.camera.far = 8;
     scene.add(lampLight, lampLight.target);
-    const moon = new T.DirectionalLight(0x8fb0ff, 0.45); moon.position.set(-1.8, 3, -6); scene.add(moon);
+    const sun = new T.DirectionalLight(0x8fb0ff, 0.45); sun.position.set(-2.2, 4, -7); sun.target.position.set(0.5, 0, 1);
+    scene.add(sun, sun.target);
     const rim = new T.PointLight(0x7f9cff, 0.6, 6); rim.position.set(1.2, 2.4, -1.8); scene.add(rim);
-    const glow = new T.PointLight(0xa9d0ff, 0.5, 3); glow.position.set(-1.25, 1.5, -0.55); scene.add(glow);
+    const glow = new T.PointLight(0xa9d0ff, 0.5, 3); glow.position.set(-1.85, 1.3, -0.55); scene.add(glow);
     const alarm = new T.PointLight(0xff3b30, 0, 7); alarm.position.set(-0.4, 2.3, -0.3); scene.add(alarm);
+    const pictureLight = new T.SpotLight(0xffd9a0, 3.0, 4, 0.75, 0.6, 1.5);
+    pictureLight.position.set(BOARD.x, 3.0, -2.6); pictureLight.target.position.set(BOARD.x, 1.8, -3); scene.add(pictureLight, pictureLight.target);
+    const doorLamp = new T.PointLight(0xffc98a, 1.2, 3.5, 1.6); doorLamp.position.set(DX - 0.1, 2.6, -2.6); scene.add(doorLamp);
 
-    // floor (planks), walls, skirting
-    const planks = canvasTex(T, 512, 512, (g, w) => {
-      for (let i = 0; i < 8; i++) {
-        g.fillStyle = ["#4a3324", "#523928", "#47301f", "#4e3626"][i % 4]; g.fillRect(0, i * 64, w, 64);
-        g.fillStyle = "rgba(0,0,0,.35)"; g.fillRect(0, i * 64, w, 2); g.fillRect(((i * 173) % w), i * 64, 2, 64);
+    // walls: teal paper above dark panelling with raised panels and a rail
+    const wallpaper = canvasTex(T, 256, 256, (g, w, h) => {
+      g.fillStyle = "#1d3a3d"; g.fillRect(0, 0, w, h);
+      g.strokeStyle = "rgba(160,200,190,.07)"; g.lineWidth = 3;
+      for (let x = 0; x < w; x += 64) for (let y = 0; y < h; y += 64) {
+        g.beginPath(); g.moveTo(x + 32, y + 6); g.lineTo(x + 58, y + 32); g.lineTo(x + 32, y + 58); g.lineTo(x + 6, y + 32); g.closePath(); g.stroke();
       }
+      g.fillStyle = "rgba(0,0,0,.12)"; for (let x = 0; x < w; x += 64) g.fillRect(x, 0, 2, h);
     });
-    planks.wrapS = planks.wrapT = T.RepeatWrapping; planks.repeat.set(3, 3);
-    const floor = add(new T.Mesh(new T.PlaneGeometry(10, 9), std(0xffffff, 0.85, { map: planks })), 0, 0, 0.5, { cast: false });
-    floor.rotation.x = -Math.PI / 2;
-    const paper = canvasTex(T, 256, 256, (g, w, h) => {
-      g.fillStyle = "#1f2840"; g.fillRect(0, 0, w, h);
-      for (let x = 0; x < w; x += 32) { g.fillStyle = "rgba(255,255,255,.035)"; g.fillRect(x, 0, 12, h); g.fillStyle = "rgba(0,0,0,.12)"; g.fillRect(x + 12, 0, 2, h); }
-    });
-    paper.wrapS = paper.wrapT = T.RepeatWrapping; paper.repeat.set(5, 2);
-    const wallMat = std(0xffffff, 0.92, { map: paper });
-    add(new T.Mesh(new T.BoxGeometry(10, 4, 0.1), wallMat), 0, 2, -3.05, { cast: false });
-    add(new T.Mesh(new T.BoxGeometry(0.1, 4, 9), wallMat), -3.55, 2, 0.5, { cast: false });
-    add(new T.Mesh(new T.BoxGeometry(10, 0.14, 0.04), std(0x2b2116)), 0, 0.07, -2.99, { cast: false });
-    const panel = std(0x2e2119, 0.55), rail = std(0x4a3424, 0.45);
-    add(new T.Mesh(new T.BoxGeometry(10, 0.95, 0.03), panel), 0, 0.5, -2.985, { cast: false });
-    add(new T.Mesh(new T.BoxGeometry(10, 0.05, 0.06), rail), 0, 0.99, -2.97, { cast: false });
-    add(new T.Mesh(new T.BoxGeometry(0.03, 0.95, 9), panel), -3.485, 0.5, 0.5, { cast: false });
-    add(new T.Mesh(new T.BoxGeometry(0.06, 0.05, 9), rail), -3.47, 0.99, 0.5, { cast: false });
-    add(new T.Mesh(new T.BoxGeometry(0.04, 0.14, 9), std(0x2b2116)), -3.49, 0.07, 0.5, { cast: false });
+    wallpaper.wrapS = wallpaper.wrapT = T.RepeatWrapping; wallpaper.repeat.set(6, 2);
+    const wallMat = std(0xffffff, 0.9, { map: wallpaper });
+    plane(10, 4.2, wallMat, 0, 2.1, -3.0);
+    plane(9, 4.2, wallMat, -3.55, 2.1, 0.5, scene, [0, Math.PI / 2, 0]);
+    const panelMat = pbr("dark_paneled_wood", [6, 1], 0x8a6a55), raised = pbr("dark_paneled_wood", [0.4, 0.4], 0x9a7a62);
+    const rail = std(0x6b4128, 0.4);
+    for (const [x0, x1] of [[-5, DX - 0.66], [DX + 0.66, 5]]) {  // the back wall's panelling, broken by the door
+      const w = x1 - x0, x = (x0 + x1) / 2;
+      box(w, 1.05, 0.04, panelMat, x, 0.53, -2.99); box(w, 0.07, 0.08, rail, x, 1.07, -2.95); box(w, 0.14, 0.06, DARKWOOD, x, 0.07, -2.97);
+    }
+    for (let x = -4.2; x < 4.4; x += 0.85) if (Math.abs(x - DX) > 0.95) box(0.66, 0.66, 0.03, raised, x, 0.52, -2.965);
+    box(0.04, 1.05, 9, panelMat, -3.53, 0.53, 0.5); box(0.08, 0.07, 9, rail, -3.49, 1.07, 0.5); box(0.06, 0.14, 9, DARKWOOD, -3.51, 0.07, 0.5);
+    for (let z = -2.6; z < 3; z += 0.85) box(0.03, 0.66, 0.66, raised, -3.505, 0.52, z);
 
-    // a rug under the desk
-    const rugTex = canvasTex(T, 512, 320, (g, w, h) => {
-      g.fillStyle = "#6b1f24"; g.fillRect(0, 0, w, h);
-      g.strokeStyle = "#c79b4a"; g.lineWidth = 10; g.strokeRect(18, 18, w - 36, h - 36);
-      g.strokeStyle = "#3d1215"; g.lineWidth = 4; g.strokeRect(40, 40, w - 80, h - 80);
-      g.fillStyle = "#c79b4a"; for (let i = 0; i < 6; i++) { g.beginPath(); g.arc(90 + i * 66, h / 2, 14, 0, 7); g.fill(); }
+    // floor: herringbone parquet; a Persian rug with a real woven surface under the desk
+    plane(10, 9, pbr("herringbone_parquet", [5, 4.5], 0xb88a66), 0, 0, 0.5, scene, [-Math.PI / 2, 0, 0]);
+    const rugTex = canvasTex(T, 1024, 640, (g, w, h) => {
+      g.fillStyle = "#6c1d22"; g.fillRect(0, 0, w, h);
+      [["#c99a4a", 22, 10], ["#1f2a44", 44, 16], ["#c99a4a", 70, 6]].forEach(([c, o, lw]) => { g.strokeStyle = c; g.lineWidth = lw; g.strokeRect(o, o, w - 2 * o, h - 2 * o); });
+      g.fillStyle = "#8a2a2c"; for (let x = 70; x < w - 70; x += 36) for (let y = 70; y < h - 70; y += 36) { g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); }
+      g.fillStyle = "#c99a4a"; for (let x = 30; x < w - 20; x += 40) { g.beginPath(); g.arc(x, 33, 5, 0, 7); g.arc(x, h - 33, 5, 0, 7); g.fill(); }
+      g.save(); g.translate(w / 2, h / 2); g.fillStyle = "#1f2a44";
+      for (let a = 0; a < 12; a++) { g.rotate(Math.PI / 6); g.beginPath(); g.ellipse(190, 0, 60, 22, 0, 0, 7); g.fill(); }
+      g.beginPath(); g.ellipse(0, 0, 230, 150, 0, 0, 7); g.fill();
+      g.fillStyle = "#c99a4a"; g.beginPath(); g.ellipse(0, 0, 170, 105, 0, 0, 7); g.fill();
+      g.fillStyle = "#6c1d22"; g.beginPath(); g.ellipse(0, 0, 120, 72, 0, 0, 7); g.fill();
+      g.restore();
     });
-    const rug = add(new T.Mesh(new T.PlaneGeometry(3.2, 2.0), std(0xffffff, 1, { map: rugTex })), -0.8, 0.006, -0.3, { cast: false });
-    rug.rotation.x = -Math.PI / 2; rug.rotation.z = 0.12;
+    const weave = pbr("floral_jacquard", [6, 4]);  // only its normal and roughness: the feel of the weave
+    plane(3.6, 2.4, new T.MeshStandardMaterial({ map: rugTex, normalMap: weave.normalMap, roughnessMap: weave.roughnessMap, normalScale: new T.Vector2(1.4, 1.4) }), -0.35, 0.012, 0.05, scene, [-Math.PI / 2, 0, 0.18]);
+    plane(3.75, 2.55, std(0x2a1a2a, 0.95), -0.35, 0.006, 0.05, scene, [-Math.PI / 2, 0, 0.18]);
 
-    // the window with blinds, the city and the rain
+    // the tall window: the city (sky and weather from the mood), rain, blinds, light on the floor
     const win = makeWindow(T);
-    add(new T.Mesh(new T.PlaneGeometry(1.5, 1.15), new T.MeshBasicMaterial({ map: win.city })), -2.1, 2.05, -2.99, { cast: false, receive: false });
-    add(new T.Mesh(new T.PlaneGeometry(1.5, 1.15), new T.MeshBasicMaterial({ map: win.rain, transparent: true })), -2.1, 2.05, -2.985, { cast: false, receive: false });
-    const flash = add(new T.Mesh(new T.PlaneGeometry(1.5, 1.15), new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, toneMapped: false })), -2.1, 2.05, -2.982, { cast: false, receive: false });
-    const frameMat = std(0x3b2a1b, 0.7);
-    [[0, 0.62, 1.62, 0.08], [0, -0.62, 1.62, 0.08], [-0.79, 0, 0.08, 1.3], [0.79, 0, 0.08, 1.3], [0, 0, 0.05, 1.2]].forEach(([x, y, w, h]) =>
-      add(new T.Mesh(new T.BoxGeometry(w, h, 0.08), frameMat), -2.1 + x, 2.05 + y, -2.96));
-    for (let i = 0; i < 5; i++) add(new T.Mesh(new T.BoxGeometry(1.52, 0.035, 0.03), std(0xb9a37f, 0.6)), -2.1, 2.5 - i * 0.1, -2.93);
+    flat(1.7, 2.1, new T.MeshBasicMaterial({ map: win.city, toneMapped: false }), WX, WY, -2.995);
+    flat(1.7, 2.1, new T.MeshBasicMaterial({ map: win.rain, transparent: true, toneMapped: false }), WX, WY, -2.99);
+    const flash = flat(1.7, 2.1, new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, toneMapped: false }), WX, WY, -2.985);
+    const frameMat = std(0x2c1a10, 0.5);
+    [[0, 1.08, 1.86, 0.1], [0, -1.08, 1.86, 0.12], [-0.9, 0, 0.1, 2.26], [0.9, 0, 0.1, 2.26], [0, 0, 0.06, 2.1], [0, 0.25, 1.7, 0.05]]
+      .forEach(([x, y, w, h]) => box(w, h, 0.1, frameMat, WX + x, WY + y, -2.94));
+    box(1.95, 0.06, 0.25, frameMat, WX, WY - 1.12, -2.86);
+    for (let i = 0; i < 12; i++) box(1.72, 0.035, 0.03, std(0xd9c8a0, 0.6), WX, WY + 1.0 - i * 0.065, -2.9, scene, [0.5, 0, 0]);
     const stripes = canvasTex(T, 256, 256, (g, w, h) => {
-      g.clearRect(0, 0, w, h);
-      for (let y = 18; y < h - 18; y += 34) {
-        const band = g.createLinearGradient(0, 0, w, 0);
-        band.addColorStop(0, "rgba(255,255,255,0)"); band.addColorStop(0.5, "rgba(255,255,255,.9)"); band.addColorStop(1, "rgba(255,255,255,0)");
-        g.fillStyle = band; g.fillRect(16, y, w - 32, 16);
+      for (let y = 10; y < h; y += 30) {
+        const b = g.createLinearGradient(0, 0, w, 0);
+        b.addColorStop(0, "rgba(255,255,255,0)"); b.addColorStop(0.5, "rgba(255,255,255,.95)"); b.addColorStop(1, "rgba(255,255,255,0)");
+        g.fillStyle = b; g.fillRect(10, y, w - 20, 13);
       }
     });
-    const blinds = new T.Mesh(new T.PlaneGeometry(2.2, 2.4), new T.MeshBasicMaterial({ map: stripes, transparent: true, opacity: 0.22, depthWrite: false, blending: T.AdditiveBlending }));
-    blinds.rotation.x = -Math.PI / 2; blinds.rotation.z = 0.35; blinds.position.set(-1.25, 0.009, -1.25); scene.add(blinds);
-    const shaft = new T.Mesh(new T.PlaneGeometry(1.4, 3.2), new T.MeshBasicMaterial({ map: radialTex(T, "rgba(255,255,255,.5)", "rgba(255,255,255,0)"), transparent: true, opacity: 0.18, depthWrite: false, blending: T.AdditiveBlending }));
-    shaft.position.set(-1.75, 1.35, -2.0); shaft.rotation.set(-0.55, 0.3, 0); scene.add(shaft);
+    const blinds = flat(2.6, 3.0, new T.MeshBasicMaterial({ map: stripes, transparent: true, opacity: 0.22, blending: T.AdditiveBlending, depthWrite: false }), -0.9, 0.014, -1.0, scene, [-Math.PI / 2, 0, 0.45]);
+    const shaft = flat(1.6, 3.4, new T.MeshBasicMaterial({ map: radialTex(T, "rgba(255,255,255,.5)", "rgba(255,255,255,0)"), transparent: true, opacity: 0.18, depthWrite: false, blending: T.AdditiveBlending }), WX - 0.2, 1.4, -2.1, scene, [-0.55, 0.3, 0]);
 
-    // the bookshelf on the left wall
-    const shelf = new T.Group(); shelf.position.set(-3.3, 0, 1.1); shelf.rotation.y = Math.PI / 2; scene.add(shelf);
-    const wood = std(0x4f3322, 0.75);
-    const back = new T.Mesh(new T.BoxGeometry(1.4, 2.0, 0.04), wood); back.position.set(0, 1.0, -0.2); back.receiveShadow = true; shelf.add(back);
-    [-0.68, 0.68].forEach((x) => { const s = new T.Mesh(new T.BoxGeometry(0.04, 2.0, 0.4), wood); s.position.set(x, 1.0, 0); s.castShadow = s.receiveShadow = true; shelf.add(s); });
-    const spines = [0x8c2f2f, 0x2f5d8c, 0x7a6a2a, 0x2f6b4f, 0x5b3a6e, 0x9a5a28, 0x1f3a5f];
-    for (let row = 0; row < 4; row++) {
-      const plank = new T.Mesh(new T.BoxGeometry(1.36, 0.04, 0.38), wood); plank.position.set(0, 0.1 + row * 0.48, 0); plank.receiveShadow = true; shelf.add(plank);
-      let x = -0.62, n = 0;
-      while (x < 0.55) {
-        const bw = 0.05 + ((n * 7 + row * 3) % 3) * 0.02, bh = 0.28 + ((n * 5 + row) % 4) * 0.035;
-        const book = new T.Mesh(new T.BoxGeometry(bw, bh, 0.26), std(spines[(n + row * 2) % spines.length], 0.7));
-        book.position.set(x + bw / 2, 0.12 + row * 0.48 + bh / 2, 0.02); book.castShadow = true; shelf.add(book);
-        x += bw + 0.008; n += 1;
+    // a hanging plant beside the window
+    const leaf = std(0x3f7a3a, 0.7), leafDark = std(0x2e5c2c, 0.7);
+    const bush = (x, y, z, n, spread) => {
+      for (let i = 0; i < n; i++) {
+        const m = put(new T.SphereGeometry(0.07 + (i % 3) * 0.025, 8, 6), i % 2 ? leaf : leafDark,
+          x + Math.sin(i * 2.3) * spread, y + Math.cos(i * 1.7) * spread * 0.6, z + Math.cos(i * 3.1) * spread * 0.5);
+        m.scale.set(1.4, 0.55, 1); m.rotation.z = i;
       }
-    }
-
-    // a filing cabinet and a wall clock
-    add(new T.Mesh(new T.BoxGeometry(0.6, 1.3, 0.6), std(0x56606e, 0.5, { metalness: 0.4 })), 2.75, 0.65, -2.6);
-    for (let i = 0; i < 3; i++) add(new T.Mesh(new T.BoxGeometry(0.2, 0.03, 0.03), std(0xc9c9c9, 0.3, { metalness: 0.8 })), 2.75, 1.1 - i * 0.38, -2.29);
-    const clockFace = canvasTex(T, 256, 256, (g) => {
-      g.fillStyle = "#f3eee5"; g.beginPath(); g.arc(128, 128, 120, 0, 7); g.fill();
-      g.strokeStyle = "#23201b"; g.lineWidth = 10; g.stroke();
-      g.fillStyle = "#23201b";
-      for (let i = 0; i < 60; i++) { const a = i * Math.PI / 30, r = i % 5 ? 2 : 3.5; g.beginPath(); g.arc(128 + Math.sin(a) * 108, 128 - Math.cos(a) * 108, r, 0, 7); g.fill(); }
-      g.font = "700 30px Georgia, serif"; g.textAlign = "center"; g.textBaseline = "middle";
-      for (let n = 1; n <= 12; n++) { const a = n * Math.PI / 6; g.fillText(String(n), 128 + Math.sin(a) * 84, 130 - Math.cos(a) * 84); }
-    });
-    add(new T.Mesh(new T.CylinderGeometry(0.28, 0.28, 0.05, 32), std(0x3b2a1b, 0.6)), 0.25, 2.75, -2.97, { cast: false }).rotation.x = Math.PI / 2;
-    add(new T.Mesh(new T.CircleGeometry(0.25, 32), new T.MeshBasicMaterial({ map: clockFace })), 0.25, 2.75, -2.94, { cast: false, receive: false });
-    const hands = new T.Group(); hands.position.set(0.25, 2.75, -2.93); scene.add(hands);
-    const hourHand = new T.Mesh(new T.BoxGeometry(0.025, 0.13, 0.01), std(0x23201b)); hourHand.position.y = 0.06;
-    const minHand = new T.Mesh(new T.BoxGeometry(0.018, 0.2, 0.01), std(0x23201b)); minHand.position.y = 0.09;
-    const hourPivot = new T.Group(); hourPivot.add(hourHand); const minPivot = new T.Group(); minPivot.add(minHand);
-    hands.add(hourPivot, minPivot);
-
-    // desk, chair, lamp and the computer (the window into the user's app), turned to the camera
-    const station = new T.Group(); station.position.set(-1.55, 0, -0.85); station.rotation.y = Math.PI / 4; scene.add(station);
-    const part = (geo, mat, x, y, z) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; station.add(m); return m; };
-    const deskWood = std(0x6b4630, 0.6);
-    part(new T.BoxGeometry(1.9, 0.07, 1.0), deskWood, 0, 0.9, 0);
-    part(new T.BoxGeometry(0.5, 0.82, 0.95), deskWood, -0.68, 0.45, 0);  // drawers
-    part(new T.BoxGeometry(0.06, 0.86, 0.06), deskWood, 0.88, 0.43, 0.44);
-    part(new T.BoxGeometry(0.06, 0.86, 0.06), deskWood, 0.88, 0.43, -0.44);
-    for (let i = 0; i < 3; i++) part(new T.BoxGeometry(0.12, 0.02, 0.02), std(0xd9b45a, 0.3, { metalness: 0.7 }), -0.68, 0.72 - i * 0.26, 0.49);
-    const screen = makeScreen(T);
-    part(new T.BoxGeometry(1.24, 0.8, 0.06), std(0x1c1f27, 0.4), 0.05, 1.42, -0.3);
-    const display = new T.Mesh(new T.PlaneGeometry(1.14, 0.71), new T.MeshBasicMaterial({ map: screen.tex, toneMapped: false }));
-    display.position.set(0.05, 1.42, -0.265); station.add(display);
-    part(new T.BoxGeometry(0.08, 0.36, 0.08), std(0x1c1f27, 0.4), 0.05, 1.1, -0.32);
-    part(new T.BoxGeometry(0.4, 0.02, 0.22), std(0x1c1f27, 0.4), 0.05, 0.94, -0.32);
-    part(new T.BoxGeometry(0.72, 0.03, 0.26), std(0x2c2f3a, 0.5), 0.05, 0.95, 0.15);
-    part(new T.CylinderGeometry(0.05, 0.045, 0.12, 16), std(0xf3eee5, 0.5), 0.75, 0.99, 0.25);  // coffee mug
-    part(new T.BoxGeometry(0.34, 0.03, 0.44), std(0xe9dfc8, 0.9), -0.55, 0.95, 0.12);           // case folder
-    part(new T.CylinderGeometry(0.12, 0.14, 0.04, 20), std(0x2f6b4f, 0.4, { metalness: 0.5 }), -0.72, 0.95, -0.25);  // lamp base
-    part(new T.CylinderGeometry(0.018, 0.018, 0.7), std(0x8a8a8a, 0.3, { metalness: 0.8 }), -0.72, 1.3, -0.25);
-    const shade = part(new T.ConeGeometry(0.2, 0.22, 24, 1, true), std(0x2f6b4f, 0.4, { metalness: 0.4, side: T.DoubleSide }), -0.62, 1.66, -0.18);
-    shade.rotation.z = -0.5;
-    const bulb = new T.Mesh(new T.SphereGeometry(0.05, 12, 10), new T.MeshBasicMaterial({ color: 0xfff1c8, toneMapped: false }));
-    bulb.position.set(-0.6, 1.6, -0.17); station.add(bulb);
-    const halo = new T.Sprite(new T.SpriteMaterial({ map: radialTex(T, "rgba(255,214,150,.55)", "rgba(255,214,150,0)"), transparent: true, depthWrite: false, blending: T.AdditiveBlending }));
-    halo.scale.set(0.9, 0.9, 1); halo.position.copy(bulb.position); station.add(halo);
-    // an office chair in front of the computer: Kane sits here while he works
-    const leather = std(0x2a2422, 0.45), steel = std(0x9aa0a8, 0.3, { metalness: 0.75 });
-    const chair = new T.Group(); chair.position.set(-1.09, 0, -0.46); chair.rotation.y = Math.PI / 4 + Math.PI; scene.add(chair);
-    const cp = (geo, mat, x, y, z, rx = 0, ry = 0) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, 0); m.castShadow = m.receiveShadow = true; chair.add(m); return m; };
-    for (let i = 0; i < 5; i++) {
-      const a = i * Math.PI * 2 / 5;
-      cp(new T.BoxGeometry(0.05, 0.035, 0.3), steel, Math.sin(a) * 0.15, 0.07, Math.cos(a) * 0.15, 0, a);
-      cp(new T.SphereGeometry(0.032, 10, 8), std(0x1a1a1a, 0.5), Math.sin(a) * 0.29, 0.032, Math.cos(a) * 0.29);
-    }
-    cp(new T.CylinderGeometry(0.03, 0.035, 0.36, 12), steel, 0, 0.26, 0);
-    cp(new T.BoxGeometry(0.5, 0.06, 0.48), leather, 0, 0.47, 0);
-    cp(new T.BoxGeometry(0.46, 0.06, 0.44), std(0x3a302c, 0.6), 0, 0.52, 0.01);
-    cp(new T.BoxGeometry(0.06, 0.32, 0.05), steel, 0, 0.62, -0.24, -0.1);
-    cp(new T.BoxGeometry(0.48, 0.5, 0.07), leather, 0, 0.92, -0.27, -0.12);
-    cp(new T.BoxGeometry(0.42, 0.44, 0.04), std(0x3a302c, 0.6), 0, 0.92, -0.225, -0.12);
-    [-0.27, 0.27].forEach((x) => { cp(new T.BoxGeometry(0.05, 0.04, 0.3), leather, x, 0.68, -0.02); cp(new T.BoxGeometry(0.03, 0.17, 0.03), steel, x, 0.6, -0.02); });
-
-    const blobTex = radialTex(T, "rgba(0,0,0,.55)", "rgba(0,0,0,0)");
-    const blob = (w, d, x, z, ry = 0) => {
-      const m = new T.Mesh(new T.PlaneGeometry(w, d), new T.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false }));
-      m.rotation.x = -Math.PI / 2; m.rotation.z = ry; m.position.set(x, 0.008, z); scene.add(m); return m;
     };
-    blob(2.4, 1.4, -1.55, -0.85, Math.PI / 4);   // desk
-    blob(0.9, 0.9, -1.09, -0.46);                  // chair
-    blob(0.9, 0.9, 2.75, -2.6);                    // filing cabinet
-    blob(0.8, 1.8, -3.25, 1.1);                    // bookshelf
-    const kaneShadow = blob(0.9, 0.9, 0, 0);
+    cyl(0.11, 0.08, 0.14, std(0x8a5a3a, 0.7), WX - 1.15, 3.2, -2.8); bush(WX - 1.15, 3.3, -2.8, 8, 0.14);
+    cyl(0.006, 0.006, 0.95, std(0x2a2a2a, 0.5), WX - 1.15, 3.75, -2.8);  // its cord to the ceiling
+    for (const [x, n] of [[WX - 1.2, 5], [WX - 1.08, 4]]) for (let i = 0; i < n; i++) bush(x + Math.sin(i) * 0.06, 3.2 - i * 0.12, -2.75, 2, 0.05);
 
-    // dust drifting in the lamplight
-    const dustGeo = new T.BufferGeometry(), dustPos = new Float32Array(90 * 3);
-    for (let i = 0; i < 90; i++) { dustPos[i * 3] = -1.6 + Math.random() * 1.6; dustPos[i * 3 + 1] = 0.6 + Math.random() * 1.4; dustPos[i * 3 + 2] = -1.2 + Math.random() * 1.2; }
-    dustGeo.setAttribute("position", new T.BufferAttribute(dustPos, 3));
-    const dust = new T.Points(dustGeo, new T.PointsMaterial({ size: 0.018, color: 0xffd9a0, transparent: true, opacity: 0.55, depthWrite: false, blending: T.AdditiveBlending }));
-    scene.add(dust);
-    dust.update = (dt) => {
-      for (let i = 0; i < 90; i++) {
-        dustPos[i * 3 + 1] += dt * 0.03 * (1 + (i % 3)); dustPos[i * 3] += Math.sin((dustPos[i * 3 + 1] + i) * 3) * dt * 0.02;
-        if (dustPos[i * 3 + 1] > 2.0) dustPos[i * 3 + 1] = 0.6;
-      }
-      dustGeo.attributes.position.needsUpdate = true;
-    };
-
-    // the corkboard on the back wall, where Kane pins the case's evidence as he finds it
-    const corkTex = canvasTex(T, 512, 320, (g, w, h) => {
-      g.fillStyle = "#b8875a"; g.fillRect(0, 0, w, h);
-      for (let i = 0; i < 2400; i++) { g.fillStyle = i % 2 ? "rgba(70,40,15,.22)" : "rgba(255,240,215,.14)"; g.fillRect((i * 97) % w, (i * 57) % h, 2, 2); }
+    // the corkboard under its picture light: Kane pins the case's real evidence on the left; the
+    // right-hand column is the board's own furniture (a header, a street map, three status lights)
+    box(2.25, 1.5, 0.06, std(0x5a361f, 0.45), BOARD.x, BOARD.y, BOARD.z);
+    const cork = canvasTex(T, 512, 340, (g, w, h) => {
+      g.fillStyle = "#a9784a"; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 5000; i++) { g.fillStyle = i % 2 ? "rgba(70,40,15,.25)" : "rgba(255,235,205,.13)"; g.fillRect((i * 97) % w, (i * 61) % h, 2, 2); }
     });
-    const BOARD = new T.Vector3(-0.25, 1.72, -2.965);
-    add(new T.Mesh(new T.BoxGeometry(1.72, 1.12, 0.05), std(0x6e4a2c, 0.7)), BOARD.x, BOARD.y, -2.985, { cast: false });
-    add(new T.Mesh(new T.PlaneGeometry(1.6, 1.0), std(0xffffff, 0.95, { map: corkTex })), BOARD.x, BOARD.y, BOARD.z - 0.004, { cast: false });
+    plane(2.1, 1.36, std(0xffffff, 0.95, { map: cork }), BOARD.x, BOARD.y, BOARD.z + 0.035);
+    const decor = (w, h, paint, x, y, rz, tint) => {
+      const t = canvasTex(T, Math.round(w * 600), Math.round(h * 600), (g, cw, ch) => { g.fillStyle = tint; g.fillRect(0, 0, cw, ch); paint(g, cw, ch); });
+      plane(w, h, std(0xffffff, 0.85, { map: t }), BOARD.x + x, BOARD.y + y, BOARD.z + 0.045, scene, [0, 0, rz]);
+      put(new T.SphereGeometry(0.018, 10, 8), std(0xc62828, 0.4), BOARD.x + x, BOARD.y + y + h / 2 - 0.03, BOARD.z + 0.06);
+    };
+    decor(0.42, 0.15, (g) => { g.fillStyle = "#23201b"; g.font = "800 38px 'Courier New', monospace"; g.fillText("CASE FILE", 16, 60); }, 0.78, 0.5, 0.04, "#f3e6c4");
+    decor(0.4, 0.32, (g, w, h) => {
+      g.strokeStyle = "#9a8f74"; g.lineWidth = 6;
+      for (let i = 0; i < 8; i++) { g.beginPath(); g.moveTo(0, i * 30 + 10); g.lineTo(w, i * 30 + 40); g.stroke(); g.beginPath(); g.moveTo(i * 40, 0); g.lineTo(i * 40 + 30, h); g.stroke(); }
+      g.strokeStyle = "#c62828"; g.lineWidth = 9; g.beginPath(); g.arc(150, 110, 24, 0, 7); g.stroke();
+    }, 0.8, 0.05, -0.04, "#e9e1c8");
+    [0x2fb67c, 0xf0b23a, 0x8a8f9c].forEach((c, i) => put(new T.SphereGeometry(0.035, 12, 10), std(c, 0.4, { emissive: c, emissiveIntensity: i < 2 ? 0.6 : 0 }), BOARD.x + 0.7 + i * 0.09, BOARD.y - 0.5, BOARD.z + 0.06));
+    box(0.06, 0.06, 0.25, BRASS, BOARD.x, BOARD.y + 0.85, -2.86);
+    cyl(0.07, 0.07, 0.55, BRASS, BOARD.x, BOARD.y + 0.83, -2.74, scene, [0, 0, Math.PI / 2]);
+    const boardHalo = halo(0xffd9a0, 0.9, BOARD.x, BOARD.y + 0.78, -2.72, 0.5);
     const pinned = new T.Group(); scene.add(pinned);
+    const SLOTS = [[-0.72, 0.3], [-0.22, 0.32], [0.28, 0.29], [-0.72, -0.22], [-0.22, -0.2], [0.28, -0.23]];
     const board = {
       cards: [],
       add(tex) {
-        const slot = this.cards.length % 6, col = slot % 3, row = Math.floor(slot / 3);
+        const slot = this.cards.length % 6, [x, y] = SLOTS[slot];
         if (this.cards.length >= 6) pinned.remove(this.cards[slot].group);  // a full board: the oldest card makes room
         const group = new T.Group();
-        group.position.set(BOARD.x + (col - 1) * 0.5, BOARD.y + (row ? -0.23 : 0.22), BOARD.z + 0.01 + this.cards.length * 0.0005);
+        group.position.set(BOARD.x + x, BOARD.y + y, BOARD.z + 0.05 + this.cards.length * 0.0005);
         group.rotation.z = [0.05, -0.04, 0.03, -0.06, 0.04, -0.03][slot];
         const card = new T.Mesh(new T.PlaneGeometry(0.42, 0.31), new T.MeshStandardMaterial({ map: tex, roughness: 0.9 }));
         const pin = new T.Mesh(new T.SphereGeometry(0.022, 10, 8), std(0xc62828, 0.4)); pin.position.set(0, 0.13, 0.015);
@@ -499,37 +475,136 @@
       },
     };
 
-    // the door to the app's next page, with its sign
-    const frameWood = std(0x2b1d12, 0.7);
-    add(new T.Mesh(new T.BoxGeometry(1.24, 0.1, 0.12), frameWood), 1.45, 2.13, -2.95);
-    [0.86, 2.04].forEach((x) => add(new T.Mesh(new T.BoxGeometry(0.1, 2.18, 0.12), frameWood), x, 1.09, -2.95));
-    add(new T.Mesh(new T.PlaneGeometry(1.08, 2.08), new T.MeshBasicMaterial({ color: 0xfff0c8, toneMapped: false })), 1.45, 1.04, -2.995, { cast: false, receive: false });
-    const doorLight = new T.PointLight(0xffd9a0, 0, 5, 1.6); doorLight.position.set(1.45, 1.3, -2.55); scene.add(doorLight);
-    const hinge = new T.Group(); hinge.position.set(0.91, 0, -2.93); scene.add(hinge);
-    const door = new T.Mesh(new T.BoxGeometry(1.05, 2.08, 0.06), std(0x6e4a2c, 0.65)); door.position.set(0.53, 1.04, 0); door.castShadow = true; hinge.add(door);
-    const pane = new T.Mesh(new T.PlaneGeometry(0.62, 0.5), std(0xd9cfa8, 0.2, { transparent: true, opacity: 0.85, emissive: 0x3a3320 }));
-    pane.position.set(0.53, 1.55, 0.035); hinge.add(pane);
-    const knob = new T.Mesh(new T.SphereGeometry(0.045, 12, 10), std(0xd9b45a, 0.25, { metalness: 0.9 })); knob.position.set(0.92, 1.0, 0.06); hinge.add(knob);
-    const sign = makeSign(T); sign.set("the scene");
-    add(new T.Mesh(new T.PlaneGeometry(1.3, 0.24), new T.MeshBasicMaterial({ map: sign.tex, toneMapped: false })), 1.45, 2.42, -2.95, { cast: false, receive: false });
+    // the wall clock: it keeps this computer's time
+    const clockFace = canvasTex(T, 256, 256, (g) => {
+      g.fillStyle = "#f3eee5"; g.beginPath(); g.arc(128, 128, 122, 0, 7); g.fill();
+      g.fillStyle = "#23201b";
+      for (let i = 0; i < 60; i++) { const a = i * Math.PI / 30; g.beginPath(); g.arc(128 + Math.sin(a) * 112, 128 - Math.cos(a) * 112, i % 5 ? 2 : 3.5, 0, 7); g.fill(); }
+      g.font = "700 30px Georgia, serif"; g.textAlign = "center"; g.textBaseline = "middle";
+      for (let n = 1; n <= 12; n++) { const a = n * Math.PI / 6; g.fillText(String(n), 128 + Math.sin(a) * 88, 130 - Math.cos(a) * 88); }
+    });
+    const CLOCK = new T.Vector3(1.75, 3.15, -2.97);
+    cyl(0.3, 0.3, 0.06, std(0x3a2214, 0.4), CLOCK.x, CLOCK.y, CLOCK.z, scene, [Math.PI / 2, 0, 0], 40);
+    cyl(0.31, 0.31, 0.02, BRASS, CLOCK.x, CLOCK.y, CLOCK.z + 0.02, scene, [Math.PI / 2, 0, 0], 40);
+    put(new T.CircleGeometry(0.26, 40), new T.MeshBasicMaterial({ map: clockFace }), CLOCK.x, CLOCK.y, CLOCK.z + 0.035, scene, [0, 0, 0], false);
+    const hands = new T.Group(); hands.position.set(CLOCK.x, CLOCK.y, CLOCK.z + 0.045); scene.add(hands);
+    const hourHand = new T.Mesh(new T.BoxGeometry(0.025, 0.13, 0.01), std(0x23201b)); hourHand.position.y = 0.06;
+    const minHand = new T.Mesh(new T.BoxGeometry(0.016, 0.2, 0.01), std(0x23201b)); minHand.position.y = 0.09;
+    const hourPivot = new T.Group(); hourPivot.add(hourHand); const minPivot = new T.Group(); minPivot.add(minHand);
+    hands.add(hourPivot, minPivot);
 
-    // Kane stands to the right of the desk: turned three-quarters to you, he turns to the screen to act
-    const DESK = new T.Vector3(-0.38, 0, -0.12), DOOR = new T.Vector3(1.45, 0, -2.25);
-    const FACE = Math.atan2(-1.73 - DESK.x, -1.03 - DESK.z);  // toward the screen
-    const YOU = -0.55;                                          // three-quarters toward the camera
-    const INSIDE = new T.Vector3(1.45, 0, -2.85);  // in the doorway
-    const CHAIR = new T.Vector3(-1.09, 0, -0.46);   // standing by the chair
-    const SEAT_YAW = Math.PI / 4 + Math.PI;           // facing the computer
+    // the door to the app's next page: it opens on a lit corridor; the sign shows the real page
+    box(0.1, 2.3, 0.12, DARKWOOD, DX - 0.6, 1.15, -2.95); box(0.1, 2.3, 0.12, DARKWOOD, DX + 0.6, 1.15, -2.95);
+    box(1.3, 0.12, 0.12, DARKWOOD, DX, 2.32, -2.95);
+    flat(1.1, 2.26, new T.MeshBasicMaterial({ color: 0xfff0c8, toneMapped: false }), DX, 1.13, -2.992);
+    const doorLight = new T.PointLight(0xffd9a0, 0, 5, 1.6); doorLight.position.set(DX, 1.3, -2.55); scene.add(doorLight);
+    const hinge = new T.Group(); hinge.position.set(DX - 0.535, 0, -2.93); scene.add(hinge);
+    const doorWood = std(0x6b3f22, 0.45);
+    box(1.06, 2.24, 0.06, doorWood, 0.535, 1.12, 0, hinge);
+    box(0.6, 0.9, 0.02, std(0xd8c7a0, 0.25, { transparent: true, opacity: 0.88, emissive: 0x4a3a1c }), 0.535, 1.55, 0.035, hinge);
+    box(0.7, 0.55, 0.02, std(0x5e361d, 0.45), 0.535, 0.55, 0.035, hinge);
+    box(0.04, 0.2, 0.04, BRASS, 0.935, 1.05, 0.05, hinge); put(new T.SphereGeometry(0.04, 12, 10), BRASS, 0.935, 1.0, 0.07, hinge);
+    const sign = makeSign(T); sign.set("the scene");
+    flat(1.15, 0.22, new T.MeshBasicMaterial({ map: sign.tex, toneMapped: false }), DX, 2.55, -2.9, scene, [0, 0, 0.03]);
+    cyl(0.05, 0.08, 0.14, BRASS, DX + 0.85, 2.15, -2.92); halo(0xffc98a, 0.6, DX + 0.85, 2.15, -2.86, 0.6);
+
+    // the glass cabinet on the left wall, a picture above it
+    model("vintage_cabinet_01", -3.2, 0, 0.9, Math.PI / 2);
+    model("hanging_picture_frame_01", -3.5, 3.0, 0.9, Math.PI / 2);
+
+    // the desk: a steel office desk, turned to the camera, with the computer (the window into the
+    // user's app), a brass banker's lamp, books, a notebook, a mug and a pot of pens
+    const station = new T.Group(); station.position.set(-1.55, 0, -0.85); station.rotation.y = Math.PI / 4; scene.add(station);
+    model("metal_office_desk", 0, 0, 0, 0, 1, station);
+    model("stationery_supplies", 0.86, 0.86, -0.12, 0.4, 1.2, station);
+    const TOP = 0.79;  // the desk's top
+    const screen = makeScreen(T);
+    const mon = new T.Group(); mon.position.set(-0.45, 0, 0); mon.rotation.y = 0.35; station.add(mon);
+    const plastic = std(0x1c1f27, 0.35, { metalness: 0.3 });
+    box(1.2, 0.76, 0.06, plastic, 0.05, TOP + 0.48, -0.3, mon);
+    flat(1.1, 0.68, new T.MeshBasicMaterial({ map: screen.tex, toneMapped: false }), 0.05, TOP + 0.48, -0.265, mon);
+    box(0.08, 0.36, 0.08, plastic, 0.05, TOP + 0.16, -0.33, mon); box(0.4, 0.02, 0.22, plastic, 0.05, TOP + 0.01, -0.33, mon);
+    box(0.72, 0.03, 0.26, std(0x2c2f3a, 0.5), 0.05, TOP + 0.02, 0.14, mon);
+    cyl(0.11, 0.13, 0.04, BRASS, 0.62, TOP + 0.02, -0.3, station); cyl(0.015, 0.015, 0.6, BRASS, 0.62, TOP + 0.33, -0.3, station);
+    cyl(0.015, 0.015, 0.36, BRASS, 0.5, TOP + 0.64, -0.3, station, [0, 0, 1.1]);
+    put(new T.SphereGeometry(0.16, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2.2), std(0xc9a24e, 0.3, { metalness: 0.9, side: T.DoubleSide }), 0.34, TOP + 0.74, -0.28, station, [0.2, 0, 0.5]);
+    put(new T.SphereGeometry(0.045, 12, 10), new T.MeshBasicMaterial({ color: 0xfff1c8, toneMapped: false }), 0.32, TOP + 0.68, -0.27, station);
+    const lampHalo = halo(0xffcf8f, 1.3, 0.32, TOP + 0.68, -0.27, 0.75, station);
+    [[0x6e1f22, 0.06], [0x1f3a5f, 0.05], [0x7a6a2a, 0.045]].forEach(([c, h], i) => box(0.36, h, 0.26, std(c, 0.6), 0.6, TOP + 0.03 + i * 0.055, 0.2, station, [0, 0.1 * i, 0]));
+    const note = canvasTex(T, 300, 220, (g) => {
+      g.fillStyle = "#f4ecd8"; g.fillRect(0, 0, 300, 220); g.strokeStyle = "#b3261e"; g.lineWidth = 3;
+      for (let i = 0; i < 5; i++) { g.strokeRect(20, 22 + i * 38, 18, 18); g.fillStyle = "#7a7363"; g.fillRect(50, 28 + i * 38, 180 - i * 18, 6); }
+    });
+    plane(0.42, 0.3, std(0xffffff, 0.8, { map: note }), -0.25, TOP + 0.011, 0.3, station, [-Math.PI / 2, 0, 0.3]);
+    cyl(0.006, 0.006, 0.18, std(0x1a1a1a, 0.3, { metalness: 0.6 }), -0.05, TOP + 0.015, 0.36, station, [Math.PI / 2, 0, 1.2]);
+    const mugTex = canvasTex(T, 256, 128, (g) => {
+      g.fillStyle = "#f3eee5"; g.fillRect(0, 0, 256, 128); g.fillStyle = "#4a2f20"; g.fillRect(96, 30, 64, 12);
+      g.beginPath(); g.ellipse(128, 32, 50, 9, 0, 0, 7); g.fill(); g.fillStyle = "#15171d"; g.beginPath(); g.arc(110, 62, 11, 0, 7); g.arc(146, 62, 11, 0, 7); g.fill();
+    });
+    cyl(0.055, 0.05, 0.13, std(0xffffff, 0.4, { map: mugTex }), 0.78, TOP + 0.065, 0.28, station);
+    put(new T.TorusGeometry(0.035, 0.01, 8, 16), std(0xf3eee5, 0.4), 0.84, TOP + 0.065, 0.28, station);
+    for (let i = 0; i < 4; i++) halo(0xffffff, 0.12 + i * 0.05, 0.78 + Math.sin(i * 2) * 0.02, TOP + 0.19 + i * 0.07, 0.28, 0.12, station);
+
+    // the leather armchair in front of the computer: Kane pulls it out, sits, slides in
+    const CHAIR = new T.Vector3(-1.09, 0, -0.46), SEAT_YAW = Math.PI / 4 + Math.PI;  // facing the computer
+    const chair = new T.Group(); chair.position.copy(CHAIR); chair.rotation.y = SEAT_YAW; scene.add(chair);
+    model("modern_arm_chair_01", 0, 0, 0, 0, 1, chair);
+
+    // a side table in front with the evidence tray, and a big plant by the door
+    const side = new T.Group(); side.position.set(-1.25, 0, 2.0); side.rotation.y = 0.35; scene.add(side);
+    box(1.0, 0.06, 0.6, WALNUT, 0, 0.62, 0, side); box(0.9, 0.6, 0.5, DARKWOOD, 0, 0.3, 0, side);
+    box(0.6, 0.16, 0.36, std(0x6a3d22, 0.5), 0.05, 0.73, 0, side);
+    const tag = canvasTex(T, 256, 64, (g) => { g.fillStyle = "#c9a24e"; g.fillRect(0, 0, 256, 64); g.fillStyle = "#2a1a0e"; g.font = "800 36px Georgia, serif"; g.textAlign = "center"; g.fillText("EVIDENCE", 128, 46); });
+    plane(0.32, 0.08, std(0xffffff, 0.4, { metalness: 0.6, map: tag }), 0.05, 0.73, 0.185, side);
+    for (let i = 0; i < 5; i++) box(0.5, 0.005, 0.3, std([0xf3eee5, 0xe9dfc8, 0xd6e3ff, 0xf3eee5, 0xc9b88a][i], 0.8), 0.05, 0.82 + i * 0.012, -0.02 + i * 0.008, side, [0.3 - i * 0.05, 0, 0]);
+    model("potted_plant_02", 2.7, 0, 1.3, 0.6, 1.35);
+
+    // soft contact shadows under the furniture, and one that follows Kane
+    const blobTex = radialTex(T, "rgba(0,0,0,.55)", "rgba(0,0,0,0)");
+    const blob = (w, d, x, z, ry = 0, parent = scene) => {
+      const m = new T.Mesh(new T.PlaneGeometry(w, d), new T.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false }));
+      m.rotation.x = -Math.PI / 2; m.rotation.z = ry; m.position.set(x, 0.016, z); parent.add(m); return m;
+    };
+    blob(2.5, 1.4, -1.55, -0.85, Math.PI / 4);
+    blob(1.0, 1.1, 0, 0, 0, chair).position.y = 0.016;
+    blob(0.9, 2.3, -3.2, 0.9);
+    blob(1.0, 1.0, 2.7, 1.3);
+    blob(1.2, 0.8, -1.25, 2.0, -0.35);
+    const kaneShadow = blob(0.9, 0.9, 0, 0);
+
+    // dust drifting in the lamplight
+    const dustGeo = new T.BufferGeometry(), dustPos = new Float32Array(90 * 3);
+    for (let i = 0; i < 90; i++) { dustPos[i * 3] = -2.1 + Math.random() * 1.6; dustPos[i * 3 + 1] = 0.8 + Math.random() * 1.2; dustPos[i * 3 + 2] = -1.6 + Math.random() * 1.3; }
+    dustGeo.setAttribute("position", new T.BufferAttribute(dustPos, 3));
+    const dust = new T.Points(dustGeo, new T.PointsMaterial({ size: 0.018, color: 0xffd9a0, transparent: true, opacity: 0.55, depthWrite: false, blending: T.AdditiveBlending }));
+    scene.add(dust);
+    dust.update = (dt) => {
+      for (let i = 0; i < 90; i++) {
+        dustPos[i * 3 + 1] += dt * 0.03 * (1 + (i % 3)); dustPos[i * 3] += Math.sin((dustPos[i * 3 + 1] + i) * 3) * dt * 0.02;
+        if (dustPos[i * 3 + 1] > 2.0) dustPos[i * 3 + 1] = 0.8;
+      }
+      dustGeo.attributes.position.needsUpdate = true;
+    };
+
+    // Kane's spots. He starts to the right of the desk, three-quarters to you.
+    const DESK = new T.Vector3(-0.38, 0, -0.12), YOU = -0.55;
+    const DOOR = new T.Vector3(DX, 0, -2.25), INSIDE = new T.Vector3(DX, 0, -2.85);  // inside the room, in the doorway
+    const PIN_SPOT = new T.Vector3(BOARD.x - 0.2, 0, -2.3);
     // seated, the robot's hips sit 0.29 up and 0.24 behind its feet: lift and shift it onto the cushion
-    const SEAT = new T.Vector3(CHAIR.x - 0.24 * Math.sin(SEAT_YAW) * -1, 0.26, CHAIR.z - 0.24 * Math.cos(SEAT_YAW) * -1);
-    const AISLE = new T.Vector3(-0.4, 0, -0.2), PIN_SPOT = new T.Vector3(BOARD.x, 0, -2.3);
-    const AWAY = new T.Vector3(-Math.sin(SEAT_YAW), 0, -Math.cos(SEAT_YAW));     // away from the desk
-    const OUT = CHAIR.clone().addScaledVector(AWAY, 0.6);                         // the chair pulled out
-    const SIDE = OUT.clone().addScaledVector(new T.Vector3(AWAY.z, 0, -AWAY.x), 0.55);  // beside it, room side
-    const STAND = OUT.clone().addScaledVector(AWAY, -0.35);                       // in front of the pulled-out chair
-    const STEP_IN = STAND.clone().addScaledVector(new T.Vector3(AWAY.z, 0, -AWAY.x), 0.55);  // between chair and desk, from the side
-    const SEAT_OUT = SEAT.clone().addScaledVector(AWAY, 0.6);                    // seated, before sliding in
-    return { renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, board, dust, kaneShadow, hemi, sun: moon, rim, lampLight, blinds, shaft, flash, clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, CHAIR, SEAT, SEAT_YAW, chair, OUT, SIDE, STAND, STEP_IN, SEAT_OUT, AISLE, PIN_SPOT, FACE, YOU, yaw: YOU };
+    const SEAT = new T.Vector3(CHAIR.x + 0.24 * Math.sin(SEAT_YAW), 0.3, CHAIR.z + 0.24 * Math.cos(SEAT_YAW));
+    const AWAY = new T.Vector3(-Math.sin(SEAT_YAW), 0, -Math.cos(SEAT_YAW));      // away from the desk
+    const ALONG = new T.Vector3(AWAY.z, 0, -AWAY.x);                               // along the desk, room side
+    const PULL = 0.9;                                                              // the armchair is deep
+    const OUT = CHAIR.clone().addScaledVector(AWAY, PULL);                         // the chair pulled out
+    const SIDE = OUT.clone().addScaledVector(ALONG, 0.8);                          // beside it
+    const STAND = OUT.clone().addScaledVector(AWAY, -0.8);                         // between the desk and the pulled-out chair
+    const STEP_IN = STAND.clone().addScaledVector(ALONG, 0.8);                     // the same gap, from the side
+    const SEAT_OUT = SEAT.clone().addScaledVector(AWAY, PULL);                     // seated, before sliding in
+    return {
+      renderer, scene, camera, focus, screen, sign, hinge, doorLight, alarm, win, board, dust, kaneShadow, loads,
+      hemi, sun, rim, lampLight, pictureLight, doorLamp, halos: [boardHalo, lampHalo], blinds, shaft, flash,
+      clock: { hourPivot, minPivot }, DESK, DOOR, INSIDE, CHAIR, SEAT, SEAT_YAW, chair, OUT, SIDE, STAND, STEP_IN, SEAT_OUT, PIN_SPOT, YOU, yaw: YOU,
+    };
   }
 
   // ── Detective Kane: the CC0 robot, recoloured, with a fedora and a magnifying glass ───────
@@ -538,7 +613,7 @@
     const model = gltf.scene;
     const box = new T.Box3().setFromObject(model);
     model.scale.setScalar(1.72 / (box.max.y - box.min.y));
-    const colours = { Main: 0xc8a26a, Grey: 0x384055, Black: 0x15171d };
+    const colours = { Main: 0xcdb48a, Grey: 0x384055, Black: 0x15171d };
     model.traverse((o) => {
       if (!o.isMesh) return;
       o.castShadow = true; o.receiveShadow = true;
@@ -565,11 +640,12 @@
 
     // the fedora, sized in world units, then fixed to the head so it moves with it
     const hat = new T.Group();
-    const felt = new T.MeshStandardMaterial({ color: 0x4a2f20, roughness: 0.8 });
-    const brim = new T.Mesh(new T.CylinderGeometry(0.34, 0.34, 0.025, 32), felt);
-    const crown = new T.Mesh(new T.CylinderGeometry(0.19, 0.22, 0.2, 28), felt); crown.position.y = 0.11;
-    const band = new T.Mesh(new T.CylinderGeometry(0.222, 0.222, 0.05, 28), new T.MeshStandardMaterial({ color: 0x1a120c, roughness: 0.6 })); band.position.y = 0.04;
-    [brim, crown, band].forEach((m) => { m.castShadow = true; hat.add(m); });
+    const felt = new T.MeshStandardMaterial({ color: 0x6b4630, roughness: 0.75 });
+    const brim = new T.Mesh(new T.CylinderGeometry(0.36, 0.36, 0.025, 36), felt);
+    const crown = new T.Mesh(new T.CylinderGeometry(0.2, 0.235, 0.22, 32), felt); crown.position.y = 0.12;
+    const band = new T.Mesh(new T.CylinderGeometry(0.237, 0.237, 0.055, 32), new T.MeshStandardMaterial({ color: 0x1a120c, roughness: 0.6 })); band.position.y = 0.04;
+    const dent = new T.Mesh(new T.BoxGeometry(0.2, 0.03, 0.2), felt); dent.position.y = 0.23;
+    [brim, crown, band, dent].forEach((m) => { m.castShadow = true; hat.add(m); });
     if (headMeshes.length && (headBone || headEnd)) {
       // sized and placed from the whole head's real bounds (this robot has a big round head)
       const hb = new T.Box3(), size = new T.Vector3(), mid = new T.Vector3();
@@ -579,6 +655,18 @@
       hat.scale.setScalar(k);
       hat.position.set(mid.x, hb.max.y - 0.14 * k, mid.z); hat.rotation.set(-0.1, model.rotation.y, 0.06);
       rig.scene.add(hat); (headBone || headEnd).attach(hat);
+      // the red scarf: a wrap round the neck and two tails, tied to the torso so they move with him
+      const torso = find(/^Torso/);
+      if (torso) {
+        const wool = new T.MeshStandardMaterial({ color: 0x7a1a22, roughness: 0.85 }), wool2 = new T.MeshStandardMaterial({ color: 0x8a2028, roughness: 0.85 });
+        const neck = new T.Vector3(mid.x, hb.min.y + 0.02, mid.z), yaw = model.rotation.y;
+        const wrap = new T.Mesh(new T.TorusGeometry(0.21 * k * 0.9, 0.06, 10, 28), wool); wrap.position.copy(neck); wrap.rotation.x = Math.PI / 2;
+        const tail = new T.Mesh(new T.BoxGeometry(0.13, 0.42, 0.04), wool); tail.position.set(neck.x, neck.y - 0.22, neck.z);
+        tail.rotation.y = yaw; tail.translateZ(-0.19); tail.translateX(0.08); tail.rotation.z = 0.15;
+        const tail2 = new T.Mesh(new T.BoxGeometry(0.12, 0.3, 0.04), wool2); tail2.position.set(neck.x, neck.y - 0.16, neck.z);
+        tail2.rotation.y = yaw; tail2.translateZ(-0.2); tail2.translateX(-0.07); tail2.rotation.z = -0.1;
+        [wrap, tail, tail2].forEach((m) => { m.castShadow = true; rig.scene.add(m); torso.attach(m); });
+      }
     }
     // the magnifying glass in his right hand
     const lens = new T.Group();
@@ -655,21 +743,24 @@
   // √2 diagonals, no cutting across obstacle corners, a cap on the search, then line-of-sight
   // smoothing so the route is a few straight legs. Furniture is grown by Kane's radius; the chair
   // is read where it actually is, tucked in or pulled out.
-  const NAV = { x0: -3.2, x1: 3.3, z0: -2.95, z1: 3.0, step: 0.1, radius: 0.3, chair: 0.32 };
+  const NAV = { x0: -3.2, x1: 3.4, z0: -2.95, z1: 3.0, step: 0.1, radius: 0.3, chair: 0.42 };
   function makeNav(rig) {
     const R = NAV.radius;
     const boxes = [  // footprints: centre, half sizes, turn (as set in buildOffice)
-      { cx: -1.55, cz: -0.85, hx: 0.95, hz: 0.5, a: Math.PI / 4 },   // desk
-      { cx: -3.3, cz: 1.1, hx: 0.7, hz: 0.2, a: Math.PI / 2 },       // bookshelf
-      { cx: 2.75, cz: -2.6, hx: 0.3, hz: 0.3, a: 0 },                // filing cabinet
+      { cx: -1.55, cz: -0.85, hx: 1.0, hz: 0.48, a: Math.PI / 4 },   // desk
+      { cx: -3.2, cz: 0.9, hx: 1.01, hz: 0.34, a: Math.PI / 2 },     // glass cabinet
+      { cx: -1.25, cz: 2.0, hx: 0.5, hz: 0.3, a: 0.35 },             // side table
     ];
+    const plants = [{ cx: 2.7, cz: 1.3, r: 0.42 }];
+    const door = rig.DOOR.x;
     const blocked = (x, z) => {
-      if (z < -2.7 && !(x > 1.1 && x < 1.8)) return true;          // the back wall, except the doorway
+      if (z < -2.7 && Math.abs(x - door) > 0.35) return true;       // the back wall, except the doorway
       if (x < NAV.x0 || x > NAV.x1 || z < NAV.z0 || z > NAV.z1) return true;
       for (const b of boxes) {
         const dx = x - b.cx, dz = z - b.cz, c = Math.cos(b.a), sn = Math.sin(b.a);
         if (Math.abs(dx * c - dz * sn) < b.hx + R && Math.abs(dx * sn + dz * c) < b.hz + R) return true;
       }
+      for (const c of plants) if ((x - c.cx) ** 2 + (z - c.cz) ** 2 < (c.r + R) ** 2) return true;
       const ch = rig.chair.position;
       return (x - ch.x) ** 2 + (z - ch.z) ** 2 < (NAV.chair + R) ** 2;
     };
@@ -869,6 +960,7 @@
       if (document.fonts) await Promise.all(["600 25px Caveat", "600 17px Inter"].map((f) => document.fonts.load(f).catch(() => {})));
       rig = buildOffice(window.THREE, canvas);
       kane = await loadKane(window.THREE, rig);
+      await Promise.race([Promise.all(rig.loads), new Promise((ok) => setTimeout(ok, 15000))]);
     } catch (e) {
       stage.dataset.ready = "";  // no WebGL or no model: keep the 2D detective
       return;
@@ -879,9 +971,9 @@
     stage.kaneNav = rig.nav;  // for checking the routes from the page (see tests)
     const T = window.THREE;
     const cameraViews = [
-      { label: "Office", position: new T.Vector3(0.9, 1.95, 3.7), focus: new T.Vector3(-0.65, 1.12, -0.95) },
-      { label: "Desk", position: new T.Vector3(0.15, 1.7, 2.45), focus: new T.Vector3(-1.25, 1.15, -0.75) },
-      { label: "Evidence", position: new T.Vector3(0.85, 1.85, 2.05), focus: new T.Vector3(-0.25, 1.68, -2.92) },
+      { label: "Office", position: new T.Vector3(2.15, 2.25, 4.35), focus: new T.Vector3(-0.25, 1.3, -1.45) },
+      { label: "Desk", position: new T.Vector3(0.55, 1.75, 1.9), focus: new T.Vector3(-1.55, 1.05, -0.85) },
+      { label: "Evidence", position: new T.Vector3(1.35, 1.9, 1.3), focus: new T.Vector3(0.55, 1.8, -2.97) },
     ];
     let cameraAt = Math.max(0, cameraViews.findIndex((view) => view.label === stage.dataset.camera));
     stage.dataset.camera = cameraViews[cameraAt].label;
@@ -891,7 +983,7 @@
       return stage.dataset.camera;
     };
     rig.scene.traverse((o) => {
-      for (const m of [].concat(o.material || [])) if (m.isMeshStandardMaterial) m.envMapIntensity = m.metalness > 0.5 ? 0.6 : 0.1;
+      for (const m of [].concat(o.material || [])) if (m.isMeshStandardMaterial) m.envMapIntensity = m.metalness > 0.5 ? 0.5 : 0.08;
     });
 
     // "Kane's screen": the same picture as the 3D monitor, readable even with Kane sitting in front of it
