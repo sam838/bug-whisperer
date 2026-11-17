@@ -49,6 +49,14 @@
         placeholder="cant book!!! the button does nothing. pls fix 😡"></textarea>
     </label>
 
+    <div class="examples" aria-label="Sample bug reports">
+      <span>Try a sample report:</span>
+      {% for example in examples %}
+        <button class="chip" type="button" data-example="{{ example }}"
+          title="Fill the bug report with this sample">{{ example[:48] }}{% if example|length > 48 %}…{% endif %}</button>
+      {% endfor %}
+    </div>
+
     <label class="evidence-drop">
       <span class="drop-icon" aria-hidden="true">▧</span>
       <span><b>Add evidence files</b><small>Drop in screenshots, documents, spreadsheets, or test results · up to 8 files</small></span>
