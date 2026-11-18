@@ -193,6 +193,9 @@ def _execute(argv, *, timeout, log_path, on_event) -> KaneResult:
     elif completion and exit_code == 1 and result.status == "failed" and automation_problem:
         # Kane says the failure is in the test setup, not the app: that tells us nothing about the app.
         errors.append(f"Kane: automation problem, not an app bug: {diagnosis.get('one_liner')}")
+    elif completion and exit_code == 1 and result.status == "failed" and _out_of_budget(completion):
+        # Kane ran out of its own turns before it could record its check: it couldn't finish.
+        errors.append(f"Kane ran out of turns: {completion.get('one_liner') or completion.get('reason')}")
     elif completion and exit_code == 1 and result.status == "failed":
         result.verdict = "failed"
     else:
@@ -200,6 +203,12 @@ def _execute(argv, *, timeout, log_path, on_event) -> KaneResult:
         if stderr_tail and not errors:
             errors.append(stderr_tail.strip().splitlines()[-1] if stderr_tail.strip() else "")
     return result
+
+
+def _out_of_budget(completion: dict) -> bool:
+    """Kane's own words when its turn budget ended the run, e.g. 'the run's turn budget was exhausted'."""
+    said = f"{completion.get('reason') or ''} {completion.get('one_liner') or ''}".lower()
+    return "budget" in said and any(w in said for w in ("exhausted", "ran out", "run out"))
 
 
 def _parse(line: str) -> dict | None:

@@ -306,3 +306,52 @@ def test_self_checks_are_kept_apart_from_the_bugs_bug_whisperer_fixed(tmp_path, 
     sc = proof._self_checks()
     assert sc["passing"] == 1 and sc["last_run"] == "2026-11-17 09:00"
     assert proof._revisits()["replays"] == 1  # the self-check isn't counted as a revisit of a closed case
+
+
+def lineup_record(status="done", verdict="found"):
+    def row(i, state, asked=None, verdict=None):
+        r = {"sha": f"{i:040x}", "short": f"{i:07x}", "author": "sam", "date": "2026-11-17 10:21",
+             "subject": f"commit {i}", "status": state, "questioned": bool(asked)}
+        if asked:
+            r.update(asked_as=asked, answer={"verdict": verdict, "failed_step": "No sample buttons on the page",
+                                             "summary": "", "reason": None, "errors": [], "duration": 21.4})
+        return r
+    rows = [row(1, "cleared"), row(2, "cleared", 3, "passed"), row(3, "guilty", 4, "failed"), row(4, "present", 2, "failed")]
+    if status != "done":
+        rows[2].update(status="questioning", asked_as=None)
+    return {"id": "lineup-20261118-120000", "check": "self-sample-reports", "title": "Sample reports",
+            "objective": "x", "test": "self-sample-reports", "app": "Bug Whisperer (itself)",
+            "app_file": "apps/bug-whisperer.json", "code_dir": "whisperer", "created": "2026-11-18 12:00",
+            "status": status, "now": "suspect 3 of 4" if status != "done" else None,
+            "good": {**row(0, "cleared", 1, "passed")}, "bad": rows[3], "suspects": rows,
+            "questionings": 4, "fresh_runs": 0, "verdict": verdict if status == "done" else None,
+            "verdict_words": "Kane named the commit that broke it", "culprit": rows[2]["sha"],
+            "diff": {"stat": " whisperer/templates/report.html | 8 --------", "patch": "@@ -1 +1 @@\n-    <div class=\"examples\">", "cut": 0}}
+
+
+def test_the_lineup_page_names_the_culprit_and_every_questioning_in_order(client, tmp_path, monkeypatch):
+    from whisperer import lineup
+    monkeypatch.setattr(lineup, "RUNS", tmp_path)
+    (tmp_path / "lineup-20261118-120000").mkdir()
+    (tmp_path / "lineup-20261118-120000" / "lineup.json").write_text(json.dumps(lineup_record()))
+    page = client.get("/lineup/lineup-20261118-120000").text
+    assert "Culprit found" in page and "The culprit" in page and "“commit 3”" in page
+    told = page.split("The questionings, in order")[1]
+    assert told.index("#1") < told.index("#2") < told.index("#3") < told.index("#4")
+    assert "Last good version" in page and "(ruled out)" in page  # commit 1 was never questioned
+    assert "No sample buttons on the page" in page and "Kane questioned <b>4</b> of 5 versions" in page and 'class="del"' in page
+    assert "Sample reports" in client.get("/lineups").text
+
+
+def test_a_lineup_in_progress_keeps_refreshing_and_accuses_no_one_yet(client, tmp_path, monkeypatch):
+    from whisperer import lineup
+    monkeypatch.setattr(lineup, "RUNS", tmp_path)
+    (tmp_path / "lineup-20261118-120000").mkdir()
+    (tmp_path / "lineup-20261118-120000" / "lineup.json").write_text(json.dumps(lineup_record(status="questioning")))
+    live = client.get("/lineup/lineup-20261118-120000/live").text
+    assert 'data-active="true"' in live and "suspect 3 of 4" in live
+    assert "The culprit" not in live and "Culprit found" not in live
+
+
+def test_an_unknown_lineup_is_not_found(client):
+    assert client.get("/lineup/lineup-nope", headers={"accept": "application/json"}).status_code == 404

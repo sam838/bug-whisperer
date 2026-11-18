@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-17 09:13",
+  "generated": "2026-11-18 20:33",
   "repo": "https://github.com/sam838/bug-whisperer/blob/main",
   "experiments": [
     {
@@ -160,16 +160,21 @@
       "id": "004-hook-reopened-case",
       "title": "Evidence 004: the hook. Kane blocks Claude Code until an old bug is fixed again",
       "folder": "docs/evidence/004-hook-reopened-case"
+    },
+    {
+      "id": "005-lineup-who-broke-the-front-desk",
+      "title": "Evidence 005: the Lineup. Kane names the commit that broke Bug Whisperer's front desk",
+      "folder": "docs/evidence/005-lineup-who-broke-the-front-desk"
     }
   ],
   "revisits": {
-    "sessions": 32,
+    "sessions": 58,
     "replays": 58,
     "holds": 54,
     "reopened": 4,
     "unknown": 0,
     "first": "2026-11-13 13:56",
-    "last": "2026-11-17 09:10"
+    "last": "2026-11-18 20:30"
   },
   "regression_tests": [
     {
@@ -219,10 +224,17 @@
         "objective": "Go to http://127.0.0.1:8010/r/20261113-124324-d930/report. Verify that the report has a section 'What Kane did, in a real browser', a section 'The repair' and a 'Save as PDF' button.",
         "test": ".testmuai/tests/self-case-report_test.md",
         "verdict": "holds"
+      },
+      {
+        "id": "self-sample-reports",
+        "title": "The front desk offers sample reports that fill the report box",
+        "objective": "Go to http://127.0.0.1:8010/. Verify that the page shows at least one button that fills in a sample bug report. Click the first of those buttons. Verify that the bug report text box is no longer empty.",
+        "test": ".testmuai/tests/self-sample-reports_test.md",
+        "verdict": "holds"
       }
     ],
-    "last_run": "2026-11-17 09:10",
-    "passing": 5,
+    "last_run": "2026-11-18 20:30",
+    "passing": 6,
     "caught": [
       {
         "when": "2026-11-17 09:07",
@@ -230,13 +242,57 @@
         "title": "The Verified page: the pre-registered experiments",
         "kane_said": "The /verified address shows a 404-style missing-case page, so the required 6/6 result and experiment entry cannot be displayed.",
         "note": "A negative control, staged on purpose: docs/proof/results.json was moved aside to break the Verified page, to show the checks can fail. It was put back and the next run passed."
+      },
+      {
+        "when": "2026-11-18 19:05",
+        "id": "self-closed-case",
+        "title": "A closed case: its stamp, evidence board and scene map",
+        "kane_said": "The test was given a missing or stale case identifier. The server returned its normal “Not found” page instead of the case page that should contain the requested stamp and sections.\nCreate or restore the expected case fixture, or update the test URL to a valid case-file address before rerunning.",
+        "note": "Not a regression. The Stop hook replayed these checks while a Lineup was running an OLD version of Bug Whisperer on the same port (8010), so Kane tested that old version. This is the bug that led to port claims (apprunner.claim); see docs/evidence/005-lineup-who-broke-the-front-desk."
+      },
+      {
+        "when": "2026-11-18 19:05",
+        "id": "self-verified",
+        "title": "The Verified page: the pre-registered experiments",
+        "kane_said": "The required /verified page is unavailable, so it cannot show the 6/6 result or the named experiment.",
+        "note": "Not a regression. The Stop hook replayed these checks while a Lineup was running an OLD version of Bug Whisperer on the same port (8010), so Kane tested that old version. This is the bug that led to port claims (apprunner.claim); see docs/evidence/005-lineup-who-broke-the-front-desk."
+      },
+      {
+        "when": "2026-11-18 19:05",
+        "id": "self-case-report",
+        "title": "The case report: steps, repair and a Save as PDF button",
+        "kane_said": "The requested report page displays a Not Found response instead of the required report sections and PDF button.",
+        "note": "Not a regression. The Stop hook replayed these checks while a Lineup was running an OLD version of Bug Whisperer on the same port (8010), so Kane tested that old version. This is the bug that led to port claims (apprunner.claim); see docs/evidence/005-lineup-who-broke-the-front-desk."
+      },
+      {
+        "when": "2026-11-18 20:01",
+        "id": "self-front-desk",
+        "title": "The front desk: an example report fills the case form",
+        "kane_said": "The example still fills in the witness statement, but the page shows “Investigate” instead of the required “Send Kane to investigate” button.",
+        "note": "Not a regression. The Stop hook replayed these checks while a Lineup was running an OLD version of Bug Whisperer on the same port (8010), so Kane tested that old version. This is the bug that led to port claims (apprunner.claim); see docs/evidence/005-lineup-who-broke-the-front-desk."
       }
     ]
   },
+  "lineups": [
+    {
+      "id": "lineup-20261118-200852",
+      "folder": "docs/evidence/005-lineup-who-broke-the-front-desk",
+      "title": "The front desk offers sample reports that fill the report box",
+      "verdict": "found",
+      "suspects": 41,
+      "questionings": 8,
+      "fresh_runs": 8,
+      "culprit": {
+        "short": "8565456",
+        "subject": "Redesign 3d game",
+        "date": "2026-11-17 10:21"
+      }
+    }
+  ],
   "totals": {
     "experiments_run": 6,
     "experiments_as_expected": 6,
-    "kane_runs": 68,
+    "kane_runs": 76,
     "credits": 302.3
   }
 }

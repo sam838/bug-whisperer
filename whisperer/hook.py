@@ -89,6 +89,13 @@ def _reason(reopened: list[dict], attempt: int) -> str:
             f"  Kane's check failed at: {evidence.get('failed_step') or evidence.get('reason')}",
             f"  Kane's account: {(evidence.get('summary') or '').strip()}",
         ]
+    from .lineup import held_at
+    known = held_at()
+    lineups = [r["case_id"] for r in reopened if r["case_id"] in known]
+    if lineups:
+        lines += ["", "If the bug came back in a commit (not in your uncommitted changes), Kane can name the "
+                  "commit that broke it, replaying the saved test on each suspect (no credits):"]
+        lines += [f"  python -m whisperer lineup {case_id}" for case_id in lineups]
     lines += [
         "",
         "Fix the app's code so these cases pass again, keeping the change you were making.",

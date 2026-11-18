@@ -79,3 +79,14 @@ def test_camera_is_off_unless_turned_on_on_purpose(monkeypatch, value, off):
     monkeypatch.delenv("WHISPERER_NO_CAMERA", raising=False)
     monkeypatch.setenv("WHISPERER_CAMERA", value)
     assert camera.camera_off() is off
+
+
+def test_kane_running_out_of_turns_is_not_an_app_failure(tmp_path):
+    """A real run (Nov 18): every check had passed, then Kane's turn budget ended the run as 'failed'."""
+    r = run_fake([START, {"step": 6, "status": "done", "remark": "analyze: The bug report text box is no longer empty."},
+                  {"step": 7, "status": "failed", "remark": "wait: Waiting after the checkpoint analyzer budget failure"},
+                  {"type": "run_end", "status": "failed",
+                   "reason": "The required post-click checkpoint could not commit because the run's turn budget was exhausted.",
+                   "one_liner": "The run reached the required post-click state, but its turn budget ran out."}], 1, tmp_path)
+    assert r.verdict == "error"
+    assert "ran out of turns" in r.errors[-1]

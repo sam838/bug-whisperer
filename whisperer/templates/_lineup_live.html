@@ -1,0 +1,73 @@
+{% set words = {"guilty": "Guilty", "cleared": "Cleared", "present": "Bug there", "cannot_tell": "Couldn't tell",
+                 "unresolved": "Still a suspect", "questioning": "Being questioned", "waiting": "Waiting"} %}
+<div class="live-root lineup" data-active="{{ 'true' if active else 'false' }}">
+  {% if active %}
+    <div class="verdict neutral"><span class="stamp">Questioning</span> Kane is questioning {{ now or 'the witnesses' }}: that version of the code is checked out, started, and tested in a real browser.</div>
+  {% elif l.verdict == "found" %}
+    <div class="verdict bug"><span class="stamp">Culprit found</span> Kane questioned <b>{{ l.questionings }}</b> of {{ rows|length + (1 if rows and rows[-1].sha == l.bad.sha else 2) }} versions and named the commit that broke it.</div>
+  {% elif l.verdict == "narrowed" %}
+    <div class="verdict warn"><span class="stamp">Narrowed down</span> {{ l.verdict_words }}. The commits still under suspicion are marked below.</div>
+  {% else %}
+    <div class="verdict warn"><span class="stamp">No one accused</span> {{ l.verdict_words }}.</div>
+  {% endif %}
+
+  <p class="lede lineup-lede">The saved Kane test <b>{{ l.check }}</b> passed at <code>{{ l.good.short }}</code> and fails at
+    <code>{{ l.bad.short }}</code>. The <b>{{ rows|length }}</b> commits in between that changed <code>{{ l.code_dir }}/</code> are the suspects.
+    For each one Kane questions, that commit's own code is started and Kane replays the same test on it.
+    Replays spend no credits{% if l.fresh_runs %}, but {{ l.fresh_runs }} fresh run{{ 's' if l.fresh_runs != 1 }} did{% endif %}.</p>
+
+  <section class="lineup-wall" aria-label="The suspects, oldest first">
+    <div class="lineup-ends">
+      <span class="lineup-end ok s-{{ l.good.status or 'waiting' }}">✓ <code>{{ l.good.short }}</code> last good{{ " · being questioned" if l.good.status == "questioning" }}</span>
+      <span class="lineup-end bad s-{{ l.bad.status or 'waiting' }}">✗ <code>{{ l.bad.short }}</code> broken{{ " · being questioned" if l.bad.status == "questioning" }}</span>
+    </div>
+    <ol class="suspects">
+      {% for r in rows %}
+        <li class="suspect s-{{ r.status }}{{ ' asked' if r.questioned }}">
+          <span class="placard"><code>{{ r.short }}</code>{% if r.asked_as %}<i>#{{ r.asked_as }}</i>{% endif %}</span>
+          <span class="suspect-line">{{ r.subject }}</span>
+          <span class="suspect-meta">{{ r.date[5:] }} · {{ words.get(r.status, r.status) }}{% if r.status in ("cleared", "present") and not r.questioned %} (ruled out){% endif %}</span>
+        </li>
+      {% endfor %}
+    </ol>
+    <p class="lineup-key muted"><b>#n</b> Kane questioned it, in that order. "Ruled out": another questioning settled it. A pass clears that commit and every one before it; a fail means the bug was already there.</p>
+  </section>
+
+  {% if culprit %}
+    <section class="card culprit-card">
+      <span class="culprit-label">The culprit</span>
+      <h2><code>{{ culprit.short }}</code> “{{ culprit.subject }}”</h2>
+      <p class="muted">{{ culprit.author }} · {{ culprit.date }} · questioned as #{{ culprit.asked_as }}</p>
+      {% set a = culprit.answer %}
+      {% if a.summary or a.failed_step %}<p class="culprit-said"><b>Kane:</b> “{{ (a.summary or a.failed_step).splitlines()[0] }}”</p>{% endif %}
+      <p>The commit just before it passed the same test, so this is the change that broke it.
+        Its name doesn't have to mention the bug, and often it doesn't.</p>
+      <pre class="diffstat">{{ l.diff.stat }}</pre>
+      <details data-key="diff">
+        <summary>Show the culprit's full change to {{ l.code_dir }}/</summary>
+        <pre class="diff">{% for line in l.diff.patch.splitlines() %}<span class="{{ 'add' if line.startswith('+') and not line.startswith('+++') else 'del' if line.startswith('-') and not line.startswith('---') else 'hunk' if line.startswith('@@') else '' }}">{{ line }}</span>
+{% endfor %}{% if l.diff.cut %}… {{ l.diff.cut }} more lines{% endif %}</pre>
+      </details>
+    </section>
+  {% endif %}
+
+  <section class="card">
+    <h2>The questionings, in order</h2>
+    <ol class="questionings">
+      {% for q in questionings %}
+        {% set v = q.answer.verdict %}
+        <li class="q-{{ v }}">
+          <span class="q-no">#{{ q.asked_as }}</span>
+          <div>
+            <b><code>{{ q.short }}</code> {{ q.subject }}</b>{% if q.role %} <span class="q-role">{{ q.role }}</span>{% endif %}
+            <span class="q-verdict">{{ {"passed": "✓ Cleared: the test passed", "failed": "✗ The bug is there: the test failed", "error": "⚠ Kane couldn't tell"}.get(v, v) }}{% if q.answer.duration %} · {{ q.answer.duration|round|int }} s{% endif %}{% if q.answer.fresh %} · fresh run{% endif %}</span>
+            {% if v != "passed" and (q.answer.summary or q.answer.failed_step or q.answer.reason) %}<small>Kane: “{{ (q.answer.summary or q.answer.failed_step or q.answer.reason).splitlines()[0] }}”</small>{% endif %}
+          </div>
+        </li>
+      {% else %}
+        <li class="muted">Kane is about to question the first witness.</li>
+      {% endfor %}
+    </ol>
+    {% if l.evidence %}<p class="muted">Kept as evidence: <a href="{{ repo }}/tree/main/docs/evidence/{{ l.evidence }}">docs/evidence/{{ l.evidence }}</a></p>{% endif %}
+  </section>
+</div>

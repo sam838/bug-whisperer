@@ -1,4 +1,7 @@
 {
   "about": "Notes on self-check runs, matched by the guard report they belong to. Written by hand, and shown next to the result.",
-  "guard-20261117-090744": "A negative control, staged on purpose: docs/proof/results.json was moved aside to break the Verified page, to show the checks can fail. It was put back and the next run passed."
+  "guard-20261117-090744": "A negative control, staged on purpose: docs/proof/results.json was moved aside to break the Verified page, to show the checks can fail. It was put back and the next run passed.",
+  "guard-20261118-190535": "Not a regression. The Stop hook replayed these checks while a Lineup was running an OLD version of Bug Whisperer on the same port (8010), so Kane tested that old version. This is the bug that led to port claims (apprunner.claim); see docs/evidence/005-lineup-who-broke-the-front-desk.",
+  "guard-20261118-200127": "Not a regression. The Stop hook replayed these checks while a Lineup was running an OLD version of Bug Whisperer on the same port (8010), so Kane tested that old version. This is the bug that led to port claims (apprunner.claim); see docs/evidence/005-lineup-who-broke-the-front-desk.",
+  "guard-20261118-200857": "Skipped on purpose: a Lineup held the port, so the hook marked every check 'couldn't check' instead of testing an old version. The port claim working as meant."
 }

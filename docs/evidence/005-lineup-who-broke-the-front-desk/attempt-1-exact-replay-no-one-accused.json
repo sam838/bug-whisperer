@@ -1,0 +1,417 @@
+{
+  "id": "lineup-20261118-182313",
+  "check": "self-sample-reports",
+  "title": "The front desk offers sample reports that fill the report box",
+  "objective": "Go to http://127.0.0.1:8010/. Verify that the page shows at least one button that fills in a sample bug report. Click the first of those buttons. Verify that the bug report text box is no longer empty.",
+  "test": "self-sample-reports",
+  "app": "Bug Whisperer (itself)",
+  "app_file": "apps/bug-whisperer.json",
+  "code_dir": "whisperer",
+  "created": "2026-11-18 18:23",
+  "status": "done",
+  "now": null,
+  "good": {
+    "sha": "430f52e5021f2b24f71c223abf7cd78c6717b01e",
+    "short": "430f52e",
+    "author": "sam838",
+    "date": "2026-11-13 13:08",
+    "subject": "Add the Bug Whisperer website",
+    "answer": {
+      "verdict": "error",
+      "reason": "assertion_failed: @ step 3",
+      "summary": "The live page is healthy, but the recording no longer recognizes its sample-report controls.",
+      "failed_step": "assert: the page shows at least one button that fills in a sample bug report",
+      "errors": [
+        "Kane: automation problem, not an app bug: The live page is healthy, but the recording no longer recognizes its sample-report controls."
+      ],
+      "duration": 27.2
+    },
+    "status": "cannot_tell",
+    "questioned": true,
+    "asked_as": 1
+  },
+  "bad": {
+    "sha": "85654566209667eff8885ca7d139b14837b6f649",
+    "short": "8565456",
+    "author": "sam838",
+    "date": "2026-11-17 10:21",
+    "subject": "Redesign 3d game",
+    "answer": null
+  },
+  "suspects": [
+    {
+      "sha": "035c9146a58a94a392925eb661e789a1e7647004",
+      "short": "035c914",
+      "author": "sam838",
+      "date": "2026-11-13 13:33",
+      "subject": "Connect any website, and have Kane double-check user claims",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "3326807876f1dc33ad7c280431bdaf94310d7051",
+      "short": "3326807",
+      "author": "sam838",
+      "date": "2026-11-13 13:44",
+      "subject": "Give Kane its role: the detective who closes a case only when it sees the fix",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "f1a071679e5f17e26d671aab8cca257cc0630780",
+      "short": "f1a0716",
+      "author": "sam838",
+      "date": "2026-11-13 14:13",
+      "subject": "Add the hook: Kane revisits closed cases before Claude Code may finish",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "0b4ecacc0f441786ba08499318be4a23825a489f",
+      "short": "0b4ecac",
+      "author": "sam838",
+      "date": "2026-11-13 14:53",
+      "subject": "Add the hosted live demo for Render",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "4526f21f9224166432bf23e470a55790eb230841",
+      "short": "4526f21",
+      "author": "sam838",
+      "date": "2026-11-16 09:32",
+      "subject": "Restyle the website as a case file, and lead the home page with proof",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "80be025fced7d193377bf47a7ab9e39c28aed814",
+      "short": "80be025",
+      "author": "sam838",
+      "date": "2026-11-16 09:46",
+      "subject": "Put Kane front and centre: its own voice, and a replay of each case",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "16f474c1ece0a39a7bc2709933bf22be869df828",
+      "short": "16f474c",
+      "author": "sam838",
+      "date": "2026-11-16 11:07",
+      "subject": "Fix live cases on the server, and show Kane's browser live",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "9cec82ca8068bebeba670d0e9b975ff6b7c26081",
+      "short": "9cec82c",
+      "author": "sam838",
+      "date": "2026-11-16 11:50",
+      "subject": "Lighter camera on Linux: start Chrome directly, with memory-saving flags",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "4d6a44e9d5ca7f8adaedebcff284ae5b7daa572e",
+      "short": "4d6a44e",
+      "author": "sam838",
+      "date": "2026-11-16 12:54",
+      "subject": "Keep the live view steady while a case runs",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "c059937acf27c379a82103601509e4dc082356f4",
+      "short": "c059937",
+      "author": "sam838",
+      "date": "2026-11-16 13:24",
+      "subject": "Animate the home page opening",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "c81329a3f18b0ce6c90004d05674cf7784b0e92d",
+      "short": "c81329a",
+      "author": "sam838",
+      "date": "2026-11-16 13:49",
+      "subject": "Help Kane past required form fields",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "6cbc59502cd3f66b5bdb4d904458a2eb24391de7",
+      "short": "6cbc595",
+      "author": "sam838",
+      "date": "2026-11-16 13:55",
+      "subject": "Type dates and times the way browser pickers accept them",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "0145909058e8426829afec39f121954ae3ca7616",
+      "short": "0145909",
+      "author": "sam838",
+      "date": "2026-11-16 14:29",
+      "subject": "Give the planner a field guide for any website",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "a673a9499dfd4e3c8bc666f788fb41b0d9b12362",
+      "short": "a673a94",
+      "author": "sam838",
+      "date": "2026-11-16 14:40",
+      "subject": "Teach Kane itself how to fill forms, with a context file",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "3a02defd23ab3d3493eaa81006e90d7f8d5b8f69",
+      "short": "3a02def",
+      "author": "sam838",
+      "date": "2026-11-16 14:49",
+      "subject": "Claude decides what to fill, Kane knows how to type it",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "8bfa9a73f9098836668ac9b8f5b128bc5cb599b7",
+      "short": "8bfa9a7",
+      "author": "sam838",
+      "date": "2026-11-16 15:04",
+      "subject": "Fill every field, and no checks before the real one",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "e13d36348fb8a80a59f4451b387e38cbe128de63",
+      "short": "e13d363",
+      "author": "sam838",
+      "date": "2026-11-16 15:15",
+      "subject": "Don't confirm a bug when Kane's step never happened",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "bb63eec2e3d483bd719dcf0f1db54e70a3f10cec",
+      "short": "bb63eec",
+      "author": "sam838",
+      "date": "2026-11-16 15:57",
+      "subject": "Turn the live camera off on the server",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "cf60c65bd90314605cfbe387bce3d1b38f7cf2dc",
+      "short": "cf60c65",
+      "author": "sam838",
+      "date": "2026-11-16 16:07",
+      "subject": "Add a live tracker of Kane at work",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "52acb5bf776002e81388c61495c686e92e4d1607",
+      "short": "52acb5b",
+      "author": "sam838",
+      "date": "2026-11-16 16:24",
+      "subject": "Let the host switch the camera back on, launched like demo.studio",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "e85fd484e2f5cf41372cbf2b513ea69376c0f009",
+      "short": "e85fd48",
+      "author": "sam838",
+      "date": "2026-11-16 18:16",
+      "subject": "Pin cases on a detective's corkboard, with an evidence wall per case",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "b878051ecda3954c5fdbf93c35a2d893fa385101",
+      "short": "b878051",
+      "author": "sam838",
+      "date": "2026-11-16 18:35",
+      "subject": "Only revisit closed cases when the app's own code changes",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "94cd3a095daafea604369c4a34e14c291992df33",
+      "short": "94cd3a0",
+      "author": "sam838",
+      "date": "2026-11-16 18:35",
+      "subject": "Open cases from a tester's results, with Detective Kane as the main character",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "5c7912a0711933b0adbacadd8c494b2999c95725",
+      "short": "5c7912a",
+      "author": "sam838",
+      "date": "2026-11-16 19:13",
+      "subject": "Start the game at Detective Kane's desk",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "71f9f2df84de080061557514924b067c93a8b4b1",
+      "short": "71f9f2d",
+      "author": "sam838",
+      "date": "2026-11-16 19:44",
+      "subject": "Add the scene map, a chapter card for new cases, and impact on the verdict",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "c63001828deadcbf35f45d4337e41f336a0cb5dc",
+      "short": "c630018",
+      "author": "sam838",
+      "date": "2026-11-16 20:17",
+      "subject": "Reconstruct each closed case in 3D, as a tour that plays by itself",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "4bb22006654d7b365781aac3327f5d4b86f56bd9",
+      "short": "4bb2200",
+      "author": "sam838",
+      "date": "2026-11-16 20:34",
+      "subject": "Show Detective Kane acting out each real step in 3D on a live case",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "c886350c5aecc71011febea44ace761d2edb7e1f",
+      "short": "c886350",
+      "author": "sam838",
+      "date": "2026-11-16 20:51",
+      "subject": "Give the live 3D detective a proper art pass",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "dfe5c252fb126a3ba3bc29bc2e1fbacddca0dd4c",
+      "short": "dfe5c25",
+      "author": "sam838",
+      "date": "2026-11-16 21:00",
+      "subject": "Show Kane's real browser on the 3D screen, and fix the door, the chair and the scene map",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "35d8ab9c60c3784fe28f80fe2902d7e810dd0eaf",
+      "short": "35d8ab9",
+      "author": "sam838",
+      "date": "2026-11-16 21:05",
+      "subject": "Make Detective Kane one character everywhere",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "989814f5c20850283c503f94e286a3b19f534af9",
+      "short": "989814f",
+      "author": "sam838",
+      "date": "2026-11-16 21:26",
+      "subject": "Let Kane sit at his computer and pin evidence on a corkboard as he finds it",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "300444a2c982e7cf152da7db647bb469d7fa6e55",
+      "short": "300444a",
+      "author": "sam838",
+      "date": "2026-11-16 21:33",
+      "subject": "Remaster Kane's office: noir lighting, wallpaper, wainscoting, blind stripes and dust",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "33e8d1947cf532569ff0253ddf31327799d1216c",
+      "short": "33e8d19",
+      "author": "sam838",
+      "date": "2026-11-16 22:05",
+      "subject": "Let Kane use his chair, give the clock numbers, and follow the viewer's time of day",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "612c3081052038ec9650c6311e2a92fbf3879c58",
+      "short": "612c308",
+      "author": "sam838",
+      "date": "2026-11-16 22:05",
+      "subject": "Turn the live camera off for good",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "91cb69293de2671227e54c508895db61840141e7",
+      "short": "91cb692",
+      "author": "sam838",
+      "date": "2026-11-16 22:07",
+      "subject": "Draw Kane's head like the 3D robot, and add a not-found page",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "062e92923d453aec9e22cea538a2c486b172d2cc",
+      "short": "062e929",
+      "author": "sam838",
+      "date": "2026-11-16 22:15",
+      "subject": "Add a Verified page and the proof tools behind it",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "c35cb18ba4632b4bd5bbdba39ad73d4f69baf174",
+      "short": "c35cb18",
+      "author": "sam838",
+      "date": "2026-11-16 22:24",
+      "subject": "Record the proof experiments: 6 of 6 came out as expected",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "ee5f705026901db064c89ddbd6fe4849aaa61b1d",
+      "short": "ee5f705",
+      "author": "sam838",
+      "date": "2026-11-16 22:29",
+      "subject": "Export each finished case as a report: PDF-ready page or Markdown",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "d4c95359a42af00b03f97eb531154668c8f4fce0",
+      "short": "d4c9535",
+      "author": "sam838",
+      "date": "2026-11-17 09:13",
+      "subject": "Let Kane check Bug Whisperer itself",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "c90a4c3d5532a32718a28ff944ec58987c2d189e",
+      "short": "c90a4c3",
+      "author": "sam838",
+      "date": "2026-11-17 09:34",
+      "subject": "Redesign landing page and main menu",
+      "status": "waiting",
+      "questioned": false
+    },
+    {
+      "sha": "85654566209667eff8885ca7d139b14837b6f649",
+      "short": "8565456",
+      "author": "sam838",
+      "date": "2026-11-17 10:21",
+      "subject": "Redesign 3d game",
+      "status": "waiting",
+      "questioned": false
+    }
+  ],
+  "questionings": 1,
+  "fresh_runs": 0,
+  "verdict": "cannot_tell",
+  "culprit": null,
+  "verdict_words": "Kane couldn't replay the test on a known version, so no one is accused"
+}

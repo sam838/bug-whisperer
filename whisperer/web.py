@@ -906,6 +906,46 @@ def verified(request: Request):
         "r": json.loads(path.read_text(encoding="utf-8")), "page": "verified"})
 
 
+def lineup_view(data: dict) -> dict:
+    """The Lineup page: the suspects in a row, and every questioning in the order Kane did it."""
+    rows = data["suspects"]
+    witnesses = [{**data["good"], "role": "Last good version"}, {**data["bad"], "role": "Broken version"}]
+    asked = sorted([r for r in rows + witnesses if r.get("asked_as")], key=lambda r: r["asked_as"])
+    seen, questionings = set(), []
+    for r in asked:  # the broken version can also be the last suspect: list it once
+        if r["asked_as"] not in seen:
+            seen.add(r["asked_as"])
+            questionings.append(r)
+    return {"l": data, "rows": rows, "questionings": questionings,
+            "culprit": next((r for r in rows if r["status"] == "guilty"), None),
+            "active": data["status"] != "done", "now": data.get("now"),
+            "repo": "https://github.com/sam838/bug-whisperer"}
+
+
+@app.get("/lineups", response_class=HTMLResponse)
+def lineups_page(request: Request):
+    from . import lineup
+    return templates.TemplateResponse(request, "lineups.html", {"lineups": lineup.all_lineups(), "page": "verified"})
+
+
+def _lineup(lineup_id: str) -> dict:
+    from . import lineup
+    try:
+        return lineup_view(lineup.load(lineup_id))
+    except FileNotFoundError:
+        raise HTTPException(404, "No lineup with that name")
+
+
+@app.get("/lineup/{lineup_id}", response_class=HTMLResponse)
+def lineup_page(request: Request, lineup_id: str):
+    return templates.TemplateResponse(request, "lineup.html", {**_lineup(lineup_id), "page": "verified"})
+
+
+@app.get("/lineup/{lineup_id}/live", response_class=HTMLResponse)
+def lineup_live(request: Request, lineup_id: str):
+    return templates.TemplateResponse(request, "_lineup_live.html", _lineup(lineup_id))
+
+
 @app.get("/inbox", response_class=HTMLResponse)
 def inbox(request: Request):
     items = []

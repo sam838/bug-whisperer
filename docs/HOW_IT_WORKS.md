@@ -61,6 +61,27 @@ desk, the case files, a closed case, the Verified page and the case report. When
 checks can fail, we broke the Verified page on purpose. Kane caught it (*"The /verified address
 shows a 404-style missing-case page"*), and the next run passed once it was put back.
 
+## The Lineup: who broke it?
+
+When a closed case comes back, Bug Whisperer can name the commit that brought it back
+([whisperer/lineup.py](../whisperer/lineup.py)):
+
+```
+python -m whisperer lineup <case id> --good <commit where it worked> [--bad HEAD] [--fresh]
+```
+
+The suspects are the commits in between that changed the app's code folder. Kane questions them the
+way `git bisect` does:
+1. Check out one suspect in a temporary git worktree.
+2. Start that version of the app with its own code.
+3. Replay the case's saved Kane test against it.
+
+A pass clears that suspect and everyone before it. A fail means the bug was already there. Each
+round halves the suspects. Before anyone is questioned, the witness is checked: the test must pass
+at the good commit and fail at the broken one. Otherwise no one is accused. The Stop hook remembers
+the last commit where each case held, so when it reopens a case it can suggest the lineup command
+itself. The website shows each lineup live at `/lineups`.
+
 ## Detective Kane
 
 On the website, every case is a game of detective. **Kane** walks into his 3D office, pins the
@@ -87,6 +108,11 @@ on slower computers.
   judge (Claude) Kane's actual observation instead of a guess.
 - **Replay with `--no-adaptive-heal`.** A regression test that heals itself can hide the very bug
   it's guarding. Saved tests here replay exactly or fail.
+- **An exact replay is tied to the page it was recorded on.** Replaying today's test on a
+  months-old layout, Kane said *"the live page is healthy, but the recording no longer recognizes
+  its sample-report controls"* and marked it an automation problem, not an app bug. That's the
+  honest answer, and the Lineup accused no one. For old versions, `--fresh` lets Kane check from
+  scratch with the same objective, which costs credits.
 - **Fixed dates beat relative ones.** A test that books "tomorrow" changes every day. We re-recorded
   the double-booking test with a fixed date.
 - **Kane drives local Chrome,** so it tests `localhost` directly. That's what makes the repair loop
@@ -102,5 +128,5 @@ on slower computers.
 | [`apps/`](../apps/) | Connected apps (the clinic, LambdaTest's demo shop, and Bug Whisperer itself) |
 | [`.testmuai/`](../.testmuai/) | Saved Kane tests, the closed cases and Kane's standing instructions |
 | [`docs/`](./) | Evidence from real Kane runs, the proof, and how the clinic app was built |
-| [`tests/`](../tests/) | 118 tests, with a fake Kane CLI: no credits, no Chrome |
+| [`tests/`](../tests/) | 129 tests, with a fake Kane CLI: no credits, no Chrome |
 | [AGENTS.md](../AGENTS.md) | Rules for AI agents in this repo, including Bug Whisperer's own fixer |

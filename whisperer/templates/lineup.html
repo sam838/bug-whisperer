@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}The Lineup · Bug Whisperer{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="/lineups">← Lineups</a> · {{ l.app }} · {{ l.created }}</div>
+<h1 class="case-title">The Lineup<span>Who broke it? {{ l.title }}</span></h1>
+<div id="live" data-url="/lineup/{{ l.id }}/live">
+  {% include "_lineup_live.html" %}
+</div>
+{% endblock %}

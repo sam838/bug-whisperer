@@ -5,7 +5,9 @@
   "accounts": {},
   "code_dir": "whisperer",
   "about": "Bug Whisperer's own website, checked by Kane like any other app. Read-only self-checks.",
-  "start": ["python", "selfserve.py"],
+  "start": ["python", "-m", "uvicorn", "whisperer.web:app", "--app-dir", "..",
+            "--host", "127.0.0.1", "--port", "8010", "--log-level", "warning"],
+  "env": {"WHISPERER_NO_BOOT": "1"},
   "reset": null,
   "self_check": true
 }

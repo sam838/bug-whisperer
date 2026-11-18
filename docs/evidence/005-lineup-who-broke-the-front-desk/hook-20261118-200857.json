@@ -1,0 +1,176 @@
+{
+  "when": "20261118-200857",
+  "results": [
+    {
+      "case_id": "self-front-desk",
+      "title": "The front desk: an example report fills the case form",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    },
+    {
+      "case_id": "self-case-files",
+      "title": "The case files: the corkboard and Kane's rank",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    },
+    {
+      "case_id": "self-closed-case",
+      "title": "A closed case: its stamp, evidence board and scene map",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    },
+    {
+      "case_id": "self-verified",
+      "title": "The Verified page: the pre-registered experiments",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    },
+    {
+      "case_id": "self-case-report",
+      "title": "The case report: steps, repair and a Save as PDF button",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    },
+    {
+      "case_id": "self-sample-reports",
+      "title": "The front desk offers sample reports that fill the report box",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    }
+  ],
+  "reopened": [],
+  "unknown": [
+    {
+      "case_id": "self-front-desk",
+      "title": "The front desk: an example report fills the case form",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    },
+    {
+      "case_id": "self-case-files",
+      "title": "The case files: the corkboard and Kane's rank",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    },
+    {
+      "case_id": "self-closed-case",
+      "title": "A closed case: its stamp, evidence board and scene map",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    },
+    {
+      "case_id": "self-verified",
+      "title": "The Verified page: the pre-registered experiments",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    },
+    {
+      "case_id": "self-case-report",
+      "title": "The case report: steps, repair and a Save as PDF button",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    },
+    {
+      "case_id": "self-sample-reports",
+      "title": "The front desk offers sample reports that fill the report box",
+      "app": "Bug Whisperer (itself)",
+      "verdict": "unknown",
+      "replay": {
+        "verdict": "error",
+        "reason": "Bug Whisperer (itself) is busy: lineup lineup-20261118-200852 is using port 8010",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": null
+      }
+    }
+  ]
+}

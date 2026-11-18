@@ -66,6 +66,13 @@ def main(argv=None) -> int:
     sub.add_parser("proof", help="Gather the real records into docs/proof/results.json and RESULTS.md")
     sc = sub.add_parser("selfcheck", help="Kane checks Bug Whisperer's own pages (replays the saved checks)")
     sc.add_argument("--record", action="store_true", help="Run each check once and save it as a Kane test")
+    sc.add_argument("ids", nargs="*", help="With --record: only these checks")
+    lu = sub.add_parser("lineup", help="Kane finds the commit that broke a closed case (replays only, no credits)")
+    lu.add_argument("check", help="A closed case or self-check id, e.g. self-sample-reports")
+    lu.add_argument("--good", help="A commit where it still worked (default: the last commit Kane saw it hold)")
+    lu.add_argument("--bad", default="HEAD", help="A commit where it is broken (default: HEAD)")
+    lu.add_argument("--fresh", action="store_true",
+                    help="When a replay can't tell, decide with a fresh Kane run (spends credits)")
     args = parser.parse_args(argv)
 
     if args.cmd in ("report", "repair", "cases"):
@@ -125,12 +132,31 @@ def main(argv=None) -> int:
     if args.cmd == "selfcheck":
         from . import selfcheck
         if args.record:
-            done = selfcheck.record()
+            done = selfcheck.record(args.ids or None)
             print(f"[selfcheck] {sum(d['verdict'] == 'passed' for d in done)}/{len(done)} checks recorded")
         report = selfcheck.run()
         for r in report["results"]:
             print(f"  {'✅' if r['verdict'] == 'holds' else '❌'} {r['case_id']}: {r['title']}")
         return 1 if report["reopened"] or report["unknown"] else 0
+
+    if args.cmd == "lineup":
+        from . import lineup
+        try:
+            record = lineup.run(args.check, args.good, args.bad, args.fresh,
+                                on_update=lambda m: print(f"[lineup] {m}", flush=True))
+        except (ValueError, RuntimeError) as e:
+            print(f"[lineup] {e}")
+            return 2
+        print(f"\n🕵️ {record['verdict_words']}. {record['questionings']} questioning(s) for "
+              f"{len(record['suspects'])} suspect(s).")
+        marks = {"guilty": "🔴 GUILTY", "cleared": "✅ cleared", "present": "·  bug there", "cannot_tell": "⚠️ can't tell",
+                 "unresolved": "❓ suspect", "waiting": "   not needed"}
+        for row in record["suspects"]:
+            asked = "questioned" if row["questioned"] else "ruled out"
+            print(f"  {marks.get(row['status'], row['status']):14} {row['short']} {row['date']}  {row['subject'][:60]}"
+                  + (f"  ({asked})" if row["status"] != "waiting" else ""))
+        print(f"\nThe record: runs/{record['id']}/lineup.json")
+        return 0 if record["verdict"] == "found" else 1
 
     if args.cmd in ("experiments", "proof"):
         from .proof import collect, run_experiments

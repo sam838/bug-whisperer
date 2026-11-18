@@ -1,0 +1,500 @@
+{
+  "id": "lineup-20261118-200852",
+  "check": "self-sample-reports",
+  "title": "The front desk offers sample reports that fill the report box",
+  "objective": "Go to http://127.0.0.1:8010/. Verify that the page shows at least one button that fills in a sample bug report. Click the first of those buttons. Verify that the bug report text box is no longer empty.",
+  "test": "self-sample-reports",
+  "app": "Bug Whisperer (itself)",
+  "app_file": "apps/bug-whisperer.json",
+  "code_dir": "whisperer",
+  "created": "2026-11-18 20:08",
+  "status": "done",
+  "now": null,
+  "good": {
+    "sha": "430f52e5021f2b24f71c223abf7cd78c6717b01e",
+    "short": "430f52e",
+    "author": "sam838",
+    "date": "2026-11-13 13:08",
+    "subject": "Add the Bug Whisperer website",
+    "answer": {
+      "verdict": "passed",
+      "reason": "Objective completed",
+      "summary": "You asked to fill in a sample bug report using the first available sample button.\nThe first sample bug report button was selected.\nThe bug report text box was populated successfully.",
+      "failed_step": null,
+      "errors": [],
+      "duration": 60.1,
+      "fresh": true
+    },
+    "status": "cleared",
+    "questioned": true,
+    "asked_as": 1
+  },
+  "bad": {
+    "sha": "85654566209667eff8885ca7d139b14837b6f649",
+    "short": "8565456",
+    "author": "sam838",
+    "date": "2026-11-17 10:21",
+    "subject": "Redesign 3d game",
+    "answer": {
+      "verdict": "failed",
+      "reason": "Checkpoint assertion failed: \"the page shows at least one button that fills in a sample bug report\"",
+      "summary": "The loaded page showed a prefilled bug-report box and a submit button, but no button for filling in a sample report. The test started from the wrong page state or skipped the step that would reveal those controls.\nUpdate the test setup to open the screen or state that contains sample-report buttons, or revise the objective if the prefilled report is the intended starting state.",
+      "failed_step": "assert: the page shows at least one button that fills in a sample bug report",
+      "errors": [],
+      "duration": 42.8,
+      "fresh": true
+    }
+  },
+  "suspects": [
+    {
+      "sha": "035c9146a58a94a392925eb661e789a1e7647004",
+      "short": "035c914",
+      "author": "sam838",
+      "date": "2026-11-13 13:33",
+      "subject": "Connect any website, and have Kane double-check user claims",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "3326807876f1dc33ad7c280431bdaf94310d7051",
+      "short": "3326807",
+      "author": "sam838",
+      "date": "2026-11-13 13:44",
+      "subject": "Give Kane its role: the detective who closes a case only when it sees the fix",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "f1a071679e5f17e26d671aab8cca257cc0630780",
+      "short": "f1a0716",
+      "author": "sam838",
+      "date": "2026-11-13 14:13",
+      "subject": "Add the hook: Kane revisits closed cases before Claude Code may finish",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "0b4ecacc0f441786ba08499318be4a23825a489f",
+      "short": "0b4ecac",
+      "author": "sam838",
+      "date": "2026-11-13 14:53",
+      "subject": "Add the hosted live demo for Render",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "4526f21f9224166432bf23e470a55790eb230841",
+      "short": "4526f21",
+      "author": "sam838",
+      "date": "2026-11-16 09:32",
+      "subject": "Restyle the website as a case file, and lead the home page with proof",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "80be025fced7d193377bf47a7ab9e39c28aed814",
+      "short": "80be025",
+      "author": "sam838",
+      "date": "2026-11-16 09:46",
+      "subject": "Put Kane front and centre: its own voice, and a replay of each case",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "16f474c1ece0a39a7bc2709933bf22be869df828",
+      "short": "16f474c",
+      "author": "sam838",
+      "date": "2026-11-16 11:07",
+      "subject": "Fix live cases on the server, and show Kane's browser live",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "9cec82ca8068bebeba670d0e9b975ff6b7c26081",
+      "short": "9cec82c",
+      "author": "sam838",
+      "date": "2026-11-16 11:50",
+      "subject": "Lighter camera on Linux: start Chrome directly, with memory-saving flags",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "4d6a44e9d5ca7f8adaedebcff284ae5b7daa572e",
+      "short": "4d6a44e",
+      "author": "sam838",
+      "date": "2026-11-16 12:54",
+      "subject": "Keep the live view steady while a case runs",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "c059937acf27c379a82103601509e4dc082356f4",
+      "short": "c059937",
+      "author": "sam838",
+      "date": "2026-11-16 13:24",
+      "subject": "Animate the home page opening",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "c81329a3f18b0ce6c90004d05674cf7784b0e92d",
+      "short": "c81329a",
+      "author": "sam838",
+      "date": "2026-11-16 13:49",
+      "subject": "Help Kane past required form fields",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "6cbc59502cd3f66b5bdb4d904458a2eb24391de7",
+      "short": "6cbc595",
+      "author": "sam838",
+      "date": "2026-11-16 13:55",
+      "subject": "Type dates and times the way browser pickers accept them",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "0145909058e8426829afec39f121954ae3ca7616",
+      "short": "0145909",
+      "author": "sam838",
+      "date": "2026-11-16 14:29",
+      "subject": "Give the planner a field guide for any website",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "a673a9499dfd4e3c8bc666f788fb41b0d9b12362",
+      "short": "a673a94",
+      "author": "sam838",
+      "date": "2026-11-16 14:40",
+      "subject": "Teach Kane itself how to fill forms, with a context file",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "3a02defd23ab3d3493eaa81006e90d7f8d5b8f69",
+      "short": "3a02def",
+      "author": "sam838",
+      "date": "2026-11-16 14:49",
+      "subject": "Claude decides what to fill, Kane knows how to type it",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "8bfa9a73f9098836668ac9b8f5b128bc5cb599b7",
+      "short": "8bfa9a7",
+      "author": "sam838",
+      "date": "2026-11-16 15:04",
+      "subject": "Fill every field, and no checks before the real one",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "e13d36348fb8a80a59f4451b387e38cbe128de63",
+      "short": "e13d363",
+      "author": "sam838",
+      "date": "2026-11-16 15:15",
+      "subject": "Don't confirm a bug when Kane's step never happened",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "bb63eec2e3d483bd719dcf0f1db54e70a3f10cec",
+      "short": "bb63eec",
+      "author": "sam838",
+      "date": "2026-11-16 15:57",
+      "subject": "Turn the live camera off on the server",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "cf60c65bd90314605cfbe387bce3d1b38f7cf2dc",
+      "short": "cf60c65",
+      "author": "sam838",
+      "date": "2026-11-16 16:07",
+      "subject": "Add a live tracker of Kane at work",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "52acb5bf776002e81388c61495c686e92e4d1607",
+      "short": "52acb5b",
+      "author": "sam838",
+      "date": "2026-11-16 16:24",
+      "subject": "Let the host switch the camera back on, launched like demo.studio",
+      "status": "cleared",
+      "questioned": true,
+      "answer": {
+        "verdict": "passed",
+        "reason": "Objective completed",
+        "summary": "You asked to click the first button that fills in a sample bug report.\nA sample bug report button was available and the first one was selected.\nThe witness statement text box was filled with sample bug report text.",
+        "failed_step": null,
+        "errors": [],
+        "duration": 59.9,
+        "fresh": true
+      },
+      "asked_as": 3
+    },
+    {
+      "sha": "e85fd484e2f5cf41372cbf2b513ea69376c0f009",
+      "short": "e85fd48",
+      "author": "sam838",
+      "date": "2026-11-16 18:16",
+      "subject": "Pin cases on a detective's corkboard, with an evidence wall per case",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "b878051ecda3954c5fdbf93c35a2d893fa385101",
+      "short": "b878051",
+      "author": "sam838",
+      "date": "2026-11-16 18:35",
+      "subject": "Only revisit closed cases when the app's own code changes",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "94cd3a095daafea604369c4a34e14c291992df33",
+      "short": "94cd3a0",
+      "author": "sam838",
+      "date": "2026-11-16 18:35",
+      "subject": "Open cases from a tester's results, with Detective Kane as the main character",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "5c7912a0711933b0adbacadd8c494b2999c95725",
+      "short": "5c7912a",
+      "author": "sam838",
+      "date": "2026-11-16 19:13",
+      "subject": "Start the game at Detective Kane's desk",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "71f9f2df84de080061557514924b067c93a8b4b1",
+      "short": "71f9f2d",
+      "author": "sam838",
+      "date": "2026-11-16 19:44",
+      "subject": "Add the scene map, a chapter card for new cases, and impact on the verdict",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "c63001828deadcbf35f45d4337e41f336a0cb5dc",
+      "short": "c630018",
+      "author": "sam838",
+      "date": "2026-11-16 20:17",
+      "subject": "Reconstruct each closed case in 3D, as a tour that plays by itself",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "4bb22006654d7b365781aac3327f5d4b86f56bd9",
+      "short": "4bb2200",
+      "author": "sam838",
+      "date": "2026-11-16 20:34",
+      "subject": "Show Detective Kane acting out each real step in 3D on a live case",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "c886350c5aecc71011febea44ace761d2edb7e1f",
+      "short": "c886350",
+      "author": "sam838",
+      "date": "2026-11-16 20:51",
+      "subject": "Give the live 3D detective a proper art pass",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "dfe5c252fb126a3ba3bc29bc2e1fbacddca0dd4c",
+      "short": "dfe5c25",
+      "author": "sam838",
+      "date": "2026-11-16 21:00",
+      "subject": "Show Kane's real browser on the 3D screen, and fix the door, the chair and the scene map",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "35d8ab9c60c3784fe28f80fe2902d7e810dd0eaf",
+      "short": "35d8ab9",
+      "author": "sam838",
+      "date": "2026-11-16 21:05",
+      "subject": "Make Detective Kane one character everywhere",
+      "status": "cleared",
+      "questioned": true,
+      "answer": {
+        "verdict": "passed",
+        "reason": "Objective completed",
+        "summary": "The page displayed a button for filling in a sample bug report.\nClicked the first available sample bug report button.\nThe witness statement bug report text box was filled with text successfully.",
+        "failed_step": null,
+        "errors": [],
+        "duration": 60,
+        "fresh": true
+      },
+      "asked_as": 4
+    },
+    {
+      "sha": "989814f5c20850283c503f94e286a3b19f534af9",
+      "short": "989814f",
+      "author": "sam838",
+      "date": "2026-11-16 21:26",
+      "subject": "Let Kane sit at his computer and pin evidence on a corkboard as he finds it",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "300444a2c982e7cf152da7db647bb469d7fa6e55",
+      "short": "300444a",
+      "author": "sam838",
+      "date": "2026-11-16 21:33",
+      "subject": "Remaster Kane's office: noir lighting, wallpaper, wainscoting, blind stripes and dust",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "33e8d1947cf532569ff0253ddf31327799d1216c",
+      "short": "33e8d19",
+      "author": "sam838",
+      "date": "2026-11-16 22:05",
+      "subject": "Let Kane use his chair, give the clock numbers, and follow the viewer's time of day",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "612c3081052038ec9650c6311e2a92fbf3879c58",
+      "short": "612c308",
+      "author": "sam838",
+      "date": "2026-11-16 22:05",
+      "subject": "Turn the live camera off for good",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "91cb69293de2671227e54c508895db61840141e7",
+      "short": "91cb692",
+      "author": "sam838",
+      "date": "2026-11-16 22:07",
+      "subject": "Draw Kane's head like the 3D robot, and add a not-found page",
+      "status": "cleared",
+      "questioned": true,
+      "answer": {
+        "verdict": "passed",
+        "reason": "Objective completed",
+        "summary": "The requested task was to use the first available button that inserts a sample bug report.\nA sample bug report button was available and was selected.\nThe bug report text box was filled with sample text successfully.",
+        "failed_step": null,
+        "errors": [],
+        "duration": 55.9,
+        "fresh": true
+      },
+      "asked_as": 5
+    },
+    {
+      "sha": "062e92923d453aec9e22cea538a2c486b172d2cc",
+      "short": "062e929",
+      "author": "sam838",
+      "date": "2026-11-16 22:15",
+      "subject": "Add a Verified page and the proof tools behind it",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "c35cb18ba4632b4bd5bbdba39ad73d4f69baf174",
+      "short": "c35cb18",
+      "author": "sam838",
+      "date": "2026-11-16 22:24",
+      "subject": "Record the proof experiments: 6 of 6 came out as expected",
+      "status": "cleared",
+      "questioned": false
+    },
+    {
+      "sha": "ee5f705026901db064c89ddbd6fe4849aaa61b1d",
+      "short": "ee5f705",
+      "author": "sam838",
+      "date": "2026-11-16 22:29",
+      "subject": "Export each finished case as a report: PDF-ready page or Markdown",
+      "status": "cleared",
+      "questioned": true,
+      "answer": {
+        "verdict": "passed",
+        "reason": "Objective completed",
+        "summary": "You asked to fill in a sample bug report.\nA sample bug report button was available and the first one was selected.\nThe bug report text box was filled successfully.",
+        "failed_step": null,
+        "errors": [],
+        "duration": 64.4,
+        "fresh": true
+      },
+      "asked_as": 6
+    },
+    {
+      "sha": "d4c95359a42af00b03f97eb531154668c8f4fce0",
+      "short": "d4c9535",
+      "author": "sam838",
+      "date": "2026-11-17 09:13",
+      "subject": "Let Kane check Bug Whisperer itself",
+      "status": "cleared",
+      "questioned": true,
+      "answer": {
+        "verdict": "passed",
+        "reason": "Objective completed",
+        "summary": "The request was to use the first available button that fills in a sample bug report.\nA sample bug report button was available on the form and was selected.\nThe bug report text box was filled with sample content successfully.",
+        "failed_step": null,
+        "errors": [],
+        "duration": 59.5,
+        "fresh": true
+      },
+      "asked_as": 7
+    },
+    {
+      "sha": "c90a4c3d5532a32718a28ff944ec58987c2d189e",
+      "short": "c90a4c3",
+      "author": "sam838",
+      "date": "2026-11-17 09:34",
+      "subject": "Redesign landing page and main menu",
+      "status": "cleared",
+      "questioned": true,
+      "answer": {
+        "verdict": "passed",
+        "reason": "Objective completed",
+        "summary": "You asked to fill in a sample bug report using the first available sample-report button.\nThe first sample bug report button was selected.\nThe bug report text box was filled and is no longer empty.",
+        "failed_step": null,
+        "errors": [],
+        "duration": 57.7,
+        "fresh": true
+      },
+      "asked_as": 8
+    },
+    {
+      "sha": "85654566209667eff8885ca7d139b14837b6f649",
+      "short": "8565456",
+      "author": "sam838",
+      "date": "2026-11-17 10:21",
+      "subject": "Redesign 3d game",
+      "status": "guilty",
+      "questioned": true,
+      "answer": {
+        "verdict": "failed",
+        "reason": "Checkpoint assertion failed: \"the page shows at least one button that fills in a sample bug report\"",
+        "summary": "The loaded page showed a prefilled bug-report box and a submit button, but no button for filling in a sample report. The test started from the wrong page state or skipped the step that would reveal those controls.\nUpdate the test setup to open the screen or state that contains sample-report buttons, or revise the objective if the prefilled report is the intended starting state.",
+        "failed_step": "assert: the page shows at least one button that fills in a sample bug report",
+        "errors": [],
+        "duration": 42.8,
+        "fresh": true
+      },
+      "asked_as": 2
+    }
+  ],
+  "questionings": 8,
+  "fresh_runs": 8,
+  "verdict": "found",
+  "culprit": "85654566209667eff8885ca7d139b14837b6f649",
+  "diff": {
+    "stat": " whisperer/static/app.js                |  42 ++++++-\n whisperer/static/kane3d.js             |  24 +++-\n whisperer/static/style.css             | 210 +++++++++++++++++++++++++++++++++\n whisperer/templates/_live.html         |  52 ++++++--\n whisperer/templates/investigation.html |  10 --\n whisperer/templates/report.html        |  30 ++---\n whisperer/web.py                       |  21 +++-\n 7 files changed, 347 insertions(+), 42 deletions(-)",
+    "patch": "diff --git a/whisperer/static/app.js b/whisperer/static/app.js\nindex f2ba5e4..e47572a 100644\n--- a/whisperer/static/app.js\n+++ b/whisperer/static/app.js\n@@ -47,6 +47,42 @@ document.addEventListener(\"click\", async (event) => {\n   }\n });\n \n+// The live 3D game's lightweight controls. The WebGL stage is kept across polling, while these\n+// buttons are replaced with the fresh HUD, so the selected camera is read back from the stage.\n+function syncKaneControls(root = document) {\n+  root.querySelectorAll(\"[data-kane-game]\").forEach((game) => {\n+    const stage = game.querySelector(\"[data-kane3d]\");\n+    const label = game.querySelector(\"[data-game-camera] b\");\n+    if (label && stage?.dataset.camera) label.textContent = stage.dataset.camera;\n+    const fullscreen = game.querySelector(\"[data-game-fullscreen]\");\n+    if (fullscreen) {\n+      const on = document.fullscreenElement === game;\n+      fullscreen.setAttribute(\"aria-label\", on ? \"Exit fullscreen\" : \"Enter fullscreen\");\n+      fullscreen.querySelector(\"span\").textContent = on ? \"\u26f6\" : \"\u26f6\";\n+    }\n+  });\n+}\n+\n+document.addEventListener(\"click\", async (event) => {\n+  const camera = event.target.closest(\"[data-game-camera]\");\n+  if (camera) {\n+    const stage = camera.closest(\"[data-kane-game]\")?.querySelector(\"[data-kane3d]\");\n+    const label = stage?.kaneCameraNext?.();\n+    if (label) camera.querySelector(\"b\").textContent = label;\n+    return;\n+  }\n+  const fullscreen = event.target.closest(\"[data-game-fullscreen]\");\n+  if (!fullscreen) return;\n+  const game = fullscreen.closest(\"[data-kane-game]\");\n+  try {\n+    if (document.fullscreenElement) await document.exitFullscreen();\n+    else await game.requestFullscreen();\n+  } catch {\n+    /* Fullscreen can be blocked by an embedded browser; the game still works in place. */\n+  }\n+});\n+document.addEventListener(\"fullscreenchange\", () => syncKaneControls());\n+\n // Before/after compare slider: dragging moves a clip-path wipe (no layout, GPU only).\n document.addEventListener(\"input\", (event) => {\n   const range = event.target.closest(\".compare-range\");\n@@ -343,7 +379,10 @@ if (live) {\n           .filter((d) => d.open).map((d) => d.dataset.key));\n         live.innerHTML = await response.text();\n         live.querySelectorAll(\"[data-keep]\").forEach((n) => {\n-          if (kept[n.dataset.keep]) n.replaceWith(kept[n.dataset.keep]);\n+          if (kept[n.dataset.keep]) {\n+            Object.assign(kept[n.dataset.keep].dataset, n.dataset);\n+            n.replaceWith(kept[n.dataset.keep]);\n+          }\n         });\n         live.querySelectorAll(\"details[data-key]\").forEach((d) => {\n           if (open.has(d.dataset.key)) d.open = true;\n@@ -358,6 +397,7 @@ if (live) {\n         live.querySelectorAll(\"[data-trail]\").forEach(initTrail);\n         if (window.initRecon) live.querySelectorAll(\"[data-recon]\").forEach(window.initRecon);\n         if (window.initKane3d) window.initKane3d(live);\n+        syncKaneControls(live);\n         document.dispatchEvent(new Event(\"kane:update\"));  // Kane in 3D acts out any new steps\n         typeOut(live);\n         const stampNow = stampText();\ndiff --git a/whisperer/static/kane3d.js b/whisperer/static/kane3d.js\nindex f09f504..499b919 100644\n--- a/whisperer/static/kane3d.js\n+++ b/whisperer/static/kane3d.js\n@@ -753,6 +753,18 @@\n     stage.classList.add(\"ready\");\n     stage.dataset.ready = \"1\";\n     const T = window.THREE;\n+    const cameraViews = [\n+      { label: \"Office\", position: new T.Vector3(0.9, 1.95, 3.7), focus: new T.Vector3(-0.65, 1.12, -0.95) },\n+      { label: \"Desk\", position: new T.Vector3(0.15, 1.7, 2.45), focus: new T.Vector3(-1.25, 1.15, -0.75) },\n+      { label: \"Evidence\", position: new T.Vector3(0.85, 1.85, 2.05), focus: new T.Vector3(-0.25, 1.68, -2.92) },\n+    ];\n+    let cameraAt = Math.max(0, cameraViews.findIndex((view) => view.label === stage.dataset.camera));\n+    stage.dataset.camera = cameraViews[cameraAt].label;\n+    stage.kaneCameraNext = () => {\n+      cameraAt = (cameraAt + 1) % cameraViews.length;\n+      stage.dataset.camera = cameraViews[cameraAt].label;\n+      return stage.dataset.camera;\n+    };\n     rig.scene.traverse((o) => {\n       for (const m of [].concat(o.material || [])) if (m.isMeshStandardMaterial) m.envMapIntensity = m.metalness > 0.5 ? 0.6 : 0.1;\n     });\n@@ -815,10 +827,11 @@\n     document.addEventListener(\"kane:update\", update);\n \n     // Kane's real browser on the 3D screen, whenever the live camera is filming it\n-    const liveSrc = stage.dataset.liveSrc;\n     let misses = 0;\n     const pollLive = () => {\n-      if (!canvas.isConnected || !liveSrc) return;\n+      if (!canvas.isConnected) return;\n+      const liveSrc = stage.dataset.liveSrc;\n+      if (!liveSrc) { setTimeout(pollLive, 1500); return; }\n       const img = new Image();\n       img.onload = () => { misses = 0; rig.screen.state.live = img; rig.screen.draw(); setTimeout(pollLive, 1000); };\n       img.onerror = () => {\n@@ -878,7 +891,12 @@\n       rig.clock.minPivot.rotation.z = -d.getMinutes() / 60 * Math.PI * 2;\n       rig.clock.hourPivot.rotation.z = -((d.getHours() % 12) + d.getMinutes() / 60) / 12 * Math.PI * 2;\n       rig.alarm.intensity = rig.alarmUntil && now < rig.alarmUntil ? 2.2 + Math.sin(now / 70) * 1.2 : 0;\n-      rig.camera.position.x = 0.9 + Math.sin(now / 6000) * 0.12;  // a slow drift, so the shot feels alive\n+      const view = cameraViews[cameraAt], ease = Math.min(1, dt * 3.2);\n+      const drift = cameraAt === 0 ? Math.sin(now / 6000) * 0.12 : 0;\n+      rig.camera.position.x += (view.position.x + drift - rig.camera.position.x) * ease;\n+      rig.camera.position.y += (view.position.y - rig.camera.position.y) * ease;\n+      rig.camera.position.z += (view.position.z - rig.camera.position.z) * ease;\n+      rig.focus.lerp(view.focus, ease);\n       rig.camera.lookAt(rig.focus);\n       rig.renderer.render(rig.scene, rig.camera);\n     };\ndiff --git a/whisperer/static/style.css b/whisperer/static/style.css\nindex b8e7ff5..60a7f12 100644\n--- a/whisperer/static/style.css\n+++ b/whisperer/static/style.css\n@@ -1017,3 +1017,213 @@ a.btn { text-decoration: none; }\n @media (prefers-reduced-motion: reduce) {\n   .featured-case { transition: none; }\n }\n+\n+/* The approved direction is a warm paper interface in every system theme. */\n+:root {\n+  color-scheme: light;\n+  --paper: #f3eee5; --paper-2: #ebe4d8; --card: #fffdf9; --ink: #17181d; --ink-2: #3d3f47;\n+  --muted: #6f6a62; --line: #e2d9ca; --line-strong: #cfc3b0; --accent: #b4410f;\n+  --accent-ink: #fff; --accent-soft: #f8e9dc; --bug: #b3261e; --bug-soft: #fbe9e7;\n+  --ok: #0f7a52; --ok-soft: #e3f3ea; --warn: #946200; --warn-soft: #fbf1d6;\n+  --neutral-soft: #ece7de; --shadow: 0 1px 0 rgba(23, 24, 29, .04), 0 8px 24px -12px rgba(23, 24, 29, .18);\n+}\n+.wrap { max-width: 1536px; padding: 10px 34px 40px; }\n+.topbar-shell { width: min(100%, 1440px); }\n+.detective-hero {\n+  grid-template-columns: minmax(0, .94fr) minmax(570px, 1.06fr); gap: 40px; padding: 10px 0 16px;\n+}\n+.hero-copy h1 { max-width: 690px; margin-bottom: 14px; font-size: clamp(46px, 3.85vw, 59px); line-height: .96; }\n+.hero-copy .lede { max-width: 670px; font-size: 16.5px; line-height: 1.5; }\n+.hero-copy .eyebrow { margin-bottom: 13px; }\n+.trust-row { margin-top: 15px; }\n+.kane-console { min-height: 260px; border-radius: 18px; }\n+.console-body { min-height: 214px; }\n+.console-kane { height: 210px; }\n+.console-kane .kane-sprite { width: 150px; transform: translateY(9px); }\n+.console-steps { padding-block: 12px; }\n+.console-steps li { min-height: 61px; }\n+.console-steps li b { font-size: 13px; }\n+.console-steps li small { font-size: 10.5px; }\n+.console-steps li div { padding-top: 3px; }\n+.case-workspace { grid-template-columns: minmax(0, 1.65fr) minmax(350px, .95fr); margin: 10px 0 24px; }\n+.case-intake { gap: 11px; padding: 21px 28px 22px; }\n+.workspace-head h2, .next-panel h2 { font-size: 27px; }\n+.case-intake textarea { height: 84px; min-height: 84px; }\n+.case-intake .examples { gap: 6px; }\n+.case-intake .chip { padding: 3px 10px; font-size: 11.5px; }\n+.evidence-drop { min-height: 67px; padding-block: 9px; }\n+.investigate-btn { padding-block: 11px; font-size: 15px; }\n+.next-panel { padding: 21px 26px 18px; }\n+.next-panel > p { margin: 6px 0 12px; }\n+.next-steps > li { padding-bottom: 11px; }\n+.next-steps p { margin-bottom: 5px; }\n+.proof-mini { min-height: 32px; padding-block: 5px; }\n+.recent-proof { margin: 18px 0 0; }\n+.recent-head { align-items: center; margin-bottom: 10px; }\n+.recent-head h2 { display: flex; align-items: center; gap: 9px; margin: 0; font-size: 24px; }\n+.recent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }\n+.recent-card {\n+  position: relative; overflow: hidden; display: grid; gap: 8px; min-height: 105px; padding: 12px 16px 11px 20px;\n+  color: inherit; text-decoration: none; background: var(--card); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow);\n+}\n+.recent-card::before { content: \"\"; position: absolute; inset: 0 auto 0 0; width: 5px; background: var(--line-strong); }\n+.recent-card.tone-ok::before { background: var(--ok); }\n+.recent-card.tone-bug::before { background: var(--bug); }\n+.recent-card.tone-warn::before { background: #d99a16; }\n+.recent-card > div, .recent-card footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }\n+.case-ref, .recent-card time { color: var(--muted); font: 600 10.5px/1 var(--mono); }\n+.recent-card > b { overflow: hidden; font-family: var(--serif); font-size: 16px; line-height: 1.2; white-space: nowrap; text-overflow: ellipsis; }\n+.recent-card footer { color: var(--ink-2); font-size: 11.5px; }\n+.recent-card footer strong { flex: none; padding: 3px 8px; color: var(--accent); border: 2px solid currentColor; border-radius: 4px; font: 800 10px/1 var(--sans); letter-spacing: .05em; text-transform: uppercase; transform: rotate(-2deg); }\n+.recent-card.tone-ok footer strong { color: var(--ok); }\n+.recent-card.tone-bug footer strong { color: var(--bug); }\n+.recent-card.tone-warn footer strong { color: var(--warn); }\n+\n+@media (max-width: 1050px) {\n+  .wrap { padding-inline: 20px; }\n+  .detective-hero { grid-template-columns: 1fr; }\n+  .case-workspace { grid-template-columns: minmax(0, 1.35fr) minmax(280px, .8fr); }\n+}\n+@media (max-width: 800px) {\n+  .case-workspace { grid-template-columns: 1fr; }\n+  .recent-grid { grid-template-columns: 1fr; }\n+}\n+@media (max-width: 560px) {\n+  .wrap { padding-inline: 14px; }\n+  .hero-copy h1 { font-size: 42px; }\n+}\n+\n+/* \u2500\u2500 Live 3D investigation game \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n+   The office stays the real, persistent WebGL scene. The HUD around it is replaced by polling,\n+   so progress changes without restarting Kane's animation. */\n+.live-root:has(.scene-live) > .case-track { display: none; }\n+.scene-live { gap: 10px; margin-top: 14px; }\n+.kane-game {\n+  position: relative; isolation: isolate; overflow: hidden; aspect-ratio: 16 / 7;\n+  border: 3px solid #f3eee5; border-radius: 16px; background: #10131e;\n+  box-shadow: 0 0 0 3px #15182a, 0 22px 42px -22px rgba(0, 0, 0, .72);\n+}\n+.kane-game .kane3d {\n+  position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto;\n+  border: 0; border-radius: 12px; box-shadow: none;\n+}\n+.kane-game .kane3d::after { background: radial-gradient(ellipse at 45% 50%, transparent 62%, rgba(0, 0, 0, .46)); }\n+.game-chapter {\n+  position: absolute; z-index: 4; left: 50%; top: 14px; transform: translateX(-50%);\n+  min-width: 210px; padding: 7px 16px; text-align: center; color: #f3eee5;\n+  border: 2px solid #d6a84b; border-radius: 999px; background: rgba(21, 24, 42, .9);\n+  box-shadow: 0 7px 20px -10px rgba(0, 0, 0, .8); font: 800 11px/1 var(--mono);\n+  letter-spacing: .1em; text-transform: uppercase; backdrop-filter: blur(7px);\n+}\n+.game-chapter span { color: #ffd166; }\n+.game-trail {\n+  position: absolute; z-index: 4; top: 20px; right: 16px; width: 205px; overflow: hidden;\n+  color: #f3eee5; border: 2px solid #d6c18d; border-radius: 12px; background: rgba(21, 24, 42, .92);\n+  box-shadow: 0 14px 28px -16px rgba(0, 0, 0, .9); backdrop-filter: blur(8px);\n+}\n+.game-trail h3 {\n+  display: flex; align-items: center; gap: 8px; margin: 0; padding: 12px 14px;\n+  color: #ffd166; border-bottom: 1px solid rgba(243, 238, 229, .18);\n+  font: 800 11px/1 var(--mono); letter-spacing: .1em;\n+}\n+.game-trail h3 span { font-size: 17px; }\n+.game-trail ol { display: grid; gap: 4px; margin: 0; padding: 9px; list-style: none; }\n+.game-trail li {\n+  position: relative; display: grid; grid-template-columns: 22px 1fr; gap: 7px; align-items: center;\n+  min-height: 31px; padding: 5px 8px; color: #a9adba; border: 1px solid transparent; border-radius: 8px;\n+  font-size: 11.5px; font-weight: 650;\n+}\n+.game-trail li:not(:last-child)::after {\n+  content: \"\"; position: absolute; left: 18px; top: 29px; width: 1px; height: 10px;\n+  background: rgba(214, 168, 75, .55);\n+}\n+.game-trail li i {\n+  position: relative; z-index: 1; display: grid; place-items: center; width: 17px; height: 17px;\n+  border: 2px solid #8c91a2; border-radius: 50%; background: #15182a; color: #10271e;\n+  font: 900 10px/1 var(--sans); font-style: normal;\n+}\n+.game-trail li.done { color: #d9dbe3; }\n+.game-trail li.done i { border-color: #4fd39b; background: #4fd39b; }\n+.game-trail li.active { color: #fff; border-color: #f08a4b; background: rgba(180, 65, 15, .9); box-shadow: 0 0 18px -8px #f08a4b; }\n+.game-trail li.active i { border-color: #ffd166; }\n+.game-controls { position: absolute; z-index: 4; left: 14px; bottom: 13px; display: flex; gap: 8px; }\n+.game-controls button {\n+  display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 7px 11px;\n+  color: #f3eee5; border: 2px solid rgba(243, 238, 229, .8); border-radius: 9px;\n+  background: rgba(21, 24, 42, .86); font: 700 11.5px/1 var(--sans); cursor: pointer;\n+  box-shadow: 0 8px 20px -12px rgba(0, 0, 0, .9); backdrop-filter: blur(7px);\n+}\n+.game-controls button:hover { background: rgba(42, 47, 74, .96); }\n+.game-controls button:active { transform: scale(.97); }\n+.game-controls button > span { font-size: 15px; }\n+.game-controls button small { color: #ffd166; }\n+.game-intro {\n+  position: absolute; z-index: 6; left: 50%; top: 50%; transform: translate(-50%, -50%);\n+  display: grid; justify-items: center; width: min(520px, calc(100% - 440px)); padding: 20px 28px;\n+  color: #f3eee5; text-align: center; border: 3px solid #f3eee5; border-radius: 16px;\n+  background: rgba(28, 25, 29, .88); box-shadow: 0 0 0 3px rgba(21, 24, 42, .85), 0 22px 45px -18px #000;\n+  backdrop-filter: blur(8px); animation: game-intro-in 360ms var(--ease-out) both;\n+}\n+.game-intro[hidden] { display: none; }\n+.game-intro.out { opacity: 0; transform: translate(-50%, calc(-50% - 8px)); transition: opacity 260ms ease, transform 260ms var(--ease-out); }\n+.game-intro-kicker { color: #ffd166; font: 800 12px/1 var(--mono); letter-spacing: .28em; text-transform: uppercase; }\n+.game-intro-kicker::before, .game-intro-kicker::after { content: \" \u2501 \"; letter-spacing: 0; }\n+.game-intro p { margin: 12px 0 8px; font: italic 700 25px/1.2 var(--serif); }\n+.game-intro > span:not(.game-intro-kicker) { color: #d6c18d; font-size: 14px; }\n+.game-intro small { margin-top: 8px; color: #a9adba; }\n+@keyframes game-intro-in { from { opacity: 0; transform: translate(-50%, -47%) scale(.97); } }\n+\n+.game-dialogue {\n+  display: grid; grid-template-columns: 58px minmax(0, 1fr) auto auto; gap: 12px; align-items: center;\n+  min-height: 84px; padding: 11px 16px 12px 12px; color: #f3eee5;\n+  border: 3px solid #f3eee5; border-radius: 13px; background: #15182a;\n+  box-shadow: 0 0 0 3px #15182a, 0 16px 30px -18px rgba(0, 0, 0, .65);\n+}\n+.game-dialogue .rpg-portrait { width: 58px; height: 58px; }\n+.game-dialogue-body { min-width: 0; }\n+.game-dialogue .rpg-name { display: block; }\n+.game-dialogue .rpg-text { min-height: 0; font-size: 15px; }\n+.game-thinking { display: inline-flex; gap: 4px; padding: 8px 10px; border-radius: 999px; background: #292d42; }\n+.game-thinking i { width: 6px; height: 6px; border-radius: 50%; background: #f3eee5; animation: game-think 1.2s ease-in-out infinite; }\n+.game-thinking i:nth-child(2) { animation-delay: 160ms; }\n+.game-thinking i:nth-child(3) { animation-delay: 320ms; }\n+@keyframes game-think { 50% { opacity: .28; transform: translateY(-2px); } }\n+.game-live {\n+  display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; color: #72ddb0;\n+  border: 1px solid #32bd81; border-radius: 999px; font: 800 10.5px/1 var(--mono);\n+  letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;\n+}\n+.game-live i { width: 8px; height: 8px; border-radius: 50%; background: #4fd39b; box-shadow: 0 0 0 3px rgba(79, 211, 155, .14); }\n+.kane-game:fullscreen { width: 100vw; height: 100vh; aspect-ratio: auto; border: 0; border-radius: 0; background: #10131e; }\n+.kane-game:fullscreen .kane3d { border-radius: 0; }\n+\n+@media (max-width: 900px) {\n+  .game-trail { width: 178px; }\n+  .game-trail li { min-height: 27px; padding-block: 3px; font-size: 10.5px; }\n+  .game-intro { width: min(460px, calc(100% - 380px)); padding: 16px 20px; }\n+  .game-intro p { font-size: 20px; }\n+}\n+@media (max-width: 760px) {\n+  .live-root:has(.scene-live) > .case-track { display: flex; }\n+  .kane-game { aspect-ratio: 4 / 3; }\n+  .game-trail { display: none; }\n+  .game-chapter { left: auto; right: 10px; top: 10px; transform: none; min-width: 0; }\n+  .game-intro { width: min(480px, calc(100% - 28px)); }\n+  .game-controls { left: 10px; bottom: 10px; }\n+  .game-dialogue { grid-template-columns: 48px 1fr auto; }\n+  .game-dialogue .rpg-portrait { width: 48px; height: 48px; }\n+  .game-thinking { display: none; }\n+  .game-live { grid-column: 2 / -1; justify-self: start; }\n+}\n+@media (max-width: 480px) {\n+  .game-chapter { font-size: 9px; }\n+  .game-intro p { font-size: 17px; }\n+  .game-controls button:first-child { font-size: 0; }\n+  .game-controls button:first-child b { font-size: 11px; }\n+  .game-dialogue { grid-template-columns: 1fr; }\n+  .game-dialogue .rpg-portrait { display: none; }\n+  .game-live { grid-column: 1; }\n+}\n+@media (prefers-reduced-motion: reduce) {\n+  .game-intro, .game-thinking i { animation: none; }\n+}\ndiff --git a/whisperer/templates/_live.html b/whisperer/templates/_live.html\nindex b764f34..80d7eb9 100644\n--- a/whisperer/templates/_live.html\n+++ b/whisperer/templates/_live.html\n@@ -1,11 +1,11 @@\n-{% from \"_kane.html\" import sprite, say, head %}\n+{% from \"_kane.html\" import sprite, head %}\n {% set fixv = inv.fix.get('verdict') if inv.fix else None %}\n {% set fixs = inv.fix.get('status', '') if inv.fix else '' %}\n <div class=\"live-root\" data-active=\"{{ 'true' if active else 'false' }}\">\n \n   {# ------------------------------------------------ progress ------------------------------------------------ #}\n   {% set stage = 0 %}\n-  {% if inv.status in ('planning', 're-planning') %}{% set stage = 1 %}\n+  {% if inv.status in ('queued', 'planning', 're-planning') %}{% set stage = 1 %}\n   {% elif inv.status == 'reproducing' %}{% set stage = 2 %}\n   {% elif inv.status in ('judging', 'double-checking') %}{% set stage = 3 %}\n   {% elif inv.status == 'done' %}{% set stage = 4 %}{% endif %}\n@@ -14,8 +14,9 @@\n     {% elif fixs.startswith('waiting') or fixs.startswith('Kane') %}{% set stage = 6 %}\n     {% elif fixs == 'done' %}{% set stage = 7 %}{% endif %}\n   {% endif %}\n-  <ol class=\"track\">\n-    {% for label in ['The case', 'The scene', 'Evidence', 'Verdict', 'Repair', 'Back to the scene', 'Closed'] %}\n+  {% set game_labels = ['The case', 'The scene', 'Evidence', 'Verdict', 'Repair', 'Back to the scene', 'Closed'] %}\n+  <ol class=\"track case-track\">\n+    {% for label in game_labels %}\n       <li class=\"{{ 'done' if loop.index < stage or (stage == 7 and loop.index == 7 and fixv == 'fixed') }} {{ 'now' if loop.index == stage and active }}\">{{ label }}</li>\n     {% endfor %}\n   </ol>\n@@ -25,11 +26,46 @@\n     <section class=\"scene scene-live\" data-mode=\"{{ scene.mode }}\">\n       {# Detective Kane in 3D, acting out each real step as it happens (kane3d.js). The stage is\n          kept across page refreshes; the 2D detective shows if 3D isn't available. #}\n-      <div class=\"kane3d\" data-kane3d data-keep=\"kane-3d\">\n-        <canvas class=\"kane3d-canvas\" role=\"img\" aria-label=\"Detective Kane at work, in 3D\"></canvas>\n-        <div class=\"kane3d-fallback\">{{ sprite(scene.mode) }}</div>\n+      <div class=\"kane-game\" data-kane-game>\n+        <div class=\"kane3d\" data-kane3d data-keep=\"kane-3d\" data-live-src=\"{{ live_shot or '' }}\">\n+          <canvas class=\"kane3d-canvas\" role=\"img\" aria-label=\"Detective Kane at work, in 3D\"></canvas>\n+          <div class=\"kane3d-fallback\">{{ sprite(scene.mode) }}</div>\n+        </div>\n+\n+        {% if inv.status in ('queued', 'planning') and not inv.fix %}\n+          <div class=\"game-intro\" data-chapter=\"{{ inv.id }}\" hidden>\n+            <span class=\"game-intro-kicker\">New case</span>\n+            <p>\u201c{{ inv.report[:110] }}{{ '\u2026' if inv.report|length > 110 }}\u201d</p>\n+            <span>Chapter 1 \u00b7 The witness statement</span>\n+            <small>Detective Kane takes the case\u2026</small>\n+          </div>\n+        {% endif %}\n+\n+        <div class=\"game-chapter\"><span>{{ stage }} of 7</span> \u00b7 {{ game_labels[stage - 1] }}</div>\n+        <aside class=\"game-trail\" aria-label=\"Investigation progress\">\n+          <h3><span aria-hidden=\"true\">\u2315</span> Investigation</h3>\n+          <ol>\n+            {% for label in game_labels %}\n+              <li class=\"{{ 'done' if loop.index < stage }} {{ 'active' if loop.index == stage }}\">\n+                <i aria-hidden=\"true\">{{ '\u2713' if loop.index < stage else '' }}</i><span>{{ label }}</span>\n+              </li>\n+            {% endfor %}\n+          </ol>\n+        </aside>\n+        <div class=\"game-controls\">",
+    "cut": 122
+  },
+  "verdict_words": "Kane named the commit that broke it",
+  "evidence": "005-lineup-who-broke-the-front-desk"
+}

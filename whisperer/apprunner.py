@@ -7,24 +7,84 @@ Bug Whisperer restarts the app itself after every fix and waits until it answers
 Why reset: every Kane run creates real data (bookings, patients). The reproduction and the
 re-check must start from the same state, so an optional reset command (for the sample app,
 `python seed.py`) runs before each Kane run.
+
+Why claim: a port runs one version of the app at a time. The Lineup runs old versions on it, and
+the Stop hook once replayed today's checks against one of them (Nov 18). So whoever restarts an app
+and tests it first claims its port: a lock file made atomically, released when done.
 """
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import signal
 import subprocess
 import sys
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from urllib.parse import urlparse
 
 import httpx
 
-from .detective import ROOT, App
+from .detective import ROOT, RUNS, App
 
 _started: dict[str, subprocess.Popen] = {}
+STALE_CLAIM = 20 * 60  # a claim not touched for this long belongs to a process that died
+
+
+class PortBusy(RuntimeError):
+    pass
+
+
+def _claim_file(app: App) -> Path:
+    return RUNS / f"port-{_port(app)}.claim"
+
+
+def holder(app: App) -> str | None:
+    """Who has claimed the app's port right now, or None."""
+    path = _claim_file(app)
+    try:
+        if time.time() - path.stat().st_mtime > STALE_CLAIM:
+            return None
+        return json.loads(path.read_text(encoding="utf-8")).get("who", "someone")
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+@contextmanager
+def claim(app: App, who: str, wait: float = 0):
+    """Hold the app's port while testing it. Waits up to `wait` seconds, then raises PortBusy."""
+    path = _claim_file(app)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    deadline = time.time() + wait
+    while True:
+        try:
+            fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            if holder(app) is None:  # left behind by a process that died
+                path.unlink(missing_ok=True)
+                continue
+            if time.time() >= deadline:
+                raise PortBusy(f"{app.name} is busy: {holder(app)} is using port {_port(app)}")
+            time.sleep(2)
+            continue
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump({"who": who, "pid": os.getpid(), "since": time.strftime("%Y-%m-%d %H:%M:%S")}, f)
+        break
+    try:
+        yield
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def keep_claim(app: App) -> None:
+    """Say the claim is still in use, so it isn't taken for a dead one during a long job."""
+    try:
+        os.utime(_claim_file(app))
+    except OSError:
+        pass
 
 
 def _command(parts: list[str]) -> list[str]:
@@ -118,9 +178,10 @@ SECRET_ENV = ("LT_USERNAME", "LT_ACCESS_KEY", "KANE_USERNAME", "KANE_ACCESS_KEY"
               "ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN")
 
 
-def app_env() -> dict:
+def app_env(app: App | None = None) -> dict:
     """The app runs code an AI may have edited, so it never gets Bug Whisperer's secrets."""
-    return {k: v for k, v in os.environ.items() if k not in SECRET_ENV}
+    env = {k: v for k, v in os.environ.items() if k not in SECRET_ENV}
+    return {**env, **(app.env if app else {})}
 
 
 def start(app: App) -> bool:
@@ -129,7 +190,7 @@ def start(app: App) -> bool:
     log = open(ROOT / "runs" / f"app-{_port(app)}.log", "a", encoding="utf-8")
     _started[app.name] = subprocess.Popen(
         _command(app.start), cwd=ROOT / (app.code_dir or "."), stdout=log, stderr=subprocess.STDOUT,
-        env=app_env())
+        env=app_env(app))
     return wait_until_up(app)
 
 
@@ -145,4 +206,4 @@ def reset(app: App) -> None:
     """Put the app's test data back to a known state, if the app has a reset command."""
     if app.reset:
         subprocess.run(_command(app.reset), cwd=ROOT / (app.code_dir or "."), capture_output=True,
-                       timeout=120, env=app_env())
+                       timeout=120, env=app_env(app))

@@ -151,10 +151,12 @@ def _self_checks() -> dict:
     for report in sorted((PROOF / "revisits").glob("guard-*.json")):
         data = json.loads(report.read_text(encoding="utf-8"))
         rows = [r for r in data.get("results", []) if r.get("app") == SELF_APP]
-        if rows:
-            latest, when = {r["case_id"]: r for r in rows}, report.stem.removeprefix("guard-")
+        checked = [r for r in rows if r.get("verdict") != "unknown"]  # "unknown": Kane couldn't check
+        if checked:
+            latest.update({r["case_id"]: r for r in checked})
+            when = report.stem.removeprefix("guard-")
         for r in rows:  # every time a check failed: proof the checks can fail
-            if r.get("verdict") != "holds":
+            if r.get("verdict") == "reopened":
                 said = (r.get("fresh") or {}).get("summary") or (r.get("replay") or {}).get("summary") or ""
                 caught.append({"when": stamp(report.stem.removeprefix("guard-")), "id": r["case_id"],
                                "title": r.get("title", ""), "kane_said": said, "note": notes.get(report.stem, "")})
@@ -165,10 +167,23 @@ def _self_checks() -> dict:
             "passing": sum(r["verdict"] == "holds" for r in rows), "caught": caught}
 
 
+def _lineups() -> list[dict]:
+    """Lineups kept as evidence in the repo (docs/evidence/*/lineup.json): who broke what."""
+    rows = []
+    for path in sorted(EVIDENCE.glob("*/lineup.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        culprit = next((s for s in data["suspects"] if s["status"] == "guilty"), None)
+        rows.append({"id": data["id"], "folder": f"docs/evidence/{path.parent.name}", "title": data["title"],
+                     "verdict": data["verdict"], "suspects": len(data["suspects"]),
+                     "questionings": data["questionings"], "fresh_runs": data.get("fresh_runs", 0),
+                     "culprit": {k: culprit[k] for k in ("short", "subject", "date")} if culprit else None})
+    return rows
+
+
 def collect() -> dict:
     """Gather everything, write docs/proof/results.json and RESULTS.md, and return it."""
     experiments, evidence = _experiments(), _evidence()
-    revisits, tests = _revisits(), _regression_tests()
+    revisits, tests, lineups = _revisits(), _regression_tests(), _lineups()
     ran = [e for e in experiments if e["ran"]]
     results = {
         "generated": time.strftime("%Y-%m-%d %H:%M"),
@@ -178,10 +193,12 @@ def collect() -> dict:
         "revisits": revisits,
         "regression_tests": tests,
         "self_checks": _self_checks(),
+        "lineups": lineups,
         "totals": {
             "experiments_run": len(ran),
             "experiments_as_expected": sum(e["as_expected"] for e in ran),
-            "kane_runs": sum(e.get("kane_runs", 0) for e in ran + evidence) + revisits["replays"],
+            "kane_runs": (sum(e.get("kane_runs", 0) for e in ran + evidence) + revisits["replays"]
+                          + sum(x["questionings"] for x in lineups)),
             "credits": round(sum(e.get("credits", 0) for e in ran + evidence), 1),
         },
     }
@@ -241,8 +258,17 @@ def markdown(r: dict) -> str:
             mark = {"holds": "✅", None: "–"}.get(c["verdict"], "❌")
             lines.append(f"- {mark} {c['title']}: [`{c['test'].split('/')[-1]}`](../../{c['test']})")
         for x in sc.get("caught", []):
-            lines.append(f"- 🔎 Caught on {x['when']}: *{x['title']}* failed. Kane: “{x['kane_said']}”"
+            lines.append(f"- 🔎 {x['when']}: *{x['title']}* failed. Kane: “{x['kane_said']}”"
                          + (f" *({x['note']})*" if x.get("note") else ""))
+    if r.get("lineups"):
+        lines += ["", "## The Lineup: who broke it?", "",
+                  "Kane names the commit that broke a closed case: each version he questions is checked out, "
+                  "started, and tested in a real browser, halving the suspects each time.", ""]
+        for x in r["lineups"]:
+            found = (f"named `{x['culprit']['short']}` “{x['culprit']['subject']}” ({x['culprit']['date']})"
+                     if x["culprit"] else f"accused no one ({x['verdict']})")
+            lines.append(f"- [{x['title']}](../evidence/{x['folder'].split('/')[-1]}/): {x['suspects']} suspects, "
+                         f"{x['questionings']} questioned ({x['fresh_runs']} fresh Kane runs), {found}.")
     lines += ["", "## Kept on file as Kane regression tests", ""]
     for x in r["regression_tests"]:
         lines.append(f"- {x['title']}: [`{x['test']}`](../../{x['test']}) (closed {x['closed']})")

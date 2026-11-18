@@ -10,8 +10,10 @@ clinic. They live in the same registry, so the same machinery replays them:
 - the Claude Code Stop hook replays them whenever a session changes whisperer/, and doesn't let
   the session finish while one fails.
 
-The checks run against a second copy of the site on port 8010 (whisperer/selfserve.py), so they
-never disturb the copy someone is using, and they only read pages: no new cases, no Kane runs.
+The checks run against a second copy of the site on port 8010 (started as apps/bug-whisperer.json
+says, with WHISPERER_NO_BOOT so it starts no sample apps), so they never disturb the copy someone is
+using, and they only read pages: no new cases, no Kane runs. The same start command works for any
+past version of the code, which is what lets the Lineup (lineup.py) question old commits.
 """
 
 from __future__ import annotations
@@ -30,6 +32,11 @@ CHECKS = [
      "objective": f"Go to {SITE}/. Click the first example button under 'Try a real one'. "
                   "Verify that the witness statement box now contains 'my receptionist booked mrs aisha' "
                   "and the page shows a 'Send Kane to investigate' button."},
+    # Worded to hold for every version of the front desk, so the Lineup can replay it on old commits.
+    {"id": "self-sample-reports", "title": "The front desk offers sample reports that fill the report box",
+     "objective": f"Go to {SITE}/. Verify that the page shows at least one button that fills in a sample "
+                  "bug report. Click the first of those buttons. Verify that the bug report text box is no "
+                  "longer empty."},
     {"id": "self-case-files", "title": "The case files: the corkboard and Kane's rank",
      "objective": f"Go to {SITE}/inbox. Verify that the page shows Detective Kane's rank card "
                   "and at least one pinned case stamped 'Case closed'."},
@@ -49,12 +56,12 @@ def app() -> App:
     return App.load(ROOT / APP_FILE)
 
 
-def record(say=print) -> list[dict]:
-    """Run each check once with Kane and save the passing ones as Kane tests in the registry."""
+def record(ids: list[str] | None = None, say=print) -> list[dict]:
+    """Run each check (or only `ids`) once with Kane and save the passing ones as Kane tests."""
     site = app()
     apprunner.restart(site)  # the copy on port 8010, running the code as it is now
     out = []
-    for check in CHECKS:
+    for check in [c for c in CHECKS if not ids or c["id"] in ids]:
         say(f"[selfcheck] recording {check['id']}…")
         result = kane.run(check["objective"], max_steps=15, timeout=180, name=check["id"])
         saved = regression.saved_name(check["id"])

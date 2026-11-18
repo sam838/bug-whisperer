@@ -1,0 +1,77 @@
+{
+  "when": "20261117-144028",
+  "results": [
+    {
+      "case_id": "self-front-desk",
+      "title": "The front desk: an example report fills the case form",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 12.95
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-case-files",
+      "title": "The case files: the corkboard and Kane's rank",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 2.25
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-closed-case",
+      "title": "A closed case: its stamp, evidence board and scene map",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 2.2
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-verified",
+      "title": "The Verified page: the pre-registered experiments",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 9.7
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-case-report",
+      "title": "The case report: steps, repair and a Save as PDF button",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 1.67
+      },
+      "verdict": "holds"
+    }
+  ],
+  "reopened": [],
+  "unknown": []
+}

@@ -1,0 +1,164 @@
+{
+  "when": "20261118-190535",
+  "results": [
+    {
+      "case_id": "self-front-desk",
+      "title": "The front desk: an example report fills the case form",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 12.42
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-case-files",
+      "title": "The case files: the corkboard and Kane's rank",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 1.59
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-closed-case",
+      "title": "A closed case: its stamp, evidence board and scene map",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "error",
+        "reason": "assertion_failed: @ step 5",
+        "summary": "The recorded case URL now opens a healthy not-found page instead of the case content the test expects.",
+        "failed_step": "assert: the page shows a 'Case closed' stamp, a section called 'The evidence board' and ",
+        "errors": [
+          "Kane: automation problem, not an app bug: The recorded case URL now opens a healthy not-found page instead of the case content the test expects."
+        ],
+        "duration": 54.97
+      },
+      "fresh": {
+        "verdict": "failed",
+        "reason": "Final verification failed: \"the page shows a 'Case closed' stamp, a section called 'The evidence board' and a section called 'The scene map'\"",
+        "summary": "The test was given a missing or stale case identifier. The server returned its normal \u201cNot found\u201d page instead of the case page that should contain the requested stamp and sections.\nCreate or restore the expected case fixture, or update the test URL to a valid case-file address before rerunning.",
+        "failed_step": "assert: the page shows a 'Case closed' stamp, a section called 'The evidence board' and ",
+        "errors": [],
+        "duration": 31.1
+      },
+      "verdict": "reopened"
+    },
+    {
+      "case_id": "self-verified",
+      "title": "The Verified page: the pre-registered experiments",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 4",
+        "summary": "The required /verified page is unavailable, so it cannot show the 6/6 result or the named experiment.",
+        "failed_step": "assert: the page says 6/6 pre-registered experiments came out as expected and lists the ",
+        "errors": [],
+        "duration": 31.53
+      },
+      "verdict": "reopened"
+    },
+    {
+      "case_id": "self-case-report",
+      "title": "The case report: steps, repair and a Save as PDF button",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 5",
+        "summary": "The requested report page displays a Not Found response instead of the required report sections and PDF button.",
+        "failed_step": "assert: the report has a section 'What Kane did, in a real browser', a section 'The repa",
+        "errors": [],
+        "duration": 55.11
+      },
+      "verdict": "reopened"
+    },
+    {
+      "case_id": "self-sample-reports",
+      "title": "The front desk offers sample reports that fill the report box",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "error",
+        "reason": "assertion_failed: @ step 3",
+        "summary": "The live page visibly contains sample-report controls, so the replay result does not establish a product regression.",
+        "failed_step": "assert: the page shows at least one button that fills in a sample bug report",
+        "errors": [
+          "Kane: automation problem, not an app bug: The live page visibly contains sample-report controls, so the replay result does not establish a product regression."
+        ],
+        "duration": 31.92
+      },
+      "fresh": {
+        "verdict": "passed",
+        "reason": "Objective completed",
+        "summary": "You asked to click the first button that fills in a sample bug report.\nA visible sample bug report button was selected.\nThe witness statement text box was filled with sample bug report text.",
+        "failed_step": null,
+        "errors": [],
+        "duration": 46.9
+      },
+      "verdict": "holds"
+    }
+  ],
+  "reopened": [
+    {
+      "case_id": "self-closed-case",
+      "title": "A closed case: its stamp, evidence board and scene map",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "error",
+        "reason": "assertion_failed: @ step 5",
+        "summary": "The recorded case URL now opens a healthy not-found page instead of the case content the test expects.",
+        "failed_step": "assert: the page shows a 'Case closed' stamp, a section called 'The evidence board' and ",
+        "errors": [
+          "Kane: automation problem, not an app bug: The recorded case URL now opens a healthy not-found page instead of the case content the test expects."
+        ],
+        "duration": 54.97
+      },
+      "fresh": {
+        "verdict": "failed",
+        "reason": "Final verification failed: \"the page shows a 'Case closed' stamp, a section called 'The evidence board' and a section called 'The scene map'\"",
+        "summary": "The test was given a missing or stale case identifier. The server returned its normal \u201cNot found\u201d page instead of the case page that should contain the requested stamp and sections.\nCreate or restore the expected case fixture, or update the test URL to a valid case-file address before rerunning.",
+        "failed_step": "assert: the page shows a 'Case closed' stamp, a section called 'The evidence board' and ",
+        "errors": [],
+        "duration": 31.1
+      },
+      "verdict": "reopened"
+    },
+    {
+      "case_id": "self-verified",
+      "title": "The Verified page: the pre-registered experiments",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 4",
+        "summary": "The required /verified page is unavailable, so it cannot show the 6/6 result or the named experiment.",
+        "failed_step": "assert: the page says 6/6 pre-registered experiments came out as expected and lists the ",
+        "errors": [],
+        "duration": 31.53
+      },
+      "verdict": "reopened"
+    },
+    {
+      "case_id": "self-case-report",
+      "title": "The case report: steps, repair and a Save as PDF button",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 5",
+        "summary": "The requested report page displays a Not Found response instead of the required report sections and PDF button.",
+        "failed_step": "assert: the report has a section 'What Kane did, in a real browser', a section 'The repa",
+        "errors": [],
+        "duration": 55.11
+      },
+      "verdict": "reopened"
+    }
+  ],
+  "unknown": []
+}

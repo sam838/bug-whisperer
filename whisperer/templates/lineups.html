@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Lineups · Bug Whisperer{% endblock %}
+{% block content %}
+<span class="lost-code">The Lineup</span>
+<h1 class="page-title">Who broke it?</h1>
+<p class="lede">When a closed case comes back, Kane finds the commit that brought it back. He replays the case's saved
+  test on past versions of the code, halving the suspects each time, until one commit is left.</p>
+
+{% if not lineups %}
+  <div class="card"><p>No lineups yet. Start one from the terminal:
+    <code>python -m whisperer lineup &lt;case id&gt; --good &lt;commit&gt;</code></p></div>
+{% else %}
+  <div class="list">
+    {% for l in lineups %}
+      {% set culprit = (l.suspects | selectattr("status", "equalto", "guilty") | list | first) %}
+      <a class="card row" href="/lineup/{{ l.id }}">
+        <span class="badge {{ 'bug' if l.verdict == 'found' else 'warn' if l.verdict else 'neutral' }}">{{ {"found": "Culprit found", "narrowed": "Narrowed", None: "Questioning"}.get(l.verdict, "No one accused") }}</span>
+        <span class="row-text"><b>{{ l.title }}</b>
+          <small>{{ l.app }} · {{ l.suspects|length }} suspects · {{ l.questionings }} questioned{% if culprit %} · <code>{{ culprit.short }}</code> “{{ culprit.subject }}”{% endif %}</small></span>
+        <span class="muted">{{ l.created }}</span>
+      </a>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

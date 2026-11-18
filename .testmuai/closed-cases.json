@@ -68,6 +68,16 @@
       "objective": "Go to http://127.0.0.1:8010/r/20261113-124324-d930/report. Verify that the report has a section 'What Kane did, in a real browser', a section 'The repair' and a 'Save as PDF' button.",
       "closed": "2026-11-17 09:05",
       "self_check": true
+    },
+    {
+      "case_id": "self-sample-reports",
+      "app_file": "apps/bug-whisperer.json",
+      "test": "self-sample-reports",
+      "title": "The front desk offers sample reports that fill the report box",
+      "report": "Self-check of Bug Whisperer's own pages",
+      "objective": "Go to http://127.0.0.1:8010/. Verify that the page shows at least one button that fills in a sample bug report. Click the first of those buttons. Verify that the bug report text box is no longer empty.",
+      "closed": "2026-11-18 18:18",
+      "self_check": true
     }
   ]
 }

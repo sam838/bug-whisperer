@@ -16,6 +16,12 @@
   </div>
 
   <section class="card">
+    <h2>The Lineup: who broke it?</h2>
+    <p class="muted">When a closed case comes back, Kane names the commit that brought it back: he replays its saved test
+      on past versions of the code, halving the suspects each time. <a href="/lineups">See the lineups →</a></p>
+  </section>
+
+  <section class="card">
     <h2>Pre-registered experiments</h2>
     <p class="muted">Each report and the verdict we expected were <a href="{{ r.repo }}/docs/proof/experiments.json">committed before any of them ran</a>.
       They test that Bug Whisperer doesn't invent bugs, ignores instructions hidden in a report, and asks instead of guessing.</p>
@@ -62,7 +68,7 @@
     <ul class="proof-list">{% for c in sc.checks %}<li>{{ '✅' if c.verdict == 'holds' else ('–' if not c.verdict else '❌') }} {{ c.title }}
       <a href="{{ r.repo }}/{{ c.test }}"><code>{{ c.test.split('/')[-1] }}</code></a></li>{% endfor %}</ul>
     {% for x in sc.caught %}
-      <p class="caught">🔎 <b>Caught {{ x.when }}:</b> “{{ x.title }}” failed. Kane: <i>“{{ x.kane_said }}”</i>{% if x.note %} <span class="muted">({{ x.note }})</span>{% endif %}</p>
+      <p class="caught">🔎 <b>{{ x.when }}:</b> “{{ x.title }}” failed. Kane: <i>“{{ x.kane_said }}”</i>{% if x.note %} <span class="muted">({{ x.note }})</span>{% endif %}</p>
     {% endfor %}
   </section>
   {% endif %}

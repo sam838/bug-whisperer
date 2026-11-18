@@ -50,36 +50,54 @@ def revisit(app_file: str | None = None, on_update=None) -> dict:
 
     for app_path, cases in by_app.items():
         app = App.load(ROOT / app_path)
-        notify(f"restarting {app.name} so Kane tests the code as it is now")
-        apprunner.restart(app)
-        for case in cases:
-            apprunner.reset(app)
-            notify(f"revisiting case {case['case_id']}: {case['title']}")
-            replay = regression.replay(case["test"], app.variables(),
-                                       log_path=folder / f"{case['case_id']}-replay.ndjson")
-            entry = {"case_id": case["case_id"], "title": case["title"], "app": app.name,
-                     "replay": _brief(replay)}
-            if replay.verdict == "passed":
-                entry["verdict"] = "holds"
-            elif replay.verdict == "failed":
-                entry["verdict"] = "reopened"
-            else:
-                # Kane couldn't replay its recording (the page may have changed). Decide with a
-                # fresh run of the same objective instead of guessing.
-                notify(f"case {case['case_id']}: replay inconclusive, Kane is re-checking from scratch")
-                apprunner.reset(app)
-                fresh = kane.run(case["objective"], variables=app.variables(), max_steps=30,
-                                 timeout=300, log_path=folder / f"{case['case_id']}-fresh.ndjson")
-                entry["fresh"] = _brief(fresh)
-                entry["verdict"] = {"passed": "holds", "failed": "reopened"}.get(fresh.verdict, "unknown")
-            results.append(entry)
-            _record_on_case(case["case_id"], entry, stamp)
+        try:
+            with apprunner.claim(app, f"Kane's revisit {stamp}"):
+                results += _revisit_app(app, cases, folder, stamp, notify)
+        except apprunner.PortBusy as busy:
+            # Someone else (a Lineup running an old version) has the port: testing it now would
+            # test their version, not this code. Nothing is claimed for these cases.
+            notify(str(busy))
+            results += [{"case_id": c["case_id"], "title": c["title"], "app": app.name, "verdict": "unknown",
+                         "replay": {"verdict": "error", "reason": str(busy), "summary": None,
+                                    "failed_step": None, "errors": [], "duration": None}} for c in cases]
 
     report = {"when": stamp, "results": results,
               "reopened": [r for r in results if r["verdict"] == "reopened"],
               "unknown": [r for r in results if r["verdict"] == "unknown"]}
     (folder / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     return report
+
+
+def _revisit_app(app: App, cases: list[dict], folder: Path, stamp: str, notify) -> list[dict]:
+    notify(f"restarting {app.name} so Kane tests the code as it is now")
+    apprunner.restart(app)
+    results = []
+    for case in cases:
+        apprunner.keep_claim(app)
+        apprunner.reset(app)
+        notify(f"revisiting case {case['case_id']}: {case['title']}")
+        replay = regression.replay(case["test"], app.variables(),
+                                   log_path=folder / f"{case['case_id']}-replay.ndjson")
+        entry = {"case_id": case["case_id"], "title": case["title"], "app": app.name,
+                 "replay": _brief(replay)}
+        if replay.verdict == "passed":
+            entry["verdict"] = "holds"
+            from .lineup import remember_held  # where a later Lineup can start
+            remember_held(case["case_id"], app.code_dir)
+        elif replay.verdict == "failed":
+            entry["verdict"] = "reopened"
+        else:
+            # Kane couldn't replay its recording (the page may have changed). Decide with a
+            # fresh run of the same objective instead of guessing.
+            notify(f"case {case['case_id']}: replay inconclusive, Kane is re-checking from scratch")
+            apprunner.reset(app)
+            fresh = kane.run(case["objective"], variables=app.variables(), max_steps=30,
+                             timeout=300, log_path=folder / f"{case['case_id']}-fresh.ndjson")
+            entry["fresh"] = _brief(fresh)
+            entry["verdict"] = {"passed": "holds", "failed": "reopened"}.get(fresh.verdict, "unknown")
+        results.append(entry)
+        _record_on_case(case["case_id"], entry, stamp)
+    return results
 
 
 def _record_on_case(case_id: str, entry: dict, stamp: str) -> None:

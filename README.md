@@ -13,7 +13,7 @@ argue with. If the app's code is connected, it also turns it into a fix that
 - 🛠️ **Install and use it on your own app:** [docs/SETUP.md](docs/SETUP.md)
 - ⚙️ **How it works, and what we learned about Kane CLI:** [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md)
 
-Built during the [Kane CLI Online Hackathon](https://luma.com/kanecli-online) (Nov 12–19, 2026),
+Built during the [Kane CLI Online Hackathon](https://luma.com/kanecli-online) (Nov 12–26, 2026),
 with Claude Code as the coding agent. The first commit is from Nov 13.
 
 ---
@@ -24,6 +24,7 @@ with Claude Code as the coding agent. The first commit is from Nov 13.
 |---|---|
 | **It works end to end** | A user wrote *"the system just saved it?? no warning nothing"*. Kane reproduced it, Claude repaired the code from Kane's evidence alone, and Kane passed the same steps afterwards → [evidence 001](docs/evidence/001-past-date-booking/) |
 | **Kane CLI caught or proved something** | 2 real bugs caught and proven fixed, kept as Kane regression tests. 6 of 6 experiments came out as expected, [written down before they ran](docs/proof/experiments.json) → [RESULTS.md](docs/proof/RESULTS.md) |
+| **Kane found who broke it** | A real regression in Bug Whisperer's own history: a commit called "Redesign 3d game" quietly removed the sample-report buttons. Kane questioned 8 of 41 commits, each running its own code, and named it → [evidence 005](docs/evidence/005-lineup-who-broke-the-front-desk/) |
 | **Our agent and Kane talked to each other** | Claude repairs using only Kane's failed step, his remark and his screenshot, and only Kane can close a case. The Claude Code Stop hook blocked a session until Kane saw an old bug fixed again → [evidence 004](docs/evidence/004-hook-reopened-case/) |
 
 Then, on the four scores:
@@ -36,7 +37,7 @@ Then, on the four scores:
   instructions hidden in it. 6 of 6 came out as expected.
 - **Closed loop:** Kane fails → Claude repairs with Kane's evidence → Kane re-runs the same steps →
   only a pass closes the case → the saved test is replayed on every later code change (58 times so
-  far).
+  far) → if a case comes back, the Lineup has Kane name the commit that broke it.
 - **Craft:** `bug-whisperer doctor` checks the whole setup without spending credits, and Kane
   checks Bug Whisperer itself: a check we broke on purpose was caught
   ([how](docs/HOW_IT_WORKS.md#kane-checks-bug-whisperer-itself)).
@@ -62,14 +63,16 @@ More in [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md).
 | | |
 |---|---|
 | Pre-registered experiments | **6 of 6** as expected ([experiments](docs/proof/experiments/)) |
-| Case studies with full evidence | **4** ([001](docs/evidence/001-past-date-booking/), [002](docs/evidence/002-double-booking/), [003](docs/evidence/003-shop-search-any-website/), [004](docs/evidence/004-hook-reopened-case/)) |
+| Case studies with full evidence | **5** ([001](docs/evidence/001-past-date-booking/), [002](docs/evidence/002-double-booking/), [003](docs/evidence/003-shop-search-any-website/), [004](docs/evidence/004-hook-reopened-case/), [005](docs/evidence/005-lineup-who-broke-the-front-desk/)) |
+| Lineups: the commit that broke it, named by Kane | **1** (41 suspects, 8 questioned) |
 | Bugs fixed and kept as Kane regression tests | **2** ([saved tests](.testmuai/tests/)) |
 | Stop hook revisits of closed cases | **58** in 32 sessions: 54 held, 4 reopened, 0 unclear ([reports](docs/proof/revisits/)) |
-| Kane CLI runs | about **68** |
+| Kane CLI runs | about **76** |
 
 - **[001](docs/evidence/001-past-date-booking/):** appointments could be booked in the past. Reproduced, repaired, proven.
 - **[002](docs/evidence/002-double-booking/):** two patients could be booked into the same slot. The first repair *wasn't* proven, and the reason was Bug Whisperer's own bug (the app never reloaded). That story is in the write-up.
 - **[003](docs/evidence/003-shop-search-any-website/):** a site we didn't build (LambdaTest's eCommerce Playground), with only its link.
+- **[005](docs/evidence/005-lineup-who-broke-the-front-desk/):** the Lineup. Kane named the commit that removed Bug Whisperer's own sample-report buttons. It took four attempts, and the write-up says why: two of them found bugs in Bug Whisperer itself.
 - **[004](docs/evidence/004-hook-reopened-case/):** the Stop hook blocked a fresh Claude Code session until it repaired a bug that had come back. (We removed the fix on purpose to stage this, and the write-up says so.)
 
 All numbers come from `python -m whisperer proof`, which reads the real records in this repo.

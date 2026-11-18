@@ -165,7 +165,7 @@ git clone https://github.com/sam838/bug-whisperer && cd bug-whisperer
 python -m venv .venv
 .venv\Scripts\activate             # macOS/Linux: source .venv/bin/activate
 pip install -e ".[dev]"
-python -m pytest -q tests          # 118 tests with a fake Kane: no credits, no Chrome
+python -m pytest -q tests          # 129 tests with a fake Kane: no credits, no Chrome
 bug-whisperer up                   # from the repository, it uses the repository's apps and cases
 python -m whisperer selfcheck      # Kane checks Bug Whisperer's own pages
 python -m whisperer proof          # rebuild docs/proof/RESULTS.md from the records

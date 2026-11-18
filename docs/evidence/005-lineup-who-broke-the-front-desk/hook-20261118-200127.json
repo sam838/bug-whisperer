@@ -1,0 +1,116 @@
+{
+  "when": "20261118-200127",
+  "results": [
+    {
+      "case_id": "self-front-desk",
+      "title": "The front desk: an example report fills the case form",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 6",
+        "summary": "The example still fills in the witness statement, but the page shows \u201cInvestigate\u201d instead of the required \u201cSend Kane to investigate\u201d button.",
+        "failed_step": "assert: the witness statement box now contains 'my receptionist booked mrs aisha' and th",
+        "errors": [],
+        "duration": 33.36
+      },
+      "verdict": "reopened"
+    },
+    {
+      "case_id": "self-case-files",
+      "title": "The case files: the corkboard and Kane's rank",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "error",
+        "reason": "assertion_failed: @ step 4",
+        "summary": "The replay reached a healthy empty Inbox, but the recorded test expected pre-existing Detective Kane and case data.",
+        "failed_step": "assert: the page shows Detective Kane's rank card and at least one pinned case stamped '",
+        "errors": [
+          "Kane: automation problem, not an app bug: The replay reached a healthy empty Inbox, but the recorded test expected pre-existing Detective Kane and case data."
+        ],
+        "duration": 40.53
+      },
+      "fresh": {
+        "verdict": "passed",
+        "reason": "Objective completed",
+        "summary": "Opened the case files inbox page.\nConfirmed that Detective Kane\u2019s rank card, labeled \u201cGumshoe,\u201d was visible.\nConfirmed that the pinned case list included at least one case marked \u201cCase closed.\u201d\nThe requested page details were successfully displayed.",
+        "failed_step": null,
+        "errors": [],
+        "duration": 26.7
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-closed-case",
+      "title": "A closed case: its stamp, evidence board and scene map",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 1.78
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-verified",
+      "title": "The Verified page: the pre-registered experiments",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 8.59
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-case-report",
+      "title": "The case report: steps, repair and a Save as PDF button",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 1.52
+      },
+      "verdict": "holds"
+    },
+    {
+      "case_id": "self-sample-reports",
+      "title": "The front desk offers sample reports that fill the report box",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "passed",
+        "reason": "replay completed",
+        "summary": null,
+        "failed_step": null,
+        "errors": [],
+        "duration": 2.97
+      },
+      "verdict": "holds"
+    }
+  ],
+  "reopened": [
+    {
+      "case_id": "self-front-desk",
+      "title": "The front desk: an example report fills the case form",
+      "app": "Bug Whisperer (itself)",
+      "replay": {
+        "verdict": "failed",
+        "reason": "assertion_failed: @ step 6",
+        "summary": "The example still fills in the witness statement, but the page shows \u201cInvestigate\u201d instead of the required \u201cSend Kane to investigate\u201d button.",
+        "failed_step": "assert: the witness statement box now contains 'my receptionist booked mrs aisha' and th",
+        "errors": [],
+        "duration": 33.36
+      },
+      "verdict": "reopened"
+    }
+  ],
+  "unknown": []
+}
