@@ -125,8 +125,8 @@ fixing.
 | 6 | Tue Nov 18 | **Make it easy to judge:** one-command start, live showcase URL, README "judge it in 90 seconds" | A judge can see a result in 30 seconds |
 | 7 | **Wed Nov 19** | **Video** (3 min), **launch post**, submit **early** | Submitted, video link tested in a private window |
 
-**Deadline:** most likely **Nov 19, 11:59 PM IST (Nov 20, 1:29 AM your time)**. The event page
-has typos, so confirm on Slack.
+**Deadline:** extended by the organizers (email, Nov 18) to **Nov 26, 11:59 PM IST (Nov 27,
+1:29 AM your time)**. The submission can be edited until then, so submit early and keep improving.
 
 **If we fall behind, cut in this order:** the widget → Bug Whisperer fixing itself → the live
 showcase URL (keep the one-command local run). **Never cut:** the detective, the fix loop with

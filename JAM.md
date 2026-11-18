@@ -1,9 +1,10 @@
 # JAM.md: Bug Whisperer at the Kane CLI Online Hackathon
 
 Jam: Kane CLI Online Hackathon, TestMu AI (https://luma.com/kanecli-online)
-Deadline: Nov 19, 11:59 PM IST = Nov 19, 18:29 UTC = Nov 20, 01:29 GMT+7 (confirm on Slack: an older
-copy of the brief says "2 November"). Treat it as Nov 19, 23:30 GMT+7 and submit by midday Nov 19.
-Upload lock: assume yes. After submitting: no pushes, turn off Render auto-deploy.
+Deadline: EXTENDED (organizer email, Nov 18) to Nov 26, 11:59 PM IST = Nov 26, 18:29 UTC =
+Nov 27, 01:29 GMT+7. Old deadline was Nov 19. The submission can be edited until the deadline, so
+submit an early version now and keep improving it. Treat it as Nov 26, 23:30 GMT+7.
+Upload lock: at the deadline. After the final submit: no pushes, turn off Render auto-deploy.
 
 Rules: solo or team of up to 4 | any AI coding agent (Claude Code) | Kane CLI must verify the app,
 and the agent and Kane must talk to each other | built during the event (first commit Nov 13,
@@ -41,7 +42,9 @@ Timeline (GMT+7):
 - Nov 16 evening: time-boxed stretch work, hard stop at 23:00. Push.
 - Nov 17: ship tasks 1-4 (recording run, proof batch, README, secret scan)
 - Nov 18: video (record and edit), paragraph, launch post. Feature freeze at 18:00.
-- Nov 19: fix only what's broken, repo public, submit by 12:00, post.
+- Nov 19: fix only what's broken, repo public, submit an early version, post.
+- Nov 20-25 (extension week): improve with the submission already in; second post mid-week.
+- Nov 26: final fixes, re-test the video link and live URL, final submit by 12:00 GMT+7.
 
 Cut log:
 - Nov 16 19:40: camera off on the server by default (it broke Kane's submit clicks; proven by the
