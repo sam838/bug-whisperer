@@ -206,3 +206,24 @@ def test_an_interrupted_lineup_says_it_stopped_and_frees_the_port(history, monke
     record = lineup.all_lineups()[0]
     assert record["status"] == "done" and record["verdict"] == "stopped" and record["culprit"] is None
     assert not list((repo / "runs").glob("*.claim"))
+
+
+def test_the_3d_script_follows_the_real_questionings_and_shows_the_halving(history):
+    repo, shas, asked = history
+    record = lineup.run("self-samples", good=shas[0])
+    script = lineup.stage(record)
+    line = script["line"]
+    # the broken version (HEAD) is a docs-only commit here, so it stands at the end on its own
+    assert line[0]["role"] == "good" and line[-1]["role"] == "bad" and len(line) == 1 + 6 + 1
+    assert [line[s["at"]]["sha"] for s in script["steps"]] == asked  # the real order, nothing added
+    sizes = [s["open"][1] - s["open"][0] + 1 for s in script["steps"]]
+    assert sizes == sorted(sizes, reverse=True) and sizes[-1] == 1  # each answer narrows it to one
+    assert line[script["culprit"]]["sha"] == shas[3]
+    assert script["steps"][-1]["after"][script["culprit"]] == "present"
+
+
+def test_kane_is_quoted_on_what_he_saw_not_on_repeating_the_task():
+    said = lineup._first_sentence("You asked to fill in a sample report. The button was there. The box was filled. "
+                                  "Extra words that make it much too long to show in a dialogue box at all, really, so they "
+                                  "are left out of what Kane says, every single one of them, however true.")
+    assert said == "The button was there. The box was filled."

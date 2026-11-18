@@ -1,0 +1,20 @@
+{% from "_kane.html" import head %}
+{# The Lineup in 3D: Kane walks to each version he really questioned, in the real order, and the
+   suspects he rules out step back. Every move comes from this lineup's record. three.js loads only on Play. #}
+<section class="card recon lineup3d" data-lineup3d aria-label="The Lineup, played in 3D">
+  <div class="recon-head">
+    <h2>🎬 Watch Kane question them</h2>
+    <span class="muted">{{ stage.line|length }} versions in a row · the real questionings, in order · about a minute</span>
+  </div>
+  <div class="recon-stage">
+    <canvas class="recon-canvas" aria-hidden="true"></canvas>
+    <button type="button" class="recon-play"><span>▶</span> Play the lineup</button>
+    <div class="recon-say" hidden>
+      <div class="rpg-box">
+        <div class="rpg-portrait">{{ head() }}</div>
+        <div class="rpg-body"><span class="rpg-name">KANE</span><p class="rpg-text recon-line" aria-live="polite"></p></div>
+      </div>
+    </div>
+  </div>
+  <script type="application/json" class="lineup3d-data">{{ stage|tojson }}</script>
+</section>

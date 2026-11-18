@@ -1337,3 +1337,7 @@ html:not([data-kane-view="simple"]) .scene-simple { display: none; }
 .lineup-end.s-questioning { animation: questioned-text 1.6s ease-in-out infinite; }
 @keyframes questioned-text { 50% { opacity: .45; } }
 @media (prefers-reduced-motion: reduce) { .lineup-end.s-questioning { animation: none; } }
+
+/* the 3D lineup: once it ends, "Play again" waits in a corner instead of covering the culprit */
+.lineup3d.ended .recon-play { left: auto; top: 14px; right: 14px; transform: none; padding: 10px 16px; font-size: 14px; }
+.lineup3d.ended .recon-play:active { transform: scale(.97); }

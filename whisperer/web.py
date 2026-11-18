@@ -916,7 +916,9 @@ def lineup_view(data: dict) -> dict:
         if r["asked_as"] not in seen:
             seen.add(r["asked_as"])
             questionings.append(r)
-    return {"l": data, "rows": rows, "questionings": questionings,
+    from . import lineup
+    stage = lineup.stage(data) if data["status"] == "done" and questionings else None
+    return {"l": data, "rows": rows, "questionings": questionings, "stage": stage,
             "culprit": next((r for r in rows if r["status"] == "guilty"), None),
             "active": data["status"] != "done", "now": data.get("now"),
             "repo": "https://github.com/sam838/bug-whisperer"}

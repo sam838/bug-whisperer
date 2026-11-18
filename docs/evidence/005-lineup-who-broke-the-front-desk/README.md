@@ -43,7 +43,7 @@ python -m whisperer lineup self-sample-reports --good 430f52e --bad 8565456 --fr
 
 **Culprit: `8565456` "Redesign 3d game"**, the same commit the git history points to. It took
 **8 questionings for 41 suspects**, about 13 minutes, all 8 as fresh Kane runs (157 credits). Kane's
-own logs for every questioning are in [kane/](kane/). On the website, the lineup is at `/lineups`.
+own logs for every questioning are in [kane/](kane/). On the website, the lineup is at `/lineups`, where it can also be played in 3D from this record.
 
 Before spending any credits, we rehearsed the same lineup with a plain page check in place of Kane.
 It questioned the same versions and named the same commit.

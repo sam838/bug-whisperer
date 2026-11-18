@@ -267,6 +267,66 @@ def _words(verdict: str) -> str:
             "error": "Kane couldn't tell"}.get(verdict, verdict)
 
 
+RESTATED = ("you asked", "the request", "the requested task")  # Kane repeating the task, not what he saw
+
+
+def _first_sentence(text: str | None, limit: int = 170) -> str:
+    """What Kane saw, in his own words: his first sentences, minus any that only repeat the task."""
+    sentences = [s.strip() for s in " ".join((text or "").split()).replace(". ", ".\n").split("\n") if s.strip()]
+    saw = [s for s in sentences if not s.lower().startswith(RESTATED)] or sentences
+    out = ""
+    for s in saw:
+        if out and len(out) + 1 + len(s) > limit:
+            break
+        out = f"{out} {s}".strip()
+    return out if len(out) <= limit else out[: limit - 1].rstrip() + "…"
+
+
+def stage(data: dict) -> dict:
+    """The lineup as a script for the 3D scene, from the real record only.
+
+    `line` is every version in a row, oldest first: the last good one, the suspects, and the broken
+    one, which is usually the last suspect. `steps` are Kane's questionings in the real order. Each
+    step has Kane's own words and, after his answer, which suspects are still possible (`open`) and
+    what is known about each version (`after`).
+    """
+    rows = data["suspects"]
+    line = [{**_brief_row(data["good"]), "role": "good"}] + [{**_brief_row(r), "role": "suspect"} for r in rows]
+    if rows and rows[-1]["sha"] == data["bad"]["sha"]:
+        line[-1]["role"] = "bad"
+    else:
+        line.append({**_brief_row(data["bad"]), "role": "bad"})
+    at = {row["sha"]: i for i, row in enumerate(line)}
+    asked, seen = [], set()
+    for row in sorted((r for r in [data["good"], data["bad"], *rows] if r.get("asked_as")), key=lambda r: r["asked_as"]):
+        if row["asked_as"] not in seen:
+            seen.add(row["asked_as"])
+            asked.append(row)
+    states, steps = ["waiting"] * len(line), []
+    for row in asked:
+        i, answer = at[row["sha"]], row["answer"]
+        if answer["verdict"] == "passed":
+            states[: i + 1] = ["cleared"] * (i + 1)
+        elif answer["verdict"] == "failed":
+            states[i:] = ["present"] * (len(line) - i)
+        else:
+            states[i] = "cannot_tell"
+        lo = max((j for j, s in enumerate(states) if s == "cleared"), default=-1)
+        hi = min((j for j, s in enumerate(states) if s == "present"), default=len(line) - 1)
+        steps.append({"at": i, "asked_as": row["asked_as"], "verdict": answer["verdict"],
+                      "fresh": bool(answer.get("fresh")),
+                      "said": _first_sentence(answer.get("summary") or answer.get("failed_step") or answer.get("reason"), 125),
+                      "after": list(states), "open": [lo + 1, hi]})
+    return {"check": data["title"], "verdict": data["verdict"], "words": data.get("verdict_words", ""),
+            "suspects": len(rows), "line": line, "steps": steps,
+            "culprit": at.get(data.get("culprit")) if data.get("culprit") else None}
+
+
+def _brief_row(row: dict) -> dict:
+    return {"sha": row["sha"], "short": row["short"], "subject": row["subject"], "date": row["date"],
+            "author": row.get("author", "")}
+
+
 def all_lineups() -> list[dict]:
     """Every lineup: this machine's (runs/, not committed) and the ones kept as evidence in the
     repo (docs/evidence/*/lineup.json, so the hosted demo shows them too). Newest first."""

@@ -80,7 +80,7 @@ A pass clears that suspect and everyone before it. A fail means the bug was alre
 round halves the suspects. Before anyone is questioned, the witness is checked: the test must pass
 at the good commit and fail at the broken one. Otherwise no one is accused. The Stop hook remembers
 the last commit where each case held, so when it reopens a case it can suggest the lineup command
-itself. The website shows each lineup live at `/lineups`.
+itself. The website shows each lineup live at `/lineups`. A finished lineup can also be played in 3D: Kane walks to each version he really questioned, in the real order, the suspects he rules out step back into the dark, and a red light falls on the culprit. Every move comes from the lineup's record.
 
 ## Detective Kane
 

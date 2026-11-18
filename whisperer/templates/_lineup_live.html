@@ -16,6 +16,8 @@
     For each one Kane questions, that commit's own code is started and Kane replays the same test on it.
     Replays spend no credits{% if l.fresh_runs %}, but {{ l.fresh_runs }} fresh run{{ 's' if l.fresh_runs != 1 }} did{% endif %}.</p>
 
+  {% if stage %}{% include "_lineup3d.html" %}{% endif %}
+
   <section class="lineup-wall" aria-label="The suspects, oldest first">
     <div class="lineup-ends">
       <span class="lineup-end ok s-{{ l.good.status or 'waiting' }}">✓ <code>{{ l.good.short }}</code> last good{{ " · being questioned" if l.good.status == "questioning" }}</span>

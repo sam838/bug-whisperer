@@ -341,6 +341,7 @@ def test_the_lineup_page_names_the_culprit_and_every_questioning_in_order(client
     assert "Last good version" in page and "(ruled out)" in page  # commit 1 was never questioned
     assert "No sample buttons on the page" in page and "Kane questioned <b>4</b> of 5 versions" in page and 'class="del"' in page
     assert "Sample reports" in client.get("/lineups").text
+    assert "data-lineup3d" in page and "Play the lineup" in page  # a finished lineup can be played in 3D
 
 
 def test_a_lineup_in_progress_keeps_refreshing_and_accuses_no_one_yet(client, tmp_path, monkeypatch):
@@ -351,6 +352,7 @@ def test_a_lineup_in_progress_keeps_refreshing_and_accuses_no_one_yet(client, tm
     live = client.get("/lineup/lineup-20261118-120000/live").text
     assert 'data-active="true"' in live and "suspect 3 of 4" in live
     assert "The culprit" not in live and "Culprit found" not in live
+    assert "data-lineup3d" not in live  # nothing to play until Kane has finished
 
 
 def test_an_unknown_lineup_is_not_found(client):
