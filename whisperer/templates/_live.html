@@ -1,7 +1,7 @@
 {% from "_kane.html" import sprite, head, say %}
 {% set fixv = inv.fix.get('verdict') if inv.fix else None %}
 {% set fixs = inv.fix.get('status', '') if inv.fix else '' %}
-<div class="live-root" data-active="{{ 'true' if active else 'false' }}">
+<div class="live-root" data-active="{{ 'true' if active or planning else 'false' }}">
 
   {# ------------------------------------------------ progress ------------------------------------------------ #}
   {% set stage = 0 %}
@@ -87,6 +87,7 @@
       {% elif inv.status == 'double-checking' %}🔎 Kane is checking the witness's claim, because a verdict rests on evidence and not on memory…
       {% elif fixs.startswith('fixing') %}🛠️ Claude is repairing the code, using only Kane's evidence ({{ fixs.split('(')[-1].rstrip(')') }})…
       {% elif fixs.startswith('waiting') %}🔄 The app is restarting with the repair…
+      {% elif fixs.startswith("Kane's sealed") %}🔒 The usual steps passed. Now Kane asks his sealed question: the same bug, reached another way. Claude never saw it…
       {% elif fixs.startswith('Kane') %}🕵️ Kane is back at the scene, repeating the exact same steps. It won't take Claude's word for it…
       {% else %}Working…{% endif %}
     </div>
@@ -97,7 +98,7 @@
     {% if fixv == 'fixed' %}
       <div class="verdict ok"><span class="stamp">Case closed</span> Kane saw the bug, Claude repaired it, and Kane went back to the scene and <b>saw the fix with its own eyes</b>.</div>
     {% elif fixv == 'needs_human' %}
-      <div class="verdict warn"><span class="stamp">Handed to a person</span> Three repairs didn't get past Kane. This case needs a human.</div>
+      <div class="verdict warn"><span class="stamp">Handed to a person</span> Three repairs didn't get past Kane. This case needs a human. {{ inv.fix.get('note', '') }}</div>
     {% elif fixv in ('inconclusive', 'error') %}
       <div class="verdict warn"><span class="stamp">Unsolved</span> Kane couldn't finish checking the repair{{ ': ' ~ inv.fix.get('error') if inv.fix.get('error') }}, so nothing is claimed.</div>
     {% elif inv.verdict == 'reproduced' and inv.claim.get('outcome') == 'confirmed' %}
@@ -133,15 +134,21 @@
   {% endif %}{% endif %}
 
   {% if can_fix and not active %}
-    <form method="post" action="/r/{{ inv.id }}/fix" class="fixbar">
-      {% if retry %}
-        <div><b>The last repair didn't get past Kane.</b> Try again: Claude gets Kane's newest evidence, and the earlier attempt stays on file below.</div>
-        <button class="btn primary">🛠️ Try the repair again</button>
-      {% else %}
-        <div><b>The code for {{ inv.app }} is connected.</b> Claude can repair it, and Kane will go back to the scene to check.</div>
-        <button class="btn primary">🛠️ Repair it</button>
-      {% endif %}
-    </form>
+    {% if planning %}
+      <div class="banner working"><span class="pulse"></span>🗂️ Claude is reading the code to plan the repair. Nothing is changed, and you'll see the plan before anything is…</div>
+    {% elif plan %}
+      {% include "_plan.html" %}
+    {% else %}
+      <div class="fixbar">
+        <div><b>The code for {{ inv.app }} is connected.</b>
+          {% if plan_error %}The last plan didn't hold up: {{ plan_error }}{% endif %}
+          Claude reads the code first and shows you how it would repair it. Nothing changes until you pick a way.</div>
+        <div class="fixbar-actions">
+          <form method="post" action="/r/{{ inv.id }}/fix"><button class="btn">{{ 'Try again without a plan' if retry else 'Repair without a plan' }}</button></form>
+          <form method="post" action="/r/{{ inv.id }}/plan"><button class="btn primary">🗂️ Plan the repair</button></form>
+        </div>
+      </div>
+    {% endif %}
   {% endif %}
 
   {% if board and not active %}{% include "_reconstruction.html" %}{% endif %}
@@ -254,8 +261,20 @@
     {% set last = inv.fix.attempts[-1] %}
     <section class="card">
       <h2>The repair <span class="muted">· by Claude, attempt {{ last.attempt }} of 3</span></h2>
+      {% if approach %}<p class="muted">Following plan {{ approach.id }}: {{ approach.title }}.</p>{% endif %}
       <p>{{ last.fixer_said.strip().split('\n')[0] }}</p>
+      {% if last.promise %}<p class="promise {{ 'kept' if last.promise.kept else 'strayed' }}">📏 <b>Kept its word?</b> {{ promise_line(last.promise) }}</p>{% endif %}
       {% if last.patch %}<pre class="diff">{% for line in last.patch.splitlines() if not line.startswith(('diff --git', 'index ')) %}<span class="{{ 'add' if line.startswith('+') and not line.startswith('+++') else 'del' if line.startswith('-') and not line.startswith('---') else 'ctx' }}">{{ line or ' ' }}</span>{% endfor %}</pre>{% endif %}
+      {% if last.sealed %}
+        {% set asked = last.sealed %}
+        <div class="claim {{ {'passed': 'confirmed', 'failed': 'not_true'}.get(asked.verdict, '') }}">
+          <b>🔒 Kane's sealed question:</b>
+          {% if asked.verdict == 'passed' %}✅ held. The same bug, reached another way, is fixed too.
+          {% elif asked.verdict == 'failed' %}❌ the repair missed it. {{ (asked.summary or '').split('\n')[0] }}
+          {% else %}⚠️ Kane couldn't finish it, so nothing is claimed about it.{% endif %}
+          {% if inv.repair_plan.get('sealed') %}<span class="muted">“{{ inv.repair_plan.sealed.objective }}”</span>{% endif %}
+        </div>
+      {% endif %}
       {% if inv.fix.get('regression_test') %}<p class="muted">📁 <b>Kept on file:</b> Kane's steps are saved as <code>{{ inv.fix.get('regression_test') }}</code>. Kane can revisit this scene in about 20 seconds after any change, so this bug can't sneak back.</p>{% endif %}
     </section>
   {% endif %}

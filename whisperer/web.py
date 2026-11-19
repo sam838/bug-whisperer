@@ -31,6 +31,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from . import demo, intake, kane
 from .detective import ROOT, RUNS, App, Investigation, investigate
 from .voice import BOOKKEEPING, speak
+from . import repair_plan
 from .fixer import fix, load_investigation
 
 HERE = Path(__file__).resolve().parent
@@ -72,13 +73,19 @@ def worker() -> None:
                     from . import apprunner
                     demo.reset_clinic()
                     apprunner.restart(app_cfg)
-                investigate(app_cfg, inv.report, inv.screenshot, inv=inv)
+                inv = investigate(app_cfg, inv.report, inv.screenshot, inv=inv)
+                if inv.verdict == "reproduced" and app_cfg.code_dir:
+                    repair_plan.make(app_cfg, inv)  # read-only: the plan shows before Repair
+            elif kind == "plan":
+                repair_plan.make(app_cfg, inv)
             elif kind == "fix":
                 fix(app_cfg, inv)
         except Exception as exc:  # keep the worker alive; show the error on the page
             inv = load_investigation(RUNS / inv_id)
             target = inv.fix if kind == "fix" and inv.fix else None
-            if target is not None:
+            if inv.repair_plan.get("status") in ("planning", "queued"):  # the plan went wrong, not the case
+                inv.repair_plan = {"status": "error", "error": str(exc)}
+            elif target is not None:
                 target.update(status="done", verdict="error", error=str(exc))
             else:
                 inv.status, inv.verdict = "done", "inconclusive"
@@ -269,6 +276,9 @@ def replay(inv: Investigation) -> dict | None:
         after = frames(attempts[-1].get("kane"))
         if after:
             chapters.append({"title": "Back at the scene, after the repair", "frames": after})
+        sealed = frames(attempts[-1].get("sealed"))
+        if sealed:
+            chapters.append({"title": "Kane's sealed question", "frames": sealed})
     if not chapters:
         return None
 
@@ -299,11 +309,17 @@ def view(inv: Investigation) -> dict:
     investigating = inv.status not in ("done",)
     last_try = inv.fix["attempts"][-1]["kane"] if inv.fix.get("attempts") else None
     track = live_track(inv) if (investigating or fixing) else {"steps": [], "total": 0, "hidden": 0, "elapsed": 0}
+    plan = inv.repair_plan or {}
     return {
         "inv": inv,
         "case_no": case_numbers().get(inv.id),
         "app_cfg": app_cfg,
         "active": investigating or fixing,
+        # only while its job is really queued or running: a restart mid-plan must not block Repair
+        "planning": plan.get("status") in ("planning", "queued") and inv.id in waiting,
+        "plan": plan if plan.get("status") == "ready" else None,
+        "plan_error": plan.get("error") if plan.get("status") == "error" else None,
+        "approach": (inv.fix or {}).get("approach"),
         "queued": inv.id in waiting and (inv.status == "queued" or inv.fix.get("status") == "queued"),
         "track": track,
         "scene": kane_scene(inv, track, inv.id in waiting and (inv.status == "queued" or inv.fix.get("status") == "queued"))
@@ -374,6 +390,8 @@ def kane_scene(inv: Investigation, track: dict, queued: bool) -> dict | None:
         return {"mode": "reading", "line": "Claude is repairing the code, using only my evidence. I'll check it myself after."}
     if fixs.startswith("waiting"):
         return {"mode": "idle", "line": "The app is restarting with the repair…"}
+    if fixs.startswith("Kane's sealed"):
+        return {"mode": "walking", "line": latest or "The usual steps passed. Now my sealed question: the same bug, another way in. Claude never saw it."}
     if fixs.startswith("Kane"):
         return {"mode": "walking", "line": latest or "Back to the scene. Same steps, no taking Claude's word for it."}
     return None
@@ -483,21 +501,42 @@ def evidence_board(inv: Investigation, before: dict | None, after: dict | None) 
     attempts = (inv.fix or {}).get("attempts") or []
     if attempts:
         last = attempts[-1]
-        pins.append({"id": "repair", "kind": "diff", "title": f"Claude's repair · attempt {last.get('attempt', len(attempts))}",
-                     "lines": _diff_lines(last.get("patch", ""))})
-        links.append(("verdict", "repair"))
+        approach = (inv.fix or {}).get("approach")
+        if approach:
+            pins.append({"id": "plan", "kind": "typed", "title": f"The plan picked · {approach['id']}. {approach['title']}",
+                         "body": approach["change"][:180]})
+            links.append(("verdict", "plan"))
+        title = f"Claude's repair · attempt {last.get('attempt', len(attempts))}"
+        if last.get("promise"):
+            title += " · kept its word" if last["promise"]["kept"] else " · strayed from the plan"
+        pins.append({"id": "repair", "kind": "diff", "title": title, "lines": _diff_lines(last.get("patch", ""))})
+        links.append(("plan" if approach else "verdict", "repair"))
         if after:
             pins.append({"id": "recheck", "kind": "photo", "title": "Kane, back at the scene",
                          "img": f"/files/{inv.id}/{after['dir']}/{after['file']}",
                          "body": _caption(after.get("summary", ""), inv)})
             links.append(("repair", "recheck"))
+        asked = last.get("sealed")
+        if asked:
+            shot = _key_shot(asked)
+            title = "Kane's sealed question · " + SEALED_WORDS.get(asked.get("verdict"), "couldn't finish")
+            pin = {"id": "sealed", "kind": "photo" if shot else "typed", "title": title,
+                   "body": _caption(shot.get("summary", ""), inv) if shot else (asked.get("summary") or "")[:180]}
+            if shot:
+                pin["img"] = f"/files/{inv.id}/{shot['dir']}/{shot['file']}"
+            pins.append(pin)
+            links.append(("recheck" if after else "repair", "sealed"))
     if inv.fix and inv.fix.get("status") == "done":
         words, tone = case_stamp(inv)
         test = inv.fix.get("regression_test")
         pins.append({"id": "closed", "kind": "stamp", "stamp": words, "tone": tone,
                      "body": f"Kept on file: {test}" if test else ""})
-        links.append(("recheck" if after and attempts else "verdict", "closed"))
+        last_pin = "sealed" if attempts and attempts[-1].get("sealed") else "recheck" if after and attempts else "verdict"
+        links.append((last_pin, "closed"))
     return {"pins": pins, "links": links}
+
+
+SEALED_WORDS = {"passed": "✓ held", "failed": "✗ the repair missed it"}
 
 
 def _key_shot(kane: dict | None) -> dict | None:
@@ -525,6 +564,10 @@ def reply_for_user(inv: Investigation) -> str | None:
     if inv.verdict == "needs_info":
         return f"Thanks for telling us! One quick question so we can find it: {inv.plan.get('question')}"
     return None
+
+
+promise_line = repair_plan.promise_line
+templates.env.globals["promise_line"] = promise_line
 
 
 def ticket_markdown(inv: Investigation) -> str | None:
@@ -592,8 +635,18 @@ def report_markdown(inv: Investigation) -> str:
         lines += [f"**Claim checked by Kane:** {inv.claim.get('outcome', 'unknown')}: {inv.claim.get('objective', '')}", ""]
     if r["last_try"]:
         t = r["last_try"]
-        lines += ["## The repair", "", (t.get("fixer_said") or "").strip(), "", "```diff", (t.get("patch") or "").strip(), "```", "",
-                  f"**Kane went back and repeated the same steps:** {t['kane'].get('verdict')}. {t['kane'].get('summary') or ''}".strip(), ""]
+        approach = (inv.fix or {}).get("approach")
+        lines += ["## The repair", ""]
+        if approach:
+            lines += [f"**The plan picked:** {approach['id']}. {approach['title']}: {approach['change']}", ""]
+        lines += [(t.get("fixer_said") or "").strip(), "", "```diff", (t.get("patch") or "").strip(), "```", ""]
+        if t.get("promise"):
+            lines += [f"**Kept its word?** {promise_line(t['promise'])}", ""]
+        lines += [f"**Kane went back and repeated the same steps:** {t['kane'].get('verdict')}. {t['kane'].get('summary') or ''}".strip(), ""]
+        if t.get("sealed"):
+            sealed = (inv.repair_plan or {}).get("sealed") or {}
+            lines += [f"**Kane's sealed question** (the fixer never saw it): {sealed.get('objective', '')}", "",
+                      f"Result: {t['sealed'].get('verdict')}. {t['sealed'].get('summary') or ''}".strip(), ""]
         if (inv.fix or {}).get("regression_test"):
             lines += [f"**Kept on file as a regression test:** `{inv.fix['regression_test']}`", ""]
     if r["ticket_md"]:
@@ -816,18 +869,36 @@ def report_live(request: Request, inv_id: str):
     return templates.TemplateResponse(request, "_live.html", view(get_inv(inv_id)))
 
 
-@app.post("/r/{inv_id}/fix")
-def start_fix(request: Request, inv_id: str):
+@app.post("/r/{inv_id}/plan")
+def start_plan(request: Request, inv_id: str):
     gate = live_gate(request)
     if gate is not None:
         return gate
     v = view(get_inv(inv_id))
-    if not v["can_fix"]:
+    if not v["can_fix"] or v["planning"]:
+        raise HTTPException(400, "This report can't be planned for a repair")
+    inv = v["inv"]
+    inv.repair_plan = {"status": "queued"}
+    inv.save()
+    if demo.hosted():
+        demo.count_job()
+    enqueue("plan", inv.id)
+    return RedirectResponse(f"/r/{inv.id}", status_code=303)
+
+
+@app.post("/r/{inv_id}/fix")
+def start_fix(request: Request, inv_id: str, option: str = Form("")):
+    gate = live_gate(request)
+    if gate is not None:
+        return gate
+    v = view(get_inv(inv_id))
+    if not v["can_fix"] or v["planning"]:
         raise HTTPException(400, "This report can't be fixed automatically")
     inv = v["inv"]
     if inv.fix.get("attempts"):
         inv.fix_history.append(inv.fix)  # keep the earlier try as evidence
-    inv.fix = {"status": "queued", "attempts": [], "verdict": None}
+    picked = repair_plan.choose(v["plan"], option) if v["plan"] else None
+    inv.fix = {"status": "queued", "attempts": [], "verdict": None, "option": picked["id"] if picked else None}
     inv.save()
     if demo.hosted():
         demo.count_job()

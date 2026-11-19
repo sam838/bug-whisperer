@@ -45,6 +45,7 @@ def main(argv=None) -> int:
     choice.add_argument("--no-repair", dest="repair", action="store_false", help="Don't offer a repair")
     rr = sub.add_parser("repair", help="Repair a confirmed case: Claude fixes it, Kane proves it")
     rr.add_argument("case", help="The case id (see: bug-whisperer cases)")
+    rr.add_argument("--way", help="Which way from Claude's repair plan (A, B or C; default: Claude's pick)")
     sub.add_parser("cases", help="The cases on file, newest first")
     dr = sub.add_parser("doctor", help="Check Kane CLI, Claude Code, Chrome and your apps (spends no credits)")
     dr.add_argument("--port", type=int, default=8000)
@@ -90,7 +91,7 @@ def main(argv=None) -> int:
             if not app.code_dir:
                 print(f"{app.name} has no code connected, so Bug Whisperer can reproduce its bugs but not repair them.")
                 return 1
-            return 0 if terminal.repair(inv, app)["verdict"] == "fixed" else 1
+            return 0 if terminal.repair(inv, app, way=args.way)["verdict"] == "fixed" else 1
         cases = terminal.report(args.text, terminal.choose_app(args.app), args.file, args.screenshot, args.repair)
         return 0 if all(c.verdict in ("reproduced", "not_reproduced", "needs_info") for c in cases) else 1
 

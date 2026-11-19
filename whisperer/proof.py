@@ -26,12 +26,14 @@ VERDICT_WORDS = {"reproduced": "Confirmed", "not_reproduced": "Open: not reprodu
 
 
 def _kane_runs(inv: dict) -> list[dict]:
-    """Every Kane run a case made: its attempts at the scene, and the claim double-check."""
+    """Every Kane run a case made: its attempts at the scene, the claim double-check, and each
+    repair's re-check and sealed question."""
     runs = [a.get("kane") or {} for a in inv.get("attempts") or []]
     if inv.get("claim"):
         runs.append(inv["claim"])
     for attempt in (inv.get("fix") or {}).get("attempts") or []:
         runs.append(attempt.get("kane") or {})
+        runs.append(attempt.get("sealed") or {})
     return [r for r in runs if r]
 
 

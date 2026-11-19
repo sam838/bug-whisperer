@@ -48,7 +48,7 @@ def test_reproduced_report_offers_a_fix(client, tmp_path):
                judgement={"explanation": "The app saved it.", "ticket": {"title": "Past dates accepted",
                           "steps": ["Book"], "expected": "Refused", "actual": "Saved"}})
     page = client.get(f"/r/{inv.id}").text
-    assert "Confirmed" in page and "Repair it" in page and "Past dates accepted" in page
+    assert "Confirmed" in page and "Plan the repair" in page and "Past dates accepted" in page
 
 
 def test_a_retry_in_progress_is_not_stamped_unsolved(client, tmp_path):
@@ -68,6 +68,7 @@ def test_fixed_report_shows_reply_and_no_fix_button(client, tmp_path):
                     "kane": {"verdict": "passed", "reason": "Objective completed"}}]})
     page = client.get(f"/r/{inv.id}").text
     assert "Case closed" in page and "Reply to the user" in page and "Repair it" not in page
+    assert "Plan the repair" not in page
 
 
 def test_finished_case_offers_a_replay_in_kanes_voice(client, tmp_path):
@@ -357,3 +358,57 @@ def test_a_lineup_in_progress_keeps_refreshing_and_accuses_no_one_yet(client, tm
 
 def test_an_unknown_lineup_is_not_found(client):
     assert client.get("/lineup/lineup-nope", headers={"accept": "application/json"}).status_code == 404
+
+
+PLAN = {"status": "ready", "cause": "The server saves any date.", "recommended": "B",
+        "options": [{"id": "A", "title": "Guard the calendar", "change": "Hide past days.", "files": ["templates/book.html"],
+                     "tradeoff": "Nicer, but the server still takes them.", "recommended": False},
+                    {"id": "B", "title": "Guard the door", "change": "The server refuses past dates.", "files": ["app.py"],
+                     "tradeoff": "Nothing gets past it.", "recommended": True}],
+        "sealed": {"objective": "Go to http://127.0.0.1:8001/book. Verify that yesterday is refused.",
+                   "why": "A repair for last year only would miss yesterday."}}
+
+
+def test_the_repair_plan_shows_each_way_and_the_sealed_question_before_anything_changes(client, tmp_path):
+    inv = save(tmp_path, status="done", verdict="reproduced", repair_plan=PLAN)
+    page = client.get(f"/r/{inv.id}").text
+    assert "Claude's repair plan" in page and "The server saves any date." in page
+    assert "Guard the calendar" in page and "Guard the door" in page and "Claude's pick" in page
+    assert page.count("Repair it this way") == 2 and "sealed question" in page and "yesterday is refused" in page
+
+
+def test_repair_follows_the_way_the_person_picked(client, tmp_path):
+    inv = save(tmp_path, status="done", verdict="reproduced", repair_plan=PLAN)
+    assert client.post(f"/r/{inv.id}/fix", data={"option": "a"}, follow_redirects=False).status_code == 303
+    assert detective_load(tmp_path, inv.id)["fix"]["option"] == "A"
+    inv = save(tmp_path, status="done", verdict="reproduced", repair_plan=PLAN)
+    client.post(f"/r/{inv.id}/fix", data={"option": "Z"}, follow_redirects=False)
+    assert detective_load(tmp_path, inv.id)["fix"]["option"] == "B"  # an unknown way: Claude's pick
+
+
+def test_a_plan_being_written_keeps_the_page_refreshing_and_hides_repair(client, tmp_path, monkeypatch):
+    inv = save(tmp_path, status="done", verdict="reproduced", repair_plan={"status": "planning"})
+    monkeypatch.setattr(web, "waiting", [inv.id])
+    page = client.get(f"/r/{inv.id}/live").text
+    assert 'data-active="true"' in page and "reading the code to plan the repair" in page
+    assert "Repair it this way" not in page and "Repair without a plan" not in page
+    assert client.post(f"/r/{inv.id}/fix", follow_redirects=False).status_code == 400
+    monkeypatch.setattr(web, "waiting", [])  # the server restarted mid-plan: offer to plan again
+    page = client.get(f"/r/{inv.id}/live").text
+    assert 'data-active="false"' in page and "Plan the repair" in page
+
+
+def test_the_closed_case_shows_the_kept_word_and_the_sealed_question(client, tmp_path):
+    attempt = {"attempt": 1, "fixer_said": "Refused past dates.", "patch": "--- a/clinic/app.py\n+++ b/clinic/app.py\n+check",
+               "promise": {"promised": ["app.py"], "touched": ["clinic/app.py"], "extra": [], "unused": [], "kept": True},
+               "kane": {"verdict": "passed"}, "sealed": {"verdict": "passed", "summary": "Yesterday was refused."}}
+    inv = save(tmp_path, status="done", verdict="reproduced", plan={"expected": "Refuse past dates."}, repair_plan=PLAN,
+               fix={"status": "done", "verdict": "fixed", "approach": PLAN["options"][1], "attempts": [attempt]})
+    page = client.get(f"/r/{inv.id}").text
+    assert "Following plan B: Guard the door" in page and "Kept its word?" in page
+    assert "changed only what the plan named" in page and "held. The same bug, reached another way" in page
+    assert "Kane's sealed question" in client.get(f"/r/{inv.id}/report.md").text
+
+
+def detective_load(tmp_path, inv_id):
+    return json.loads((tmp_path / inv_id / "investigation.json").read_text(encoding="utf-8"))

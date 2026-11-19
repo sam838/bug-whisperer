@@ -1,0 +1,35 @@
+{# Claude's repair plan, shown before anything changes: the cause, one to three ways to repair it,
+   and how Kane will check the repair. Each way is its own Repair button. #}
+<section class="card plan-card" aria-labelledby="plan-h-{{ inv.id }}">
+  <h2 id="plan-h-{{ inv.id }}">🗂️ Claude's repair plan <span class="muted">· Claude read the code and changed nothing yet</span></h2>
+  {% if retry %}<p class="plan-retry"><b>The last repair didn't get past Kane.</b> Pick a way again. The earlier attempt stays on file below.</p>{% endif %}
+  {% if plan.cause %}<p class="plan-cause"><b>What's wrong:</b> {{ plan.cause }}</p>{% endif %}
+  <div class="plan-options">
+    {% for o in plan.options %}
+      <form method="post" action="/r/{{ inv.id }}/fix" class="plan-option{{ ' picked' if o.recommended and plan.options|length > 1 }}">
+        <input type="hidden" name="option" value="{{ o.id }}">
+        <div class="plan-option-head">
+          <span class="plan-letter" aria-hidden="true">{{ o.id }}</span>
+          <b>{{ o.title }}</b>
+          {% if o.recommended and plan.options|length > 1 %}<span class="tag pick">Claude's pick</span>{% endif %}
+        </div>
+        <p>{{ o.change }}</p>
+        {% if o.tradeoff %}<p class="plan-tradeoff">⚖️ {{ o.tradeoff }}</p>{% endif %}
+        <p class="plan-files">Will change {% for f in o.files %}<code>{{ f }}</code>{{ ', ' if not loop.last }}{% endfor %}</p>
+        <button class="btn{{ ' primary' if o.recommended }}">🛠️ Repair it this way</button>
+      </form>
+    {% endfor %}
+  </div>
+  <div class="plan-checks">
+    <b>Then Kane checks the repair himself:</b>
+    <ol>
+      <li>👣 He repeats the exact steps that failed.</li>
+      {% if plan.sealed %}
+        <li>🔒 <b>His sealed question.</b> {{ plan.sealed.why or 'The same bug, reached another way.' }}
+          Claude won't see it while repairing, so the repair can't be written just to pass it.
+          <details><summary>Read the sealed question</summary><p class="plan-sealed">{{ plan.sealed.objective }}</p></details></li>
+      {% endif %}
+      <li>📏 Code checks that the repair changed only the files the plan named.</li>
+    </ol>
+  </div>
+</section>

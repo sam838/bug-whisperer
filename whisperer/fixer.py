@@ -4,6 +4,10 @@ A bug only counts as fixed when the SAME Kane objective that failed during the r
 passes. The fixer never sees the words "fix bug X": it gets the user's report and Kane's
 evidence, so it has to work from what Kane actually saw. It may only edit the app's code folder.
 After 3 failed attempts a human is asked.
+
+When the case has a repair plan (repair_plan.py), the fixer follows the way the person picked,
+code checks whether it changed the files the plan named, and after the usual re-check passes Kane
+asks the plan's sealed question, which the fixer never saw. Only when both pass is the case closed.
 """
 
 from __future__ import annotations
@@ -15,7 +19,7 @@ import time
 from pathlib import Path
 
 
-from . import apprunner, camera, claude, kane, regression
+from . import apprunner, camera, claude, kane, regression, repair_plan
 from . import evidence as kane_evidence
 from .detective import ROOT, App, Investigation
 
@@ -35,7 +39,7 @@ What Kane did and saw:
 - Steps Kane was given: {objective}
 - Kane's final check failed at: {failed_step}
 - Kane's account of what happened: {summary}
-{previous}
+{approach}{previous}
 Rules:
 - Only edit files in this folder (the app's code). Make the smallest change that fixes it.
 - Don't add dependencies. Keep the app's existing style.
@@ -50,15 +54,33 @@ Your previous attempt did not fix it. Kane ran the same steps again and saw this
 - Kane's account: {summary}
 """
 
+APPROACH_NOTE = """
+The person approved this way to repair it: {title}. {change}
+Files the plan expected to change: {files}. Stay with this approach. If it can't work, change
+what you must and say why in your final sentences.
+"""
 
-def fix(app: App, inv: Investigation, on_update=None) -> dict:
+SEALED_NOTE = """
+Kane's usual re-check passed. Then Kane asked a sealed question: the same bug, reached another
+way. Your repair didn't hold there:
+- Kane's steps: {objective}
+- Failed at: {failed_step}
+- Kane's account: {summary}
+Make the repair cover this too, without breaking the original steps.
+"""
+
+
+def fix(app: App, inv: Investigation, on_update=None, option: str | None = None) -> dict:
     if inv.verdict != "reproduced":
         raise ValueError("Only a reproduced bug can be fixed")
     if not app.code_dir:
         raise ValueError(f"{app.name} has no code connected, so it can only be reproduced")
     code_dir = (ROOT / app.code_dir).resolve()
     objective = inv.plan["objective"]
-    record = {"status": "fixing", "attempts": [], "verdict": None,
+    plan = inv.repair_plan if (inv.repair_plan or {}).get("status") == "ready" else {}
+    approach = repair_plan.choose(plan, option or (inv.fix or {}).get("option")) if plan else None
+    sealed = plan.get("sealed")
+    record = {"status": "fixing", "attempts": [], "verdict": None, "approach": approach,
               "before": {"kane_verdict": inv.kane.get("verdict"), "failed_step": inv.kane.get("failed_step")}}
     if inv.fix.get("attempts"):
         inv.fix_history.append(inv.fix)  # an earlier fix run: keep it as evidence
@@ -80,9 +102,12 @@ def fix(app: App, inv: Investigation, on_update=None) -> dict:
             FIX_PROMPT.format(
                 report=inv.report, expected=inv.plan.get("expected"), objective=objective,
                 failed_step=evidence.get("failed_step"), summary=evidence.get("summary"),
+                approach=APPROACH_NOTE.format(title=approach["title"], change=approach["change"],
+                                              files=", ".join(approach["files"])) if approach else "",
                 previous=previous),
             cwd=code_dir, tools="Read,Edit,Write,Glob,Grep", edits=True, timeout=900)
         patch = _diff(code_dir, started)
+        promise = repair_plan.kept_word(approach["files"], patch) if approach else None
         notify(f"waiting for the app to reload (attempt {attempt})")
         if not apprunner.restart(app):
             evidence = {"verdict": "failed", "failed_step": "The app did not start after the change",
@@ -90,7 +115,7 @@ def fix(app: App, inv: Investigation, on_update=None) -> dict:
                                    + _log_tail(app)}
             record["attempts"].append({"attempt": attempt, "fixer_said": reply.get("result", "")[-1500:],
                                        "fixer_cost_usd": reply.get("total_cost_usd"), "patch": patch,
-                                       "kane": evidence})
+                                       "promise": promise, "kane": evidence})
             previous = RETRY_NOTE.format(failed_step=evidence["failed_step"], summary=evidence["summary"])
             continue
         apprunner.reset(app)
@@ -110,9 +135,21 @@ def fix(app: App, inv: Investigation, on_update=None) -> dict:
         evidence["shots_dir"] = f"shots-verify-{run_no}-{attempt}"
         record["attempts"].append({
             "attempt": attempt, "fixer_said": reply.get("result", "")[-1500:],
-            "fixer_cost_usd": reply.get("total_cost_usd"), "patch": patch, "kane": evidence,
+            "fixer_cost_usd": reply.get("total_cost_usd"), "patch": patch, "promise": promise,
+            "kane": evidence,
         })
         inv.save()
+        if result.verdict == "passed" and sealed:
+            asked = _ask_sealed(app, inv, sealed, f"{run_no}-{attempt}", name, notify, attempt)
+            record["attempts"][-1]["sealed"] = asked
+            inv.save()
+            if asked["verdict"] == "failed":  # the repair only covered Kane's exact steps
+                regression.discard(name)
+                previous = SEALED_NOTE.format(objective=sealed["objective"], failed_step=asked.get("failed_step"),
+                                              summary=asked.get("summary"))
+                continue
+            if asked.get("regression_test"):
+                record["sealed_test"] = asked["regression_test"]
         if result.verdict == "passed":
             # Keep the passing run as a regression test, without the secrets Kane wrote into it.
             test_file = regression.sanitize(name)
@@ -134,11 +171,34 @@ def fix(app: App, inv: Investigation, on_update=None) -> dict:
                                      summary=evidence.get("summary"))
     else:
         record.update(verdict="needs_human")
+        if (record["attempts"][-1].get("sealed") or {}).get("verdict") == "failed":
+            record["note"] = "Kane's usual re-check passed, but his sealed question still failed."
     notify("done")
     return record
 
 
 SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", "dist", "build", ".next"}
+
+
+def _ask_sealed(app: App, inv: Investigation, sealed: dict, tag: str, recheck_name: str, notify,
+                attempt: int) -> dict:
+    """Kane's sealed question, asked after his usual re-check passed. Returns Kane's evidence."""
+    notify(f"Kane's sealed question (attempt {attempt})")
+    apprunner.reset(app)
+    name = f"{recheck_name}-sealed"
+    with camera.KaneCamera(inv.folder) as cam:
+        result = kane.run(sealed["objective"], variables=app.variables(), max_steps=30, timeout=300,
+                          name=name, cdp_endpoint=cam.endpoint, log_path=inv.folder / f"sealed-{tag}.ndjson")
+    name = regression.saved_name(name)
+    asked = _verify_brief(result)
+    asked.update(kane_evidence.extract_shots(result.session_dir, inv.folder / f"shots-sealed-{tag}"))
+    asked["shots_dir"] = f"shots-sealed-{tag}"
+    if result.verdict == "passed":
+        test_file = regression.sanitize(name)
+        asked.update(regression_test=name, regression_file=str(test_file.relative_to(ROOT)))
+    else:
+        regression.discard(name)  # a run that didn't pass is not a test
+    return asked
 
 
 def _in_git(code_dir: Path) -> bool:

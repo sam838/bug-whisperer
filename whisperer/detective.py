@@ -82,6 +82,7 @@ class Investigation:
     kane: dict = field(default_factory=dict)
     judgement: dict = field(default_factory=dict)
     attempts: list = field(default_factory=list)
+    repair_plan: dict = field(default_factory=dict)  # Claude's plan, shown before Repair (repair_plan.py)
     fix: dict = field(default_factory=dict)
     fix_history: list = field(default_factory=list)  # earlier fix runs, kept as evidence
     claim: dict = field(default_factory=dict)  # Kane's double-check of a claim the verdict relied on

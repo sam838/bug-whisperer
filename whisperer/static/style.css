@@ -269,6 +269,38 @@ textarea { resize: vertical; min-height: 110px; }
   border-radius: var(--radius); padding: 16px 20px; margin: 16px 0;
 }
 
+.fixbar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Claude's repair plan: the ways to repair it, side by side, each with its own Repair button. */
+.plan-card h2 .muted { font-weight: 400; }
+.plan-cause { margin: 4px 0 14px; }
+.plan-retry { margin: 4px 0 10px; color: var(--warn); }
+.plan-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.plan-option {
+  display: flex; flex-direction: column; gap: 6px; margin: 0;
+  border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 14px 16px; background: var(--paper);
+}
+.plan-option.picked { border: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); background: var(--accent-soft); }
+.plan-option p { margin: 0; overflow-wrap: anywhere; }
+.plan-option .btn { margin-top: auto; align-self: flex-start; }
+.plan-option-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.plan-letter {
+  display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--ink-2); color: var(--paper); font: 700 12.5px/1 var(--sans);
+}
+.tag.pick { background: var(--accent); color: var(--accent-ink); margin-left: 0; }
+.plan-tradeoff { color: var(--muted); font-size: 14px; }
+.plan-files { font-size: 13px; color: var(--muted); }
+.plan-files code { font-family: var(--mono); font-size: 12.5px; }
+.plan-checks { margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.plan-checks ol { margin: 8px 0 0; padding-left: 0; list-style: none; display: grid; gap: 6px; }
+.plan-checks details { margin-top: 4px; }
+.plan-checks summary { cursor: pointer; color: var(--accent); font-size: 14px; }
+.plan-sealed { font-family: var(--mono); font-size: 12.5px; margin: 6px 0 0; overflow-wrap: anywhere; }
+.promise { font-size: 14.5px; }
+.promise.kept b { color: var(--ok); }
+.promise.strayed b { color: var(--warn); }
+
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; margin: 18px 0; }
 .grid2 .card { margin: 0; }
 .grid2.tight { margin: 0; gap: 12px; }

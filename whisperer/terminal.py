@@ -2,7 +2,7 @@
 
   bug-whisperer report "cant book!!! it just saved it"     one report, one case
   bug-whisperer report --file results.xlsx                  test results: one case per failure
-  bug-whisperer repair <case>                                Claude repairs, Kane proves it
+  bug-whisperer repair <case> [--way B]                      Claude plans and repairs, Kane proves it
   bug-whisperer cases                                        what's on file
 
 Every case is saved in runs/ like a website case, so `bug-whisperer up` shows it too, with the
@@ -19,7 +19,7 @@ import threading
 import time
 from pathlib import Path
 
-from . import voice
+from . import repair_plan, voice
 from .detective import RUNS, App, Investigation, investigate
 from .paths import ROOT
 
@@ -170,21 +170,83 @@ def run_case(inv: Investigation, app: App, out=print) -> Investigation:
     return inv
 
 
-def repair(inv: Investigation, app: App, out=print) -> dict:
+def show_plan(plan: dict, out=print) -> None:
+    """Claude's repair plan, before anything changes."""
+    if plan.get("status") != "ready":
+        out(f"   No plan this time ({plan.get('error') or 'Claude could not plan it'}). "
+            "Claude will repair from Kane's evidence alone.")
+        return
+    out("\n🗂️  CLAUDE'S REPAIR PLAN  Claude read the code and changed nothing yet.")
+    if plan.get("cause"):
+        out(f"   What's wrong: {plan['cause']}")
+    for o in plan["options"]:
+        pick = "   ← Claude's pick" if o["recommended"] and len(plan["options"]) > 1 else ""
+        out(f"   {o['id']}. {o['title']}{pick}")
+        out(f"      {o['change']}")
+        if o["tradeoff"]:
+            out(f"      ⚖️  {o['tradeoff']}")
+        out(f"      Will change: {', '.join(o['files'])}")
+    if plan.get("sealed"):
+        why = plan["sealed"]["why"] or "The same bug, reached another way."
+        out(f"   🔒 Then Kane asks a sealed question that Claude won't see: {why}")
+
+
+def ensure_plan(inv: Investigation, app: App, out=print) -> dict:
+    """The case's repair plan, made now (read-only) if it has none yet, and shown."""
+    if (inv.repair_plan or {}).get("status") != "ready":
+        out("\n🗂️  Claude is reading the code to plan the repair. Nothing is changed yet…")
+        try:
+            repair_plan.make(app, inv)
+        except Exception as exc:  # no plan is not a reason to stop: the repair works without one
+            inv.repair_plan = {"status": "error", "error": str(exc)}
+            inv.save()
+    show_plan(inv.repair_plan, out)
+    return inv.repair_plan
+
+
+def ask_way(plan: dict) -> str | None:
+    """Which way to repair it: an option's letter, '' for Claude's pick, None to leave it."""
+    options = (plan or {}).get("options") or []
+    if options:
+        letters = "/".join(o["id"] for o in options)
+        answer = input(f"\nRepair it? Type {letters} to pick a way, y for Claude's pick ({plan['recommended']}), "
+                       "or Enter to leave it: ").strip().lower()
+        if answer.upper() in {o["id"] for o in options}:
+            return answer.upper()
+        return "" if answer in ("y", "yes") else None
+    answer = input("\nRepair it now? Claude repairs from Kane's evidence, Kane checks. [y/N] ").strip().lower()
+    return "" if answer in ("y", "yes") else None
+
+
+def repair(inv: Investigation, app: App, out=print, way: str | None = None, planned: bool = False) -> dict:
     from .fixer import fix
-    out(f"\n━━ Repairing case {inv.id}: Claude works from Kane's evidence only, then Kane checks.\n")
-    with Follow(inv.folder, out, new_only=True):
-        record = fix(app, inv, on_update=lambda s: out(f"🛠️  {s}"))
+    if not planned:
+        ensure_plan(inv, app, out)
+    picked = repair_plan.choose(inv.repair_plan, way) if inv.repair_plan.get("status") == "ready" else None
+    out(f"\n━━ Repairing case {inv.id}: Claude works from Kane's evidence only, then Kane checks.")
+    if picked:
+        out(f"   Following plan {picked['id']}: {picked['title']}")
     out("")
+    with Follow(inv.folder, out, new_only=True):
+        record = fix(app, inv, on_update=lambda s: out(f"🛠️  {s}"), option=picked["id"] if picked else None)
+    out("")
+    last = (record.get("attempts") or [{}])[-1]
     if record["verdict"] == "fixed":
         changed = sorted({l[6:] for a in record.get("attempts", []) for l in (a.get("patch") or "").splitlines()
                           if l.startswith("+++ b/")})
         out("✅ CASE CLOSED  Kane repeated the same steps and saw the fix with his own eyes.")
         if changed:
             out(f"   Changed: {', '.join(changed)}")
+        if last.get("promise"):
+            out(f"   📏 Kept its word? {repair_plan.promise_line(last['promise'])}")
+        sealed = (last.get("sealed") or {}).get("verdict")
+        if sealed == "passed":
+            out("   🔒 Kane's sealed question held: the same bug, reached another way, is fixed too.")
+        elif last.get("sealed"):
+            out("   🔒 Kane couldn't finish his sealed question, so nothing is claimed about it.")
         out("   The passing test is saved, and replayed whenever this app's code changes.")
     elif record["verdict"] == "needs_human":
-        out("🙋 HANDED TO A PERSON  Three repairs didn't get past Kane.")
+        out(f"🙋 HANDED TO A PERSON  Three repairs didn't get past Kane. {record.get('note', '')}".rstrip())
     else:
         out(f"⚠️  UNSOLVED  Kane couldn't finish checking the repair, so nothing is claimed. {record.get('error', '')}".rstrip())
     out(f"   {website_link(inv.id)}")
@@ -192,15 +254,20 @@ def repair(inv: Investigation, app: App, out=print) -> dict:
 
 
 def offer_repair(inv: Investigation, app: App, choice: bool | None, out=print) -> None:
-    """After a confirmed bug in an app whose code is connected: repair now, if wanted."""
+    """After a confirmed bug in an app whose code is connected: plan the repair, then repair it
+    the way the person picks."""
     if inv.verdict != "reproduced" or not app.code_dir:
         return
     if choice is None:
         if not sys.stdin.isatty():
             out(f"\n   To repair it: bug-whisperer repair {inv.id}")
             return
-        choice = input("\nRepair it now? Claude repairs from Kane's evidence, Kane checks. [y/N] ").strip().lower() in ("y", "yes")
-    if choice:
+        way = ask_way(ensure_plan(inv, app, out))
+        if way is None:
+            out(f"   Later: bug-whisperer repair {inv.id}")
+            return
+        repair(inv, app, out, way=way or None, planned=True)
+    elif choice:
         repair(inv, app, out)
     else:
         out(f"   Later: bug-whisperer repair {inv.id}")

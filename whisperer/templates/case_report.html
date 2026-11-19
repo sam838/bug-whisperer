@@ -46,9 +46,13 @@
   {% if last_try %}
   <section>
     <h2>The repair</h2>
+    {% if inv.fix.get('approach') %}<p><b>The plan picked:</b> {{ inv.fix.approach.id }}. {{ inv.fix.approach.title }}: {{ inv.fix.approach.change }}</p>{% endif %}
     {% if last_try.get('fixer_said') %}<p>{{ last_try.fixer_said }}</p>{% endif %}
     <pre class="report-diff">{{ last_try.get('patch', '') }}</pre>
+    {% if last_try.get('promise') %}<p><b>Kept its word?</b> {{ promise_line(last_try.promise) }}</p>{% endif %}
     <p><b>Kane went back and repeated the same steps:</b> {{ last_try.kane.get('verdict') }}. {{ last_try.kane.get('summary') or '' }}</p>
+    {% if last_try.get('sealed') %}<p><b>Kane's sealed question</b> (the fixer never saw it): {{ (inv.repair_plan.get('sealed') or {}).get('objective', '') }}<br>
+      Result: {{ last_try.sealed.get('verdict') }}. {{ last_try.sealed.get('summary') or '' }}</p>{% endif %}
     {% if inv.fix.get('regression_test') %}<p><b>Kept on file as a regression test:</b> <code>{{ inv.fix.regression_test }}</code></p>{% endif %}
   </section>
   {% endif %}
