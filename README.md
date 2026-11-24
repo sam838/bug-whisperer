@@ -116,10 +116,11 @@ repair bugs too. Everything else, including hosting your own copy, is in
 - **[Kane CLI](https://www.testmuai.com/kane-cli/)** by TestMu AI: every reproduction and every proof.
 - **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)**: reads reports, plans Kane's tests and repairs code.
 - **[three.js](https://threejs.org/)** r128 for the 3D office.
-- **3D models and textures:** Detective Kane is the CC0 *RobotExpressive* by Tomás Laulhé
-  (Quaternius), and the furniture and textures are CC0 from [Poly Haven](https://polyhaven.com/).
-  Every author is listed in [whisperer/static/models/CREDITS.md](whisperer/static/models/CREDITS.md).
+- **3D models:** Detective Kane, his whole office, the Lineup's room and its suspects are our own
+  Blockbench-style models, built by [art/models.py](art/models.py) (open the `.bbmodel` files in
+  [Blockbench](https://www.blockbench.net/)). The list is in
+  [whisperer/static/models/CREDITS.md](whisperer/static/models/CREDITS.md).
 
 ## License
 
-[MIT](LICENSE). The 3D models and textures are CC0 (see the credits above).
+[MIT](LICENSE), the 3D models included.

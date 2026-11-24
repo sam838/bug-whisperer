@@ -1,5 +1,6 @@
 // The case, reconstructed in 3D: Kane's office, with the case's real evidence pinned to a
-// corkboard and joined by red string in the order the investigation went. The camera tours the
+// corkboard and joined by red string in the order the investigation went. The office, the desk and
+// Kane are our own Blockbench models (art/models.py); until they load, plain shapes stand in. The camera tours the
 // evidence by itself while Kane narrates in his dialogue box. three.js is loaded only when Play
 // is pressed, and the scene only renders while the tour plays, so idle pages cost nothing.
 
@@ -75,7 +76,7 @@ function corkTexture(T) {
     g.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
   }
   const t = new T.CanvasTexture(c);
-  t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(3, 1.6);
+  t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(3, 1.6); t.encoding = T.sRGBEncoding;
   return t;
 }
 
@@ -99,6 +100,7 @@ function kaneLine(pin) {
 function buildOffice(T, canvas, board) {
   const renderer = new T.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.outputEncoding = T.sRGBEncoding;
   const scene = new T.Scene();
   scene.background = new T.Color(0x0f1118);
   scene.fog = new T.Fog(0x0f1118, 9, 18);
@@ -110,24 +112,27 @@ function buildOffice(T, canvas, board) {
   const fill = new T.DirectionalLight(0xbfd4ff, 0.35); fill.position.set(4, 5, 6); scene.add(fill);
 
   const mat = (color) => new T.MeshLambertMaterial({ color });
-  const floor = new T.Mesh(new T.PlaneGeometry(14, 12), mat(0x3a2a1f)); floor.rotation.x = -Math.PI / 2; scene.add(floor);
-  const back = new T.Mesh(new T.PlaneGeometry(14, 6), mat(0x1f2433)); back.position.set(0, 3, -4); scene.add(back);
-  const left = new T.Mesh(new T.PlaneGeometry(12, 6), mat(0x1a1e2b)); left.position.set(-7, 3, 2); left.rotation.y = Math.PI / 2; scene.add(left);
-  const right = left.clone(); right.position.x = 7; right.rotation.y = -Math.PI / 2; scene.add(right);
+  // the room, drawn plain until its model loads (see swapModels)
+  const plainRoom = new T.Group(); scene.add(plainRoom);
+  const floor = new T.Mesh(new T.PlaneGeometry(14, 12), mat(0x3a2a1f)); floor.rotation.x = -Math.PI / 2; plainRoom.add(floor);
+  const back = new T.Mesh(new T.PlaneGeometry(14, 6), mat(0x1f2433)); back.position.set(0, 3, -4); plainRoom.add(back);
+  const left = new T.Mesh(new T.PlaneGeometry(12, 6), mat(0x1a1e2b)); left.position.set(-7, 3, 2); left.rotation.y = Math.PI / 2; plainRoom.add(left);
+  const right = left.clone(); right.position.x = 7; right.rotation.y = -Math.PI / 2; plainRoom.add(right);
 
-  // the desk with its lamp, in the foreground
-  const desk = new T.Mesh(new T.BoxGeometry(3.4, 0.12, 1.4), mat(0x5b3a29)); desk.position.set(-1.2, 0.95, 1.2); scene.add(desk);
+  // the desk with its lamp, in the foreground (drawn; swapModels puts Kane's real desk here)
+  const plainDesk = new T.Group(); scene.add(plainDesk);
+  const desk = new T.Mesh(new T.BoxGeometry(3.4, 0.12, 1.4), mat(0x5b3a29)); desk.position.set(-1.2, 0.95, 1.2); plainDesk.add(desk);
   [[-2.7, 0.65], [0.3, 0.65], [-2.7, 1.75], [0.3, 1.75]].forEach(([x, z]) => {
-    const leg = new T.Mesh(new T.BoxGeometry(0.1, 0.95, 0.1), mat(0x4a2f20)); leg.position.set(x, 0.47, z); scene.add(leg);
+    const leg = new T.Mesh(new T.BoxGeometry(0.1, 0.95, 0.1), mat(0x4a2f20)); leg.position.set(x, 0.47, z); plainDesk.add(leg);
   });
   const shade = new T.Mesh(new T.ConeGeometry(0.28, 0.3, 20, 1, true), new T.MeshLambertMaterial({ color: 0x2f6b4f, side: T.DoubleSide }));
-  shade.position.set(-1.2, 1.75, 0.9); scene.add(shade);
-  const pole = new T.Mesh(new T.CylinderGeometry(0.03, 0.03, 0.7), mat(0x2b2b2b)); pole.position.set(-1.2, 1.35, 0.9); scene.add(pole);
+  shade.position.set(-1.2, 1.75, 0.9); plainDesk.add(shade);
+  const pole = new T.Mesh(new T.CylinderGeometry(0.03, 0.03, 0.7), mat(0x2b2b2b)); pole.position.set(-1.2, 1.35, 0.9); plainDesk.add(pole);
 
   // the corkboard
   const W = 7.6, H = 3.9, BY = 2.35, BZ = -3.94;
-  const frame = new T.Mesh(new T.BoxGeometry(W + 0.3, H + 0.3, 0.08), mat(0x6e4a2c)); frame.position.set(0, BY, BZ - 0.03); scene.add(frame);
-  const cork = new T.Mesh(new T.PlaneGeometry(W, H), new T.MeshLambertMaterial({ map: corkTexture(T) })); cork.position.set(0, BY, BZ + 0.02); scene.add(cork);
+  const frame = new T.Mesh(new T.BoxGeometry(W + 0.3, H + 0.3, 0.08), mat(0x6e4a2c)); frame.position.set(0, BY, BZ - 0.03); plainRoom.add(frame);
+  const cork = new T.Mesh(new T.PlaneGeometry(W, H), new T.MeshLambertMaterial({ map: corkTexture(T) })); cork.position.set(0, BY, BZ + 0.02); plainRoom.add(cork);
 
   // Detective Kane, standing by the board
   const kane = new T.Group();
@@ -156,12 +161,13 @@ function buildOffice(T, canvas, board) {
       const backing = new T.Mesh(new T.PlaneGeometry(1.62, 1.08), mat(0xffffff)); group.add(backing);
       const photo = new T.Mesh(new T.PlaneGeometry(1.5, 0.84), new T.MeshBasicMaterial({ color: 0xffffff }));
       photo.position.set(0, 0.06, 0.005); group.add(photo);
-      loader.load(pin.img, (tex) => { photo.material.map = tex; photo.material.needsUpdate = true; });
+      loader.load(pin.img, (tex) => { tex.encoding = T.sRGBEncoding; photo.material.map = tex; photo.material.needsUpdate = true; });
     } else {
-      const note = new T.Mesh(new T.PlaneGeometry(1.5, 1.125), new T.MeshLambertMaterial({ map: new T.CanvasTexture(paper(pin)) }));
+      const tex = new T.CanvasTexture(paper(pin)); tex.encoding = T.sRGBEncoding;
+      const note = new T.Mesh(new T.PlaneGeometry(1.5, 1.125), new T.MeshLambertMaterial({ map: tex }));
       group.add(note);
     }
-    const tack = new T.Mesh(new T.SphereGeometry(0.06, 14, 10), mat(0xc62828)); tack.position.set(0, 0.5, 0.05); group.add(tack);
+    const tack = new T.Mesh(new T.BoxGeometry(0.09, 0.09, 0.07), mat(0xc62828)); tack.position.set(0, 0.5, 0.04); group.add(tack);
     scene.add(group);
     spots[pin.id] = { pin, x, y, tack: new T.Vector3(x, y + 0.5, BZ + 0.1) };
   });
@@ -176,7 +182,20 @@ function buildOffice(T, canvas, board) {
     scene.add(line);
   });
 
-  return { renderer, scene, camera, kane, spots, pins, board: { W, H, BY, BZ } };
+  return { renderer, scene, camera, kane, plainRoom, plainDesk, spots, pins, board: { W, H, BY, BZ } };
+}
+
+// The office (its walls, floor and corkboard) and Kane's own desk and desk set: the Blockbench
+// models of his live office, in place of the plain shapes
+function swapModels(T, world) {
+  const loader = new T.GLTFLoader();
+  const one = (name) => new Promise((ok) => loader.load(`/static/models/bb/${name}.glb`, (g) => ok(g.scene), undefined, () => ok(null)));
+  return Promise.all([one("recon_room"), one("desk"), one("desk_set")]).then(([room, desk, set]) => {
+    if (room) { world.scene.remove(world.plainRoom); world.scene.add(room); world.plainRoom = room; }
+    if (!desk || !set) return;  // keep the drawn one
+    const station = new T.Group(); station.position.set(-1.2, 0, 1.2); station.add(desk, set);
+    world.scene.remove(world.plainDesk); world.scene.add(station); world.plainDesk = station;
+  });
 }
 
 // ── the tour: wide shot, then each piece of evidence in turn, then wide again ────────────────
@@ -240,6 +259,7 @@ function initRecon(section) {
         world.robot = await window.kaneRobot.loadKane(T, { scene: world.scene, DESK: new T.Vector3(2.7, 0, -0.9), YOU: -0.6 });
         world.scene.remove(world.kane);
         world.kane = world.robot.model;
+        await swapModels(T, world);
       } catch (e) { /* keep the drawn detective */ }
     }
     if (world.robot) world.robot.play("Wave");  // he greets you as the tour starts

@@ -46,7 +46,7 @@
       if (major) { g.font = "600 22px 'JetBrains Mono', monospace"; g.fillText(String(cm), 10, y - 8); }
     }
     const t = new T.CanvasTexture(c);
-    t.wrapS = T.RepeatWrapping;
+    t.wrapS = T.RepeatWrapping; t.encoding = T.sRGBEncoding;
     return t;
   }
 
@@ -95,9 +95,23 @@
   }
 
   // ── the room and the suspects ───────────────────────────────────────────────────────────────
-  function buildRoom(T, canvas, data) {
+  // The room and the suspects are our own Blockbench models (art/models.py): a 3 m stretch of wall
+  // with its height chart and floor, laid as many times as the row needs, and three suspects in
+  // turn down the row.
+  const SUSPECTS = ["suspect_hoodie", "suspect_suit", "suspect_beanie"];
+  const STRETCH = 3;  // metres of wall in one lineup_wall model
+  async function loadModels(T) {
+    if (!T.GLTFLoader) return { suspects: [], wall: null };
+    const loader = new T.GLTFLoader();
+    const one = (name) => new Promise((ok) => loader.load(`/static/models/bb/${name}.glb`, (g) => ok(g.scene), undefined, () => ok(null)));
+    const [wall, ...suspects] = await Promise.all([one("lineup_wall"), ...SUSPECTS.map(one)]);
+    return { wall, suspects: suspects.every(Boolean) ? suspects : [] };
+  }
+
+  function buildRoom(T, canvas, data, { suspects, wall: stretch }) {
     const renderer = new T.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.outputEncoding = T.sRGBEncoding;
     const scene = new T.Scene();
     scene.background = new T.Color(0x0e1016);
     const camera = new T.PerspectiveCamera(FOV, 16 / 9, 0.1, 120);
@@ -108,32 +122,50 @@
     const n = data.line.length, width = (n - 1) * GAP;
     const xOf = (i) => -width / 2 + i * GAP;
     const wallW = width + 8;
-    const chart = heightChart(T); chart.repeat.set(wallW / 3, 1);
-    const wall = new T.Mesh(new T.PlaneGeometry(wallW, 3), new T.MeshLambertMaterial({ map: chart }));
-    wall.position.set(0, 1.5, -0.75); scene.add(wall);
-    const floor = new T.Mesh(new T.PlaneGeometry(wallW, 14), new T.MeshLambertMaterial({ color: 0x1b1d24 }));
-    floor.rotation.x = -Math.PI / 2; floor.position.z = 5; scene.add(floor);
-    const strip = new T.Mesh(new T.PlaneGeometry(wallW, 0.06), new T.MeshBasicMaterial({ color: 0xffd166 }));
-    strip.rotation.x = -Math.PI / 2; strip.position.set(0, 0.005, 0.6); scene.add(strip);  // the line on the floor
+    if (stretch) {  // the wall, its floor and the yellow line, one 3 m stretch after another
+      const count = Math.ceil(wallW / STRETCH);
+      for (let i = 0; i < count; i++) {
+        const piece = i ? stretch.clone(true) : stretch;
+        piece.position.set(-count * STRETCH / 2 + i * STRETCH, 0, -0.75); scene.add(piece);
+      }
+    } else {  // a drawn room, if the model couldn't load
+      const chart = heightChart(T); chart.repeat.set(wallW / 3, 1);
+      const wall = new T.Mesh(new T.PlaneGeometry(wallW, 3), new T.MeshLambertMaterial({ map: chart }));
+      wall.position.set(0, 1.5, -0.75); scene.add(wall);
+      const floor = new T.Mesh(new T.PlaneGeometry(wallW, 14), new T.MeshLambertMaterial({ color: 0x1b1d24 }));
+      floor.rotation.x = -Math.PI / 2; floor.position.z = 5; scene.add(floor);
+      const strip = new T.Mesh(new T.PlaneGeometry(wallW, 0.06), new T.MeshBasicMaterial({ color: 0xffd166 }));
+      strip.rotation.x = -Math.PI / 2; strip.position.set(0, 0.005, 0.6); scene.add(strip);  // the line on the floor
+    }
 
     const figs = data.line.map((s, i) => {
       const group = new T.Group();
       group.position.set(xOf(i), 0, 0);
-      const shade = 0x3a3f4d + ((i * 7919) % 5) * 0x030303;  // a little variety down the row
-      const body = new T.MeshLambertMaterial({ color: shade });
-      const skin = new T.MeshLambertMaterial({ color: 0x555b6b });
-      const torso = new T.Mesh(new T.CylinderGeometry(0.2, 0.25, 0.95, 14), body); torso.position.y = 0.92; group.add(torso);
-      [-0.09, 0.09].forEach((x) => {
-        const leg = new T.Mesh(new T.CylinderGeometry(0.07, 0.07, 0.48, 10), body); leg.position.set(x, 0.24, 0); group.add(leg);
-      });
-      const head = new T.Mesh(new T.SphereGeometry(0.16, 18, 14), skin); head.position.y = 1.58; group.add(head);
+      let mats;
+      if (suspects.length) {  // our Blockbench suspects in turn, each with its own materials to dim
+        const body = suspects[i % suspects.length].clone(true);
+        mats = [];
+        body.traverse((o) => { if (o.isMesh) { o.material = o.material.clone(); mats.push(o.material); } });
+        group.add(body);
+      } else {  // a plain figure, if the models couldn't load
+        const shade = 0x3a3f4d + ((i * 7919) % 5) * 0x030303;  // a little variety down the row
+        const body = new T.MeshLambertMaterial({ color: shade });
+        const skin = new T.MeshLambertMaterial({ color: 0x555b6b });
+        const torso = new T.Mesh(new T.CylinderGeometry(0.2, 0.25, 0.95, 14), body); torso.position.y = 0.92; group.add(torso);
+        [-0.09, 0.09].forEach((x) => {
+          const leg = new T.Mesh(new T.CylinderGeometry(0.07, 0.07, 0.48, 10), body); leg.position.set(x, 0.24, 0); group.add(leg);
+        });
+        const head = new T.Mesh(new T.SphereGeometry(0.16, 18, 14), skin); head.position.y = 1.58; group.add(head);
+        mats = [body, skin];
+      }
+      // the placard, held up at chest height
       const pc = document.createElement("canvas"); pc.width = 384; pc.height = 240;
-      const texture = new T.CanvasTexture(pc);
+      const texture = new T.CanvasTexture(pc); texture.encoding = T.sRGBEncoding;
       const plate = new T.MeshBasicMaterial({ map: texture });
       const placard = new T.Mesh(new T.PlaneGeometry(0.66, 0.41), plate);
       placard.position.set(0, 1.08, 0.27); group.add(placard);
       scene.add(group);
-      const fig = { group, x: xOf(i), mats: [body, skin], base: [body.color.clone(), skin.color.clone()], plate,
+      const fig = { group, x: xOf(i), mats, base: mats.map((m) => m.color.clone()), plate,
                     placard: { canvas: pc, texture }, s, light: 1, z: 0 };
       drawPlacard(fig.placard, s, null);
       return fig;
@@ -234,7 +266,7 @@
         fig.z = fromZ + (target.z - fromZ) * k; fig.light = fromL + (target.light - fromL) * k;
         fig.group.position.z = fig.z;
         fig.mats.forEach((m, n) => m.color.copy(fig.base[n]).multiplyScalar(fig.light));
-        if (state === "present" && !inPlay) fig.mats[0].color.r += 0.08 * k;
+        if (state === "present" && !inPlay) fig.mats.forEach((m) => { m.color.r += 0.08 * k; });
         fig.plate.color.setScalar(Math.max(0.42, fig.light));
       });
     }
@@ -342,7 +374,7 @@
           f.mats.forEach((m, n) => m.color.copy(f.base[n])); f.plate.color.setScalar(1); });
         world.lamp.intensity = 0;
       }
-      world ||= buildRoom(T, canvas, data);
+      world ||= buildRoom(T, canvas, data, await loadModels(T));
       if (!kane) {
         const start = new T.Vector3(world.xOf(0) - 1.6, 0, KANE_Z);
         try {
