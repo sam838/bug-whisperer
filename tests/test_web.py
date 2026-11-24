@@ -412,3 +412,16 @@ def test_the_closed_case_shows_the_kept_word_and_the_sealed_question(client, tmp
 
 def detective_load(tmp_path, inv_id):
     return json.loads((tmp_path / inv_id / "investigation.json").read_text(encoding="utf-8"))
+
+
+def test_live_part_is_fingerprinted_so_an_unchanged_page_is_not_redrawn(client, tmp_path):
+    inv = save(tmp_path, status="done", verdict="reproduced", judgement={"explanation": "The app saved it."},
+               repair_plan={"status": "planning"})
+    first, again = client.get(f"/r/{inv.id}/live"), client.get(f"/r/{inv.id}/live")
+    sig = first.headers["X-Live-Sig"]
+    assert sig and again.headers["X-Live-Sig"] == sig
+    assert f'data-sig="{sig}"' in client.get(f"/r/{inv.id}").text  # the page starts on the same version
+    inv.judgement = {"explanation": "Kane saw it save the date again."}
+    inv.save()
+    changed = client.get(f"/r/{inv.id}/live")
+    assert "saw it save the date again" in changed.text and changed.headers["X-Live-Sig"] != sig

@@ -4,7 +4,7 @@
 <div class="crumbs"><a href="/inbox">← Case files</a> · {{ inv.app }} · opened {{ inv.created }}</div>
 <h1 class="case-title">Case #{{ case_no }}{% if (inv.judgement.get('ticket') or {}).get('title') %}<span>{{ inv.judgement.ticket.title }}</span>{% endif %}</h1>
 {% if inv.note %}<div class="claim">↪ {{ inv.note }}</div>{% endif %}
-<div id="live" data-url="/r/{{ inv.id }}/live" data-active="{{ 'true' if active or planning else 'false' }}">
+<div id="live" data-url="/r/{{ inv.id }}/live" data-active="{{ 'true' if active or planning else 'false' }}" data-sig="{{ live_sig }}">
   {% include "_live.html" %}
 </div>
 {% endblock %}

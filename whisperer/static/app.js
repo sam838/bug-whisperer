@@ -452,7 +452,10 @@ if (live) {
     if (!isActive()) return;
     try {
       const response = await fetch(live.dataset.url, { cache: "no-store" });
-      if (response.ok) {
+      // Nothing changed since the last refresh (Claude still planning, say): leave the page alone.
+      const sig = response.headers.get("X-Live-Sig");
+      if (response.ok && !(sig && sig === live.dataset.sig)) {
+        live.dataset.sig = sig || "";
         const stepsBefore = live.querySelectorAll(".steps.live li").length;
         const stampBefore = stampText();
         // Keep what the viewer is looking at: the live picture stays the same element (so it

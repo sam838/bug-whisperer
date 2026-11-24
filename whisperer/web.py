@@ -848,7 +848,9 @@ def intake_live(request: Request, intake_id: str):
 
 @app.get("/r/{inv_id}", response_class=HTMLResponse)
 def report_page(request: Request, inv_id: str):
-    return templates.TemplateResponse(request, "investigation.html", {**view(get_inv(inv_id)), "page": "inbox"})
+    ctx = view(get_inv(inv_id))
+    return templates.TemplateResponse(request, "investigation.html",
+                                      {**ctx, "page": "inbox", "live_sig": live_part(request, ctx)[1]})
 
 
 @app.get("/r/{inv_id}/report", response_class=HTMLResponse)
@@ -866,7 +868,16 @@ def report_export_md(inv_id: str):
 
 @app.get("/r/{inv_id}/live", response_class=HTMLResponse)
 def report_live(request: Request, inv_id: str):
-    return templates.TemplateResponse(request, "_live.html", view(get_inv(inv_id)))
+    html, sig = live_part(request, view(get_inv(inv_id)))
+    return HTMLResponse(html, headers={"X-Live-Sig": sig})
+
+
+def live_part(request: Request, ctx: dict) -> tuple[str, str]:
+    """The live part of a case page, and a fingerprint of it. The page polls every 2 seconds and
+    skips a refresh whose fingerprint it already shows: re-rendering an unchanged page replays the
+    corkboard and every other entrance animation (it blinked all through Claude's repair plan)."""
+    html = templates.get_template("_live.html").render({**ctx, "request": request})
+    return html, hashlib.sha1(html.encode("utf-8")).hexdigest()[:16]
 
 
 @app.post("/r/{inv_id}/plan")
