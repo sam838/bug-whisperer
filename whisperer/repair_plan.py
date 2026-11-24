@@ -15,8 +15,9 @@ named with the files the repair really changed.
 
 from __future__ import annotations
 
-import time
+from datetime import datetime
 from pathlib import Path, PurePosixPath
+from urllib.parse import urlparse
 
 from . import claude, fields
 from .detective import ROOT, App, Investigation
@@ -33,7 +34,7 @@ The user's report:
 </report>
 
 What the app should do: {expected}
-Today is {today}.
+{clock}
 
 What Kane did and saw:
 - Kane's steps: {objective}
@@ -66,6 +67,10 @@ real repair should pass it. Write it like Kane's steps above:
 - Then: "Store what the page shows after that as 'what_happened'."
 - End with ONE check: "Verify that <the correct behaviour>."
 - Only behaviour the report already expects. No new features.
+- Times: the user wrote in their own clock and time zone, which may not be the app's. Judge
+  "past" and "future" by the app's clock above, never by the user's. A time on today's date must
+  be at least 2 hours away from the app's time now. If the app's clock is unknown, use whole days
+  (yesterday, next week), never a time earlier or later today.
 
 {fields}"""
 
@@ -77,13 +82,25 @@ def make(app: App, inv: Investigation) -> dict:
     inv.save()
     kane = inv.kane or {}
     raw = claude.ask_json(PROMPT.format(
-        report=inv.report, expected=(inv.plan or {}).get("expected"), today=time.strftime("%A %d %B %Y"),
+        report=inv.report, expected=(inv.plan or {}).get("expected"), clock=app_clock(app),
         objective=(inv.plan or {}).get("objective"), failed_step=kane.get("failed_step"),
         summary=kane.get("summary"), fields=fields.GUIDE),
         cwd=code_dir, tools="Read,Glob,Grep", timeout=600)
     inv.repair_plan = check(raw, code_dir, app, (inv.plan or {}).get("objective", ""))
     inv.save()
     return inv.repair_plan
+
+
+def app_clock(app: App, now: datetime | None = None) -> str:
+    """What "now" is for the app. On a hosted server it is often UTC while the user is not (Nov 24:
+    a sealed question booked "today 08:00" from the user's 9am, but the app's clock said 02:35)."""
+    now = now or datetime.now().astimezone()
+    if urlparse(app.base_url).hostname in ("127.0.0.1", "localhost", "::1"):
+        offset = now.strftime("%z")
+        return (f"The app runs on this computer. Its clock says {now:%A %d %B %Y, %H:%M} "
+                f"(UTC{offset[:3]}:{offset[3:]}).")
+    return (f"Today is about {now:%A %d %B %Y}. The app runs on another computer, so its time of day "
+            "and time zone are unknown.")
 
 
 def check(raw: dict, code_dir: Path, app: App, objective: str = "") -> dict:

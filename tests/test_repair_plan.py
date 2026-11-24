@@ -88,3 +88,21 @@ def test_kept_word_compares_the_plan_with_the_real_diff():
     assert repair_plan.promise_line(strayed).startswith("No: it also changed clinic/models.py")
     deleted = repair_plan.kept_word(["old.py"], "--- a/clinic/old.py\n+++ /dev/null\n-x\n")
     assert deleted["kept"] and deleted["touched"] == ["clinic/old.py"]
+
+
+def test_planner_gets_the_apps_own_clock_with_its_time_zone():
+    from datetime import datetime, timedelta, timezone
+    utc_morning = datetime(2026, 11, 24, 2, 35, tzinfo=timezone(timedelta(0)))
+    clock = repair_plan.app_clock(APP, utc_morning)
+    assert "Tuesday 24 November 2026, 02:35" in clock and "(UTC+00:00)" in clock
+
+
+def test_planner_is_told_when_the_apps_clock_is_unknown():
+    shop = App(name="Shop", base_url="https://shop.example.com")
+    clock = repair_plan.app_clock(shop)
+    assert "unknown" in clock and ":" not in clock.split("Today is about")[1].split(".")[0]
+
+
+def test_sealed_question_rules_judge_time_by_the_apps_clock():
+    assert "{clock}" in repair_plan.PROMPT and "{today}" not in repair_plan.PROMPT
+    assert "at least 2 hours away" in repair_plan.PROMPT
