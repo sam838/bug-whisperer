@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Case #6 · Bug Whisperer</title>
+  <link rel="icon" type="image/svg+xml" href="/static/kane-head.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    // Kane's live scene: the 3D office or the simple 2D view, as the person last chose
+    // (the simple one by default when the system asks for less motion)
+    (function () {
+      var view = null;
+      try { view = localStorage.getItem("kaneView"); } catch (e) { /* storage blocked */ }
+      if (view !== "3d" && view !== "simple") view = matchMedia("(prefers-reduced-motion: reduce)").matches ? "simple" : "3d";
+      document.documentElement.dataset.kaneView = view;
+    })();
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-shell">
+      <a class="brand" href="/">
+        <img class="brand-mark" src="/static/kane-head.svg" alt="" aria-hidden="true">
+        <span class="brand-name">Bug Whisperer</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="/" class="new-case "><span aria-hidden="true">＋</span> New case</a>
+        <a href="/inbox" class="on"><span aria-hidden="true">▱</span> Case files</a>
+        <a href="/verified" class=""><span aria-hidden="true">◇</span> Evidence</a>
+        <a href="/apps" class=""><span aria-hidden="true">▰</span> Apps</a>
+      </nav>
+      <span class="proof-pill"><i aria-hidden="true"></i> Browser-verified</span>
+    </div>
+  </header>
+  
+    <div class="demo-bar">
+      <span class="demo-dot" aria-hidden="true"></span>
+      <b>Live demo.</b> The clinic sample app starts every case as the AI first built it, bugs included.
+      Every case runs Kane CLI for real.
+      <a href="/unlock">Judges: unlock live cases →</a>
+    </div>
+  
+  <main class="wrap">
+    
+<div class="crumbs"><a href="/inbox">← Case files</a> · Clinic Records · opened 2026-11-24 12:33</div>
+<h1 class="case-title">Case #6<span>Past-dated appointments are accepted without a warning</span></h1>
+
+<div id="live" data-url="/r/20261124-123326-9973/live" data-active="false" data-sig="07706b61e4add3f7">
+  
+
+
+<div class="live-root" data-active="false">
+
+  
+  
+  
+  
+    
+  
+  
+  <ol class="track case-track">
+    
+      <li class="done ">The case</li>
+    
+      <li class="done ">The scene</li>
+    
+      <li class="done ">Evidence</li>
+    
+      <li class="done ">Verdict</li>
+    
+      <li class="done ">Repair</li>
+    
+      <li class="done ">Back to the scene</li>
+    
+      <li class="done ">Closed</li>
+    
+  </ol>
+
+  
+
+  
+  
+    
+      <div class="verdict ok"><span class="stamp">Case closed</span> Kane saw the bug, Claude repaired it, and Kane went back to the scene and <b>saw the fix with its own eyes</b>.</div>
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+<section class="card recon" data-recon aria-label="The case, reconstructed in 3D">
+  <div class="recon-head">
+    <h2>🎬 The case, reconstructed</h2>
+    <span class="muted">Kane's office in 3D · this case's real evidence · plays by itself, under a minute</span>
+  </div>
+  <div class="recon-stage">
+    <canvas class="recon-canvas" aria-hidden="true"></canvas>
+    <button type="button" class="recon-play"><span>▶</span> Play the reconstruction</button>
+    <div class="recon-say" hidden>
+      <div class="rpg-box">
+        <div class="rpg-portrait"><svg class="kane-head" viewBox="0 0 100 100" shape-rendering="crispEdges"  aria-hidden="true">
+  <path d="M6 36 H94 L90 39 H10 Z" fill="#341e11"/>
+  <rect x="17" y="35" width="66" height="52" fill="#d7c8a7"/>
+  <rect x="17" y="84" width="66" height="3" fill="#c2b28f"/>
+  <rect x="21" y="39" width="58" height="44" fill="#fffddc"/>
+  <rect x="23" y="41" width="54" height="40" fill="#1c3335"/>
+  <g fill="#22403f"><rect x="23" y="45" width="54" height="2"/><rect x="23" y="51" width="54" height="2"/>
+    <rect x="23" y="57" width="54" height="2"/><rect x="23" y="63" width="54" height="2"/><rect x="23" y="69" width="54" height="2"/><rect x="23" y="75" width="54" height="2"/></g>
+  <g fill="#7bf4e5"><rect x="31" y="55" width="15" height="10"/><rect x="54" y="55" width="15" height="10"/><rect x="42" y="71" width="16" height="4"/></g>
+  <g fill="#b4fbf2"><rect x="31" y="55" width="15" height="2"/><rect x="54" y="55" width="15" height="2"/></g>
+  <rect x="71" y="78" width="4" height="3" fill="#4cf880"/>
+  <rect x="19" y="87" width="62" height="10" fill="#c6353d"/>
+  <rect x="19" y="94" width="62" height="3" fill="#a82a33"/>
+  <rect x="20" y="8" width="60" height="23" fill="#704c37"/>
+  <rect x="20" y="8" width="60" height="2" fill="#7d5640"/>
+  <rect x="20" y="19" width="60" height="6" fill="#2d2521"/>
+  <rect x="6" y="31" width="88" height="5" fill="#583d2d"/>
+</svg></div>
+        <div class="rpg-body"><span class="rpg-name">KANE</span><p class="rpg-text recon-line"></p></div>
+      </div>
+    </div>
+  </div>
+  <script type="application/json" class="recon-data">{"links": [["statement", "reading"], ["reading", "scene"], ["scene", "verdict"], ["verdict", "plan"], ["plan", "repair"], ["repair", "recheck"], ["recheck", "sealed"], ["sealed", "closed"]], "pins": [{"body": "booked mr tan for today at 7:00 this morning but it was already 9am when i did it. the system just saved it, no warning. i thought you fixed booking in the past??", "id": "statement", "kind": "hand", "title": "Witness statement"}, {"body": "The user booked an appointment for Mr Tan at 07:00 on the current day after 9am had already passed, and the system saved the past-dated appointment with no validation warning.", "id": "reading", "kind": "typed", "title": "Claude\u0027s reading"}, {"body": "I checked: The appointment was rejected with a warning that the date and time are in the past.", "id": "scene", "img": "/files/20261124-123326-9973/shots-reproduce-2/018.jpg", "kind": "photo", "title": "Kane at the scene"}, {"body": "The booking form was filled out with a date and time in the past and submitted successfully (the server returned a normal save/redirect), with no warning shown anywhere on the page", "id": "verdict", "kind": "stamp", "stamp": "Confirmed", "tone": "bug"}, {"body": "In the same validation function that already checks the date/time format, also combine the chosen date and time and compare it to the clinic\u0027s current date and time; if it\u0027s not la", "id": "plan", "kind": "typed", "title": "The plan picked \u00b7 A. Reject past date and time on save"}, {"id": "repair", "kind": "diff", "lines": ["+    parsed_date = None", "-        date.fromisoformat(appt_date)", "+        parsed_date = date.fromisoformat(appt_date)", "+    parsed_time = None", "-        datetime.strptime(appt_time, \"%H:%M\")", "+        parsed_time = datetime.strptime(appt_time, \"%H:%M\").time()"], "title": "Claude\u0027s repair \u00b7 attempt 1 \u00b7 kept its word"}, {"body": "I checked: The appointment was rejected with a warning that the date and time are in the past.", "id": "recheck", "img": "/files/20261124-123326-9973/shots-verify-1-1/016.jpg", "kind": "photo", "title": "Kane, back at the scene"}, {"body": "I checked: The appointment was rejected with a warning that the date and time are in the past.", "id": "sealed", "img": "/files/20261124-123326-9973/shots-sealed-1-1/017.jpg", "kind": "photo", "title": "Kane\u0027s sealed question \u00b7 \u2713 held"}, {"body": "Kept on file: bug-20261124-123326-9973-r1a1", "id": "closed", "kind": "stamp", "stamp": "Case closed", "tone": "ok"}]}</script>
+</section>
+  
+
+<section class="board" data-board data-links='[["statement", "reading"], ["reading", "scene"], ["scene", "verdict"], ["verdict", "plan"], ["plan", "repair"], ["repair", "recheck"], ["recheck", "sealed"], ["sealed", "closed"]]' aria-label="Evidence board">
+  <h2 class="board-title">🧷 The evidence board</h2>
+  
+    <div class="scene scene-case scene-end">
+      <div class="scene-actor"><svg class="kane-sprite kane-idle" viewBox="0 0 120 170" role="img" aria-label="Detective Kane">
+  <ellipse cx="60" cy="163" rx="30" ry="5" fill="rgba(0,0,0,.2)"/>
+  <g class="kane-body">
+    <rect x="44" y="133" width="10" height="22" rx="4" fill="#9aa3b5"/>
+    <rect x="66" y="133" width="10" height="22" rx="4" fill="#9aa3b5"/>
+    <rect x="39" y="152" width="18" height="8" rx="3" fill="#384055"/>
+    <rect x="63" y="152" width="18" height="8" rx="3" fill="#384055"/>
+    <path d="M42 96 L78 96 L74 134 L46 134 Z" fill="#cdb48a"/>
+    <rect x="40" y="96" width="40" height="8" rx="4" fill="#384055"/>
+    <rect x="40" y="122" width="40" height="5" fill="#384055"/>
+    <circle cx="60" cy="113" r="3" fill="#9aa6c2"/>
+    <rect x="29" y="100" width="9" height="28" rx="4.5" fill="#9aa3b5"/>
+    <circle cx="33.5" cy="130" r="5" fill="#384055"/>
+    <g class="kane-lens">
+      <rect x="82" y="100" width="9" height="24" rx="4.5" fill="#9aa3b5" transform="rotate(-25 86 102)"/>
+      <circle cx="97" cy="122" r="5" fill="#384055"/>
+      <rect x="99" y="112" width="4" height="13" rx="2" fill="#4a2f20" transform="rotate(-30 101 118)"/>
+      <circle cx="106" cy="104" r="10" fill="rgba(170,215,255,.45)" stroke="#d9b45a" stroke-width="3.5"/>
+      <path d="M101 99 q4 -4 9 -2" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+    </g>
+    <svg class="kane-head" viewBox="0 0 100 100" shape-rendering="crispEdges" x="10" y="0" width="100" height="100" aria-hidden="true">
+  <path d="M6 36 H94 L90 39 H10 Z" fill="#341e11"/>
+  <rect x="17" y="35" width="66" height="52" fill="#d7c8a7"/>
+  <rect x="17" y="84" width="66" height="3" fill="#c2b28f"/>
+  <rect x="21" y="39" width="58" height="44" fill="#fffddc"/>
+  <rect x="23" y="41" width="54" height="40" fill="#1c3335"/>
+  <g fill="#22403f"><rect x="23" y="45" width="54" height="2"/><rect x="23" y="51" width="54" height="2"/>
+    <rect x="23" y="57" width="54" height="2"/><rect x="23" y="63" width="54" height="2"/><rect x="23" y="69" width="54" height="2"/><rect x="23" y="75" width="54" height="2"/></g>
+  <g fill="#7bf4e5"><rect x="31" y="55" width="15" height="10"/><rect x="54" y="55" width="15" height="10"/><rect x="42" y="71" width="16" height="4"/></g>
+  <g fill="#b4fbf2"><rect x="31" y="55" width="15" height="2"/><rect x="54" y="55" width="15" height="2"/></g>
+  <rect x="71" y="78" width="4" height="3" fill="#4cf880"/>
+  <rect x="19" y="87" width="62" height="10" fill="#c6353d"/>
+  <rect x="19" y="94" width="62" height="3" fill="#a82a33"/>
+  <rect x="20" y="8" width="60" height="23" fill="#704c37"/>
+  <rect x="20" y="8" width="60" height="2" fill="#7d5640"/>
+  <rect x="20" y="19" width="60" height="6" fill="#2d2521"/>
+  <rect x="6" y="31" width="88" height="5" fill="#583d2d"/>
+</svg>
+  </g>
+</svg></div>
+      <div class="rpg-box" role="status">
+  <div class="rpg-portrait"><svg class="kane-head" viewBox="0 0 100 100" shape-rendering="crispEdges"  aria-hidden="true">
+  <path d="M6 36 H94 L90 39 H10 Z" fill="#341e11"/>
+  <rect x="17" y="35" width="66" height="52" fill="#d7c8a7"/>
+  <rect x="17" y="84" width="66" height="3" fill="#c2b28f"/>
+  <rect x="21" y="39" width="58" height="44" fill="#fffddc"/>
+  <rect x="23" y="41" width="54" height="40" fill="#1c3335"/>
+  <g fill="#22403f"><rect x="23" y="45" width="54" height="2"/><rect x="23" y="51" width="54" height="2"/>
+    <rect x="23" y="57" width="54" height="2"/><rect x="23" y="63" width="54" height="2"/><rect x="23" y="69" width="54" height="2"/><rect x="23" y="75" width="54" height="2"/></g>
+  <g fill="#7bf4e5"><rect x="31" y="55" width="15" height="10"/><rect x="54" y="55" width="15" height="10"/><rect x="42" y="71" width="16" height="4"/></g>
+  <g fill="#b4fbf2"><rect x="31" y="55" width="15" height="2"/><rect x="54" y="55" width="15" height="2"/></g>
+  <rect x="71" y="78" width="4" height="3" fill="#4cf880"/>
+  <rect x="19" y="87" width="62" height="10" fill="#c6353d"/>
+  <rect x="19" y="94" width="62" height="3" fill="#a82a33"/>
+  <rect x="20" y="8" width="60" height="23" fill="#704c37"/>
+  <rect x="20" y="8" width="60" height="2" fill="#7d5640"/>
+  <rect x="20" y="19" width="60" height="6" fill="#2d2521"/>
+  <rect x="6" y="31" width="88" height="5" fill="#583d2d"/>
+</svg></div>
+  <div class="rpg-body">
+    <span class="rpg-name">KANE</span>
+    <p class="rpg-text" data-type="end-20261124-123326-9973">I saw the fix with my own eyes.</p>
+  </div>
+  <span class="rpg-next" aria-hidden="true">▼</span>
+</div>
+    </div>
+  
+  <div class="board-wall">
+    <svg class="strings" aria-hidden="true"></svg>
+    
+      <figure class="pinned pin-hand at-statement" data-pin="statement"
+              style="--tilt: -2.1deg; --i: 0">
+        <span class="pin" aria-hidden="true"></span>
+        
+          <b class="pinned-title">Witness statement</b>
+          <p>booked mr tan for today at 7:00 this morning but it was already 9am when i did it. the system just saved it, no warning. i thought you fixed booking in the past??</p>
+        
+      </figure>
+    
+      <figure class="pinned pin-typed at-reading" data-pin="reading"
+              style="--tilt: 2.8deg; --i: 1">
+        <span class="pin" aria-hidden="true"></span>
+        
+          <b class="pinned-title">Claude&#39;s reading</b>
+          <p>The user booked an appointment for Mr Tan at 07:00 on the current day after 9am had already passed, and the system saved the past-dated appointment with no validation warning.</p>
+        
+      </figure>
+    
+      <figure class="pinned pin-photo at-scene" data-pin="scene"
+              style="--tilt: 0.0deg; --i: 2">
+        <span class="pin" aria-hidden="true"></span>
+        
+          <a href="/files/20261124-123326-9973/shots-reproduce-2/018.jpg" target="_blank"><img src="/files/20261124-123326-9973/shots-reproduce-2/018.jpg" alt="Kane at the scene" loading="lazy"></a>
+          <figcaption><b>Kane at the scene</b><span>I checked: The appointment was rejected with a warning that the date and time are in the past.</span></figcaption>
+        
+      </figure>
+    
+      <figure class="pinned pin-stamp at-verdict" data-pin="verdict"
+              style="--tilt: -2.1deg; --i: 3">
+        <span class="pin" aria-hidden="true"></span>
+        
+          <span class="stamp tone-bug">Confirmed</span>
+          <p>The booking form was filled out with a date and time in the past and submitted successfully (the server returned a normal save/redirect), with no warning shown anywhere on the page</p>
+        
+      </figure>
+    
+      <figure class="pinned pin-typed at-plan" data-pin="plan"
+              style="--tilt: -1.4deg; --i: 4">
+        <span class="pin" aria-hidden="true"></span>
+        
+          <b class="pinned-title">The plan picked · A. Reject past date and time on save</b>
+          <p>In the same validation function that already checks the date/time format, also combine the chosen date and time and compare it to the clinic&#39;s current date and time; if it&#39;s not la</p>
+        
+      </figure>
+    
+      <figure class="pinned pin-diff at-repair" data-pin="repair"
+              style="--tilt: 1.4deg; --i: 5">
+        <span class="pin" aria-hidden="true"></span>
+        
+          <b class="pinned-title">Claude&#39;s repair · attempt 1 · kept its word</b>
+          <pre><span class="add">+    parsed_date = None</span><span class="del">-        date.fromisoformat(appt_date)</span><span class="add">+        parsed_date = date.fromisoformat(appt_date)</span><span class="add">+    parsed_time = None</span><span class="del">-        datetime.strptime(appt_time, &#34;%H:%M&#34;)</span><span class="add">+        parsed_time = datetime.strptime(appt_time, &#34;%H:%M&#34;).time()</span></pre>
+        
+      </figure>
+    
+      <figure class="pinned pin-photo at-recheck" data-pin="recheck"
+              style="--tilt: 1.4deg; --i: 6">
+        <span class="pin" aria-hidden="true"></span>
+        
+          <a href="/files/20261124-123326-9973/shots-verify-1-1/016.jpg" target="_blank"><img src="/files/20261124-123326-9973/shots-verify-1-1/016.jpg" alt="Kane, back at the scene" loading="lazy"></a>
+          <figcaption><b>Kane, back at the scene</b><span>I checked: The appointment was rejected with a warning that the date and time are in the past.</span></figcaption>
+        
+      </figure>
+    
+      <figure class="pinned pin-photo at-sealed" data-pin="sealed"
+              style="--tilt: 1.4deg; --i: 7">
+        <span class="pin" aria-hidden="true"></span>
+        
+          <a href="/files/20261124-123326-9973/shots-sealed-1-1/017.jpg" target="_blank"><img src="/files/20261124-123326-9973/shots-sealed-1-1/017.jpg" alt="Kane&#39;s sealed question · ✓ held" loading="lazy"></a>
+          <figcaption><b>Kane&#39;s sealed question · ✓ held</b><span>I checked: The appointment was rejected with a warning that the date and time are in the past.</span></figcaption>
+        
+      </figure>
+    
+      <figure class="pinned pin-stamp at-closed" data-pin="closed"
+              style="--tilt: -1.4deg; --i: 8">
+        <span class="pin" aria-hidden="true"></span>
+        
+          <span class="stamp tone-ok">Case closed</span>
+          <p>Kept on file: bug-20261124-123326-9973-r1a1</p>
+        
+      </figure>
+    
+  </div>
+</section>
+  
+
+
+<section class="card scenemap" aria-label="Scene map">
+  <h2>🗺️ The scene map <span class="muted">· each room is a page Kane really visited, in the order he went</span></h2>
+  
+    <div class="trail" data-trail>
+      <p class="trail-label">Kane&#39;s first visit</p>
+      <ol class="rooms">
+        
+          
+          <li class="room" data-room>
+            <span class="room-name"><span class="room-no">1</span>Login</span>
+            <code class="room-path">/login</code>
+            
+              <ul class="room-acts">
+                <li class="passed"><span aria-hidden="true">🧭</span><span class="act">I went to /login.</span></li><li class="passed"><span aria-hidden="true">⌨️</span><span class="act">I typed the test email into Email.</span></li><li class="passed"><span aria-hidden="true">⌨️</span><span class="act">I typed the test password into Password.</span></li><li class="passed"><span aria-hidden="true">👆</span><span class="act">I clicked Log in button in the login form.</span></li>
+                
+              </ul>
+            
+            
+          </li>
+        
+          
+          <li class="room" data-room>
+            <span class="room-name"><span class="room-no">2</span>Patients</span>
+            <code class="room-path">/patients</code>
+            
+              <ul class="room-acts">
+                <li class="passed"><span aria-hidden="true">👆</span><span class="act">I clicked Appointments link in the top navigation bar.</span></li>
+                
+              </ul>
+            
+            
+          </li>
+        
+          
+          <li class="room" data-room>
+            <span class="room-name"><span class="room-no">3</span>Appointments</span>
+            <code class="room-path">/appointments</code>
+            
+              <ul class="room-acts">
+                <li class="passed"><span aria-hidden="true">👆</span><span class="act">I clicked + Book appointment.</span></li>
+                
+              </ul>
+            
+            
+          </li>
+        
+          
+          <li class="room" data-room>
+            <span class="room-name"><span class="room-no">4</span>Appointments · New</span>
+            <code class="room-path">/appointments/new</code>
+            
+              <ul class="room-acts">
+                <li class="passed"><span aria-hidden="true">☰</span><span class="act">I picked Aisha Rahman in the Patient dropdown.</span></li><li class="passed"><span aria-hidden="true">⌨️</span><span class="act">I typed date as 11 November 2020.</span></li><li class="passed"><span aria-hidden="true">⌨️</span><span class="act">I typed 07:00 into the Time field.</span></li><li class="passed"><span aria-hidden="true">👆</span><span class="act">I clicked Book appointment button.</span></li>
+                
+              </ul>
+            
+            
+          </li>
+        
+          
+          <li class="room clue" data-room>
+            <span class="room-name"><span class="room-no">5</span>Patients · #10</span>
+            <code class="room-path">/patients/10</code>
+            
+              <ul class="room-acts">
+                <li class="passed"><span aria-hidden="true">⏳</span><span class="act">I waited to see what the page did.</span></li><li class="failed"><span aria-hidden="true">✔</span><span class="act">I checked: The appointment was rejected with a warning that the date and time are in the past.</span></li>
+                
+              </ul>
+            
+            <span class="room-badge bug">🔴 Clue: the bug</span>
+            
+          </li>
+        
+      </ol>
+      <span class="trail-token" aria-hidden="true"><svg class="kane-head" viewBox="0 0 100 100" shape-rendering="crispEdges"  aria-hidden="true">
+  <path d="M6 36 H94 L90 39 H10 Z" fill="#341e11"/>
+  <rect x="17" y="35" width="66" height="52" fill="#d7c8a7"/>
+  <rect x="17" y="84" width="66" height="3" fill="#c2b28f"/>
+  <rect x="21" y="39" width="58" height="44" fill="#fffddc"/>
+  <rect x="23" y="41" width="54" height="40" fill="#1c3335"/>
+  <g fill="#22403f"><rect x="23" y="45" width="54" height="2"/><rect x="23" y="51" width="54" height="2"/>
+    <rect x="23" y="57" width="54" height="2"/><rect x="23" y="63" width="54" height="2"/><rect x="23" y="69" width="54" height="2"/><rect x="23" y="75" width="54" height="2"/></g>
+  <g fill="#7bf4e5"><rect x="31" y="55" width="15" height="10"/><rect x="54" y="55" width="15" height="10"/><rect x="42" y="71" width="16" height="4"/></g>
+  <g fill="#b4fbf2"><rect x="31" y="55" width="15" height="2"/><rect x="54" y="55" width="15" height="2"/></g>
+  <rect x="71" y="78" width="4" height="3" fill="#4cf880"/>
+  <rect x="19" y="87" width="62" height="10" fill="#c6353d"/>
+  <rect x="19" y="94" width="62" height="3" fill="#a82a33"/>
+  <rect x="20" y="8" width="60" height="23" fill="#704c37"/>
+  <rect x="20" y="8" width="60" height="2" fill="#7d5640"/>
+  <rect x="20" y="19" width="60" height="6" fill="#2d2521"/>
+  <rect x="6" y="31" width="88" height="5" fill="#583d2d"/>
+</svg></span>
+    </div>
+  
+    <div class="trail after" data-trail>
+      <p class="trail-label">Back at the scene, after the repair</p>
+      <ol class="rooms">
+        
+          
+          <li class="room" data-room>
+            <span class="room-name"><span class="room-no">1</span>Login</span>
+            <code class="room-path">/login</code>
+            
+              <ul class="room-acts">
+                <li class="passed"><span aria-hidden="true">🧭</span><span class="act">I went to /login.</span></li><li class="passed"><span aria-hidden="true">⌨️</span><span class="act">I typed the test email into Email.</span></li><li class="passed"><span aria-hidden="true">⌨️</span><span class="act">I typed the test password into Password.</span></li><li class="passed"><span aria-hidden="true">👆</span><span class="act">I clicked Logging in with email and password.</span></li>
+                
+              </ul>
+            
+            
+          </li>
+        
+          
+          <li class="room" data-room>
+            <span class="room-name"><span class="room-no">2</span>Patients</span>
+            <code class="room-path">/patients</code>
+            
+              <ul class="room-acts">
+                <li class="passed"><span aria-hidden="true">👆</span><span class="act">I clicked Appointments in the top navigation bar.</span></li>
+                
+              </ul>
+            
+            
+          </li>
+        
+          
+          <li class="room" data-room>
+            <span class="room-name"><span class="room-no">3</span>Appointments</span>
+            <code class="room-path">/appointments</code>
+            
+              <ul class="room-acts">
+                <li class="passed"><span aria-hidden="true">👆</span><span class="act">I clicked + Book appointment to start booking a new appointment.</span></li>
+                
+              </ul>
+            
+            
+          </li>
+        
+          
+          <li class="room solved" data-room>
+            <span class="room-name"><span class="room-no">4</span>Appointments · New</span>
+            <code class="room-path">/appointments/new</code>
+            
+              <ul class="room-acts">
+                <li class="passed"><span aria-hidden="true">☰</span><span class="act">I picked Aisha Rahman from the Patient dropdown.</span></li><li class="passed"><span aria-hidden="true">⌨️</span><span class="act">I typed 11 November 2020 into the Date field.</span></li><li class="passed"><span aria-hidden="true">⌨️</span><span class="act">I typed 07:00 into the Time field.</span></li><li class="passed"><span aria-hidden="true">👆</span><span class="act">I clicked Book appointment button.</span></li>
+                <li class="more">+1 more</li>
+              </ul>
+            
+            <span class="room-badge ok">🟢 Fixed: Kane saw it</span>
+          </li>
+        
+      </ol>
+      <span class="trail-token" aria-hidden="true"><svg class="kane-head" viewBox="0 0 100 100" shape-rendering="crispEdges"  aria-hidden="true">
+  <path d="M6 36 H94 L90 39 H10 Z" fill="#341e11"/>
+  <rect x="17" y="35" width="66" height="52" fill="#d7c8a7"/>
+  <rect x="17" y="84" width="66" height="3" fill="#c2b28f"/>
+  <rect x="21" y="39" width="58" height="44" fill="#fffddc"/>
+  <rect x="23" y="41" width="54" height="40" fill="#1c3335"/>
+  <g fill="#22403f"><rect x="23" y="45" width="54" height="2"/><rect x="23" y="51" width="54" height="2"/>
+    <rect x="23" y="57" width="54" height="2"/><rect x="23" y="63" width="54" height="2"/><rect x="23" y="69" width="54" height="2"/><rect x="23" y="75" width="54" height="2"/></g>
+  <g fill="#7bf4e5"><rect x="31" y="55" width="15" height="10"/><rect x="54" y="55" width="15" height="10"/><rect x="42" y="71" width="16" height="4"/></g>
+  <g fill="#b4fbf2"><rect x="31" y="55" width="15" height="2"/><rect x="54" y="55" width="15" height="2"/></g>
+  <rect x="71" y="78" width="4" height="3" fill="#4cf880"/>
+  <rect x="19" y="87" width="62" height="10" fill="#c6353d"/>
+  <rect x="19" y="94" width="62" height="3" fill="#a82a33"/>
+  <rect x="20" y="8" width="60" height="23" fill="#704c37"/>
+  <rect x="20" y="8" width="60" height="2" fill="#7d5640"/>
+  <rect x="20" y="19" width="60" height="6" fill="#2d2521"/>
+  <rect x="6" y="31" width="88" height="5" fill="#583d2d"/>
+</svg></span>
+    </div>
+  
+</section>
+
+  
+  
+    <section class="card replay" data-replay>
+      <div class="replay-head">
+        <h2>🎞️ Watch Kane solve this case</h2>
+        <span class="muted">35 moments · about 42 s · Kane's real screens</span>
+      </div>
+      <div class="replay-stage">
+        <img class="replay-img on" alt="Kane's screen">
+        <img class="replay-img" alt="" aria-hidden="true">
+        <span class="replay-chapter"></span>
+        <div class="replay-end" hidden>
+          <span class="stamp replay-stamp"></span>
+          <p class="replay-end-line"></p>
+        </div>
+        <button type="button" class="replay-play"><span>▶</span> Watch Kane</button>
+      </div>
+      <p class="replay-line" aria-live="polite"><span class="who">🕵️ Kane:</span> <span class="text"></span></p>
+      <div class="replay-bar">
+        <button type="button" class="btn replay-prev" aria-label="Previous moment">‹</button>
+        <div class="replay-progress"><span></span></div>
+        <button type="button" class="btn replay-next" aria-label="Next moment">›</button>
+      </div>
+      <script type="application/json" class="replay-data">{"chapters": [{"frames": [{"failed": false, "line": "I went to http://127.0.0.1:8001/login.", "src": "/files/20261124-123326-9973/shots-reproduce-2/001.jpg"}, {"failed": false, "line": "I typed the test email into Email.", "src": "/files/20261124-123326-9973/shots-reproduce-2/003.png"}, {"failed": false, "line": "I typed the test password into Password.", "src": "/files/20261124-123326-9973/shots-reproduce-2/006.png"}, {"failed": false, "line": "I clicked Log in button in the login form.", "src": "/files/20261124-123326-9973/shots-reproduce-2/008.png"}, {"failed": false, "line": "I clicked Appointments link in the top navigation bar.", "src": "/files/20261124-123326-9973/shots-reproduce-2/009.png"}, {"failed": false, "line": "I clicked + Book appointment.", "src": "/files/20261124-123326-9973/shots-reproduce-2/010.png"}, {"failed": false, "line": "I picked Aisha Rahman in the Patient dropdown.", "src": "/files/20261124-123326-9973/shots-reproduce-2/011.png"}, {"failed": false, "line": "I typed date as 11 November 2020.", "src": "/files/20261124-123326-9973/shots-reproduce-2/012.png"}, {"failed": false, "line": "I typed 07:00 into the Time field.", "src": "/files/20261124-123326-9973/shots-reproduce-2/013.png"}, {"failed": false, "line": "I clicked Book appointment button.", "src": "/files/20261124-123326-9973/shots-reproduce-2/015.png"}, {"failed": false, "line": "I waited to see what the page did.", "src": "/files/20261124-123326-9973/shots-reproduce-2/016.jpg"}, {"failed": true, "line": "I checked: The appointment was rejected with a warning that the date and time are in the past. It wasn\u0027t true.", "src": "/files/20261124-123326-9973/shots-reproduce-2/018.jpg"}], "title": "At the scene"}, {"frames": [{"failed": false, "line": "I went to http://127.0.0.1:8001/login.", "src": "/files/20261124-123326-9973/shots-verify-1-1/001.jpg"}, {"failed": false, "line": "I typed the test email into Email.", "src": "/files/20261124-123326-9973/shots-verify-1-1/003.png"}, {"failed": false, "line": "I typed the test password into Password.", "src": "/files/20261124-123326-9973/shots-verify-1-1/006.png"}, {"failed": false, "line": "I clicked Logging in with email and password.", "src": "/files/20261124-123326-9973/shots-verify-1-1/008.png"}, {"failed": false, "line": "I clicked Appointments in the top navigation bar.", "src": "/files/20261124-123326-9973/shots-verify-1-1/009.png"}, {"failed": false, "line": "I clicked + Book appointment to start booking a new appointment.", "src": "/files/20261124-123326-9973/shots-verify-1-1/010.png"}, {"failed": false, "line": "I picked Aisha Rahman from the Patient dropdown.", "src": "/files/20261124-123326-9973/shots-verify-1-1/011.png"}, {"failed": false, "line": "I typed 11 November 2020 into the Date field.", "src": "/files/20261124-123326-9973/shots-verify-1-1/012.png"}, {"failed": false, "line": "I typed 07:00 into the Time field.", "src": "/files/20261124-123326-9973/shots-verify-1-1/013.png"}, {"failed": false, "line": "I clicked Book appointment button.", "src": "/files/20261124-123326-9973/shots-verify-1-1/014.png"}, {"failed": false, "line": "I checked: The appointment was rejected with a warning that the date and time are in the past.", "src": "/files/20261124-123326-9973/shots-verify-1-1/016.jpg"}], "title": "Back at the scene, after the repair"}, {"frames": [{"failed": false, "line": "I went to http://127.0.0.1:8001/login.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/001.jpg"}, {"failed": false, "line": "I typed the test email into Email.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/003.png"}, {"failed": false, "line": "I typed the test password into Password.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/006.png"}, {"failed": false, "line": "I clicked Log in button in the login form.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/008.png"}, {"failed": false, "line": "I clicked Appointments in the top navigation.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/009.png"}, {"failed": false, "line": "I clicked + Book appointment link.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/010.png"}, {"failed": false, "line": "I picked James Carter in the Patient dropdown.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/011.png"}, {"failed": false, "line": "I typed 24 November 2026 into the Date field.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/012.png"}, {"failed": false, "line": "I typed 08:00 into the Time field.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/013.png"}, {"failed": false, "line": "I typed Follow-up visit into the Reason field.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/014.png"}, {"failed": false, "line": "I clicked Book appointment button.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/015.png"}, {"failed": false, "line": "I checked: The appointment was rejected with a warning that the date and time are in the past.", "src": "/files/20261124-123326-9973/shots-sealed-1-1/017.jpg"}], "title": "Kane\u0027s sealed question"}], "count": 35, "end": {"line": "I saw the fix with my own eyes.", "stamp": "Case closed", "tone": "ok"}, "seconds": 42}</script>
+    </section>
+  
+
+  
+  <div class="grid2">
+    <section class="card">
+      <h2>The witness statement</h2>
+      <blockquote class="complaint">booked mr tan for today at 7:00 this morning but it was already 9am when i did it. the system just saved it, no warning. i thought you fixed booking in the past??</blockquote>
+      
+      
+        <h3>Claude's reading of the case</h3>
+        <p>The user booked an appointment for Mr Tan at 07:00 on the current day after 9am had already passed, and the system saved the past-dated appointment with no validation warning.</p>
+      
+    </section>
+
+    <section class="card">
+      
+      <h2>At the scene <span class="tag bug">Past appointment is accepted instead of rejected</span></h2>
+      
+        <a href="/files/20261124-123326-9973/shots-reproduce-2/018.jpg" target="_blank"><img class="shot kane" src="/files/20261124-123326-9973/shots-reproduce-2/018.jpg" alt="What Kane saw"></a>
+        <p class="caption">assert: The appointment was rejected with a warning that the date and time are in the pa</p>
+      
+      
+        <div class="notes"><b>🕵️ Detective Kane's notes</b><p>“The booking form accepted a date and time that were already in the past and saved the appointment.”</p></div>
+      
+    </section>
+  </div>
+
+  
+  
+
+  
+  
+    <section class="card">
+      <h2>The scene, before and after the repair <span class="muted">· same steps, same detective · drag to compare</span></h2>
+      
+        <div class="compare" data-compare>
+          <img class="compare-img kane" src="/files/20261124-123326-9973/shots-reproduce-2/018.jpg" alt="Before the repair">
+          <img class="compare-img compare-after kane" src="/files/20261124-123326-9973/shots-verify-1-1/016.jpg" alt="After the repair">
+          <span class="compare-handle" aria-hidden="true"></span>
+          <span class="compare-label left">❌ Before</span>
+          <span class="compare-label right">✅ After</span>
+          <input class="compare-range" type="range" min="0" max="100" value="50" aria-label="Drag to compare the scene before and after the repair">
+        </div>
+      
+      <div class="ba-captions">
+        <p class="caption"><b class="bad">Before:</b> Final verification failed: &#34;The appointment was rejected with a warning that the date and time are in the past.&#34;</p>
+        <p class="caption"><b class="good">After:</b> Objective completed</p>
+      </div>
+    </section>
+  
+
+  
+    
+    <section class="card">
+      <h2>The repair <span class="muted">· by Claude, attempt 1 of 3</span></h2>
+      <p class="muted">Following plan A: Reject past date and time on save.</p>
+      <p>The edit looks syntactically correct. The booking form let past date/times through because `validate_appointment` only checked date/time format, never compared against the current time; I added a check in that same function that combines the chosen date and time and rejects it with &#34;Please choose a date and time in the future.&#34; if it isn&#39;t later than the clinic&#39;s current time (via the existing `utcnow()` helper).</p>
+      <p class="promise kept">📏 <b>Kept its word?</b> Yes: it changed only what the plan named (clinic/app.py).</p>
+      <pre class="diff"><span class="ctx">--- a/clinic/app.py</span><span class="ctx">+++ b/clinic/app.py</span><span class="ctx">@@ -243,14 +243,19 @@ def validate_patient(full_name: str, date_of_birth: str) -&gt; list[str]:</span><span class="ctx"> </span><span class="ctx"> def validate_appointment(appt_date: str, appt_time: str) -&gt; list[str]:</span><span class="ctx">     errors = []</span><span class="add">+    parsed_date = None</span><span class="ctx">     try:</span><span class="del">-        date.fromisoformat(appt_date)</span><span class="add">+        parsed_date = date.fromisoformat(appt_date)</span><span class="ctx">     except ValueError:</span><span class="ctx">         errors.append(&#34;Please choose a valid date.&#34;)</span><span class="add">+    parsed_time = None</span><span class="ctx">     try:</span><span class="del">-        datetime.strptime(appt_time, &#34;%H:%M&#34;)</span><span class="add">+        parsed_time = datetime.strptime(appt_time, &#34;%H:%M&#34;).time()</span><span class="ctx">     except ValueError:</span><span class="ctx">         errors.append(&#34;Please choose a valid time.&#34;)</span><span class="add">+    if parsed_date is not None and parsed_time is not None:</span><span class="add">+        if datetime.combine(parsed_date, parsed_time) &lt;= utcnow():</span><span class="add">+            errors.append(&#34;Please choose a date and time in the future.&#34;)</span><span class="ctx">     return errors</span><span class="ctx"> </span><span class="ctx"> </span></pre>
+      
+        
+        <div class="claim confirmed">
+          <b>🔒 Kane's sealed question:</b>
+          ✅ held. The same bug, reached another way, is fixed too.
+          
+          <span class="muted">“Start at http://127.0.0.1:8001/login. Log in with email {{account1_email}} and password {{account1_password}}. Go to the page to book a new appointment. Select &#39;James Carter&#39; in the Patient dropdown. Set the Date field to 24 November 2026. Set the Time field to 08:00. Set the Reason field to &#39;Follow-up visit&#39;. Click the Book button. Store what the page shows after that as &#39;what_happened&#39;. Verify that the appointment was rejected with a warning that the date and time are in the past.”</span>
+        </div>
+      
+      <p class="muted">📁 <b>Kept on file:</b> Kane's steps are saved as <code>bug-20261124-123326-9973-r1a1</code>. Kane can revisit this scene in about 20 seconds after any change, so this bug can't sneak back.</p>
+    </section>
+  
+
+  
+
+  
+
+  
+  
+    <div class="exportbar">
+      <div><b>📁 Take the case with you.</b> Everything Kane proved, in one report: the statement, his steps and photos, the verdict, the repair and its proof.</div>
+      <div class="exportbar-actions">
+        <a class="btn primary" href="/r/20261124-123326-9973/report" target="_blank">📄 Case report (PDF)</a>
+        <a class="btn" href="/r/20261124-123326-9973/report.md">⬇️ Markdown</a>
+      </div>
+    </div>
+  
+
+  
+  
+    <div class="grid2">
+      
+        <section class="card">
+          <h2>Reply to the user</h2>
+          <p class="reply" id="reply-20261124-123326-9973">Thanks for telling us! We followed your exact steps and saw the same problem, and it&#39;s fixed now. The system should reject booking an appointment whose date and time are already in the past and show a warning instead of silently saving it. We checked the fix by doing the same steps again, and we&#39;ll re-check them after every future change, so it stays fixed.</p>
+          <button class="btn" data-copy="reply-20261124-123326-9973">Copy reply</button>
+        </section>
+      
+      
+        <section class="card">
+          <h2>Bug ticket</h2>
+          <pre class="ticket" id="ticket-20261124-123326-9973">## Past-dated appointments are accepted without a warning
+
+**Steps**
+1. Log in with a valid account
+2. Go to the new appointment booking page
+3. Select any patient
+4. Set the Date and Time fields to a date/time that is already in the past
+5. Click the Book button
+
+**Expected:** The system rejects the booking and shows a warning that the selected date and time are in the past.
+
+**Actual:** The system saves the appointment anyway and redirects to the patient&#39;s page with no warning shown.
+
+Reproduced by Kane CLI (Bug Whisperer report 20261124-123326-9973).</pre>
+          <button class="btn" data-copy="ticket-20261124-123326-9973">Copy for GitHub / Jira</button>
+        </section>
+      
+    </div>
+  
+
+  
+  
+    <details class="card" data-key="case-file">
+      <summary>📁 The full case file: Kane's instructions and every screen it saw</summary>
+      <h3>Kane's instructions</h3>
+      <p class="objective">Go to http://127.0.0.1:8001/login. Log in with email {{account1_email}} and password {{account1_password}}. Go to the page to book a new appointment. Select &#39;Aisha&#39; in the Patient dropdown. Set the Date field to 11 November 2020. Set the Time field to 07:00. Leave the Notes field empty. Click the Book button. Store what the page shows after that as &#39;what_happened&#39;. Verify that the appointment was rejected with a warning that the date and time are in the past.</p>
+      
+        <h3>Every screen at the scene</h3>
+        <div class="film">
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/001.jpg" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/001.jpg" alt="" loading="lazy"><span>I went to http://127.0.0.1:8001/login.</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/002.jpg" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/002.jpg" alt="" loading="lazy"><span>queued plan (3 steps): type &#34;Email&#34;; type &#34;Password&#34;; click &#34;Log in&#34;</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/003.png" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/003.png" alt="" loading="lazy"><span>I typed the test email into Email.</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/004.jpg" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/004.jpg" alt="" loading="lazy"><span></span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/005.jpg" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/005.jpg" alt="" loading="lazy"><span>queued plan (2 steps): type &#34;Password&#34;; click &#34;Log in&#34;</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/006.png" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/006.png" alt="" loading="lazy"><span>I typed the test password into Password.</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/007.jpg" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/007.jpg" alt="" loading="lazy"><span></span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/008.png" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/008.png" alt="" loading="lazy"><span>I clicked Log in button in the login form.</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/009.png" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/009.png" alt="" loading="lazy"><span>I clicked Appointments link in the top navigation bar.</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/010.png" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/010.png" alt="" loading="lazy"><span>I clicked + Book appointment.</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/011.png" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/011.png" alt="" loading="lazy"><span>I picked Aisha Rahman in the Patient dropdown.</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/012.png" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/012.png" alt="" loading="lazy"><span>I typed date as 11 November 2020.</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/013.png" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/013.png" alt="" loading="lazy"><span>I typed 07:00 into the Time field.</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/014.jpg" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/014.jpg" alt="" loading="lazy"><span>PRIMARY: Fill the new appointment details: select &#39;Aisha&#39; in the Patie</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/015.png" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/015.png" alt="" loading="lazy"><span>I clicked Book appointment button.</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/016.jpg" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/016.jpg" alt="" loading="lazy"><span>I waited to see what the page did.</span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/017.jpg" target="_blank" class="passed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/017.jpg" alt="" loading="lazy"><span>ANALYZE(visual, &#39;The appointment was rejected with a warning that the </span></a>
+          
+            <a href="/files/20261124-123326-9973/shots-reproduce-2/018.jpg" target="_blank" class="failed">
+              <img src="/files/20261124-123326-9973/shots-reproduce-2/018.jpg" alt="" loading="lazy"><span>I checked: The appointment was rejected with a warning that the date a</span></a>
+          
+        </div>
+      
+      <p class="muted">Kane needed 2 visits: it lost the trail the first time, so Claude re-planned from Kane's own notes.</p>
+      <p class="muted">Kane CLI: 36 credits · 114 s · <a href="https://test-manager.lambdatest.com/projects/01M79CPRYEM9QGX80PPKEX08BX/test-cases/01M86RX06HHHDQC73WQ02T2E06/dashboard/share/US_VYHYO9TZEBED2WQI1A66GE5ZY9EHU5147L4QH5EAVTJ91HASEUIIJD8HS4UUBKOD?type=summary&amp;agentView=true&amp;fqdn=summary-page" target="_blank">open in TestMu AI</a></p>
+    </details>
+  
+</div>
+</div>
+
+  </main>
+  <footer class="foot">
+    <span>Every bug report is a case.</span>
+    <span>Claude reads it and does the repairs.</span>
+    <span><b>🕵️ Kane CLI is the detective:</b> it goes to the scene in a real browser and only closes the case when it sees the fix with its own eyes.</span>
+  </footer>
+  <script src="/static/app.js"></script>
+  <script src="/static/recon.js"></script>
+  <script src="/static/kane3d.js"></script>
+  <script src="/static/lineup3d.js"></script>
+</body>
+</html>

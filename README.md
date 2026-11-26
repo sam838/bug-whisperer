@@ -8,7 +8,7 @@ argue with. If the app's code is connected, it also turns it into a fix that
 
 - 🌐 **Live demo:** https://bug-whisperer-tqgg.onrender.com (browse every case freely; live runs
   need the passcode in our submission)
-- ▶️ **Video:** _added with the submission_
+- ▶️ **Video (4 min):** https://youtu.be/_JRYddyiJ9w
 - 📊 **Every result, generated from the real records:** [docs/proof/RESULTS.md](docs/proof/RESULTS.md)
 - 🛠️ **Install and use it on your own app:** [docs/SETUP.md](docs/SETUP.md)
 - ⚙️ **How it works, and what we learned about Kane CLI:** [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md)
@@ -63,7 +63,7 @@ More in [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md).
 | | |
 |---|---|
 | Pre-registered experiments | **6 of 6** as expected ([experiments](docs/proof/experiments/)) |
-| Case studies with full evidence | **5** ([001](docs/evidence/001-past-date-booking/), [002](docs/evidence/002-double-booking/), [003](docs/evidence/003-shop-search-any-website/), [004](docs/evidence/004-hook-reopened-case/), [005](docs/evidence/005-lineup-who-broke-the-front-desk/)) |
+| Case studies with full evidence | **6** ([001](docs/evidence/001-past-date-booking/), [002](docs/evidence/002-double-booking/), [003](docs/evidence/003-shop-search-any-website/), [004](docs/evidence/004-hook-reopened-case/), [005](docs/evidence/005-lineup-who-broke-the-front-desk/), [006](docs/evidence/006-sealed-question-earlier-today/)) |
 | Lineups: the commit that broke it, named by Kane | **1** (41 suspects, 8 questioned) |
 | Bugs fixed and kept as Kane regression tests | **2** ([saved tests](.testmuai/tests/)) |
 | Stop hook revisits of closed cases | **58** in 32 sessions: 54 held, 4 reopened, 0 unclear ([reports](docs/proof/revisits/)) |
@@ -74,6 +74,7 @@ More in [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md).
 - **[003](docs/evidence/003-shop-search-any-website/):** a site we didn't build (LambdaTest's eCommerce Playground), with only its link.
 - **[005](docs/evidence/005-lineup-who-broke-the-front-desk/):** the Lineup. Kane named the commit that removed Bug Whisperer's own sample-report buttons. It took four attempts, and the write-up says why: two of them found bugs in Bug Whisperer itself.
 - **[004](docs/evidence/004-hook-reopened-case/):** the Stop hook blocked a fresh Claude Code session until it repaired a bug that had come back. (We removed the fix on purpose to stage this, and the write-up says so.)
+- **[006](docs/evidence/006-sealed-question-earlier-today/):** the full loop on the live site, with Claude's repair plan before the repair and Kane's sealed question after it. The first live try was a false fail caused by a time zone mix-up, and the write-up says how we fixed it.
 
 All numbers come from `python -m whisperer proof`, which reads the real records in this repo.
 
